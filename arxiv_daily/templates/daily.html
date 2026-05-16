@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ day }} 日报 · 具身智读{% endblock %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <div class="eyebrow">Daily digest</div>
+      <h1>{{ day }} 日报</h1>
+      <p>{{ papers|length }} 篇候选论文{% if report %}，由 {{ report.model|model_label }} 生成{% else %}，尚未生成智能日报{% endif %}。</p>
+    </div>
+  </section>
+
+  <div class="page-layout">
+    <nav class="anchor-nav" aria-label="页内导航">
+      <span class="nav-label">页内导航</span>
+      <a href="#daily-actions">操作</a>
+      <a href="#summary-progress" data-progress-nav="summary-progress" hidden>生成进度</a>
+      <a href="#daily-report">日报正文</a>
+      <a href="#markdown-preview">Markdown</a>
+      <span class="nav-label nav-label-secondary">相关页面</span>
+      <a class="nav-external" href="/?day={{ day }}">回到主界面</a>
+    </nav>
+
+    <div class="page-main">
+      <section class="actions anchor-target" id="daily-actions">
+        <form method="post" action="/daily/{{ day }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/daily/{{ day }}" data-running-label="生成中...">
+          <input type="hidden" name="force" value="true">
+          <button type="submit">生成/刷新日报</button>
+        </form>
+        <form method="post" action="/daily/{{ day }}/export">
+          <button class="secondary" type="submit">导出 Markdown</button>
+        </form>
+        <a class="button secondary" href="/?day={{ day }}">回到主界面</a>
+      </section>
+
+      <section class="progress-panel summary-progress anchor-target" id="summary-progress" hidden>
+        <div class="progress-head">
+          <div>
+            <div class="progress-title" id="summary-progress-title" data-progress-title>正在生成当日日报</div>
+            <div class="progress-message" id="summary-progress-message" data-progress-message>正在准备当天论文上下文。</div>
+          </div>
+          <div class="progress-percent" id="summary-progress-percent" data-progress-percent>0%</div>
+        </div>
+        <div class="progress-track" aria-label="日报生成进度">
+          <div class="progress-fill" id="summary-progress-fill" data-progress-fill style="width: 0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span><strong id="summary-progress-stage" data-progress-stage>准备中</strong></span>
+          <span>类型 <strong id="summary-progress-kind" data-progress-kind>日报</strong></span>
+          <span>候选 <strong>{{ papers|length }}</strong> 篇</span>
+          <span>模型 <strong id="summary-progress-model" data-progress-model>智能模型</strong></span>
+        </div>
+      </section>
+
+      <section class="panel summary-card anchor-target" id="daily-report">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Daily Intelligence</div>
+            <h2>智能日报</h2>
+          </div>
+          {% if report %}
+            <span class="summary-badge">{{ report.model|model_label }}</span>
+          {% endif %}
+        </div>
+        {% if report %}
+          <div class="summary-meta">
+            <span>{{ report.paper_count }} 篇候选论文</span>
+            <span>{{ report.generated_at|format_dt }}</span>
+          </div>
+          <article class="summary-view daily-summary">{{ report.content|strip_first_heading|summary_html }}</article>
+        {% else %}
+          <div class="empty-state">
+            <strong>还没有生成当日日报</strong>
+            <span>点击“生成/刷新日报”，系统会把当天候选论文整理成趋势、重点论文、数据集/benchmark 和建议深读列表。</span>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="panel markdown-panel anchor-target" id="markdown-preview">
+        <details>
+          <summary>查看 Markdown 导出预览</summary>
+          <div class="markdown-rendered">{{ markdown_preview|markdown_html }}</div>
+          <details class="source-details">
+            <summary>查看原始 Markdown</summary>
+            <pre class="markdown-preview">{{ markdown_preview }}</pre>
+          </details>
+        </details>
+      </section>
+    </div>
+  </div>
+{% endblock %}

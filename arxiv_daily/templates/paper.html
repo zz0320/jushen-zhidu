@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}{{ paper.title|clean_latex }} · 具身智读{% endblock %}
+{% block content %}
+  <section class="page-head paper-hero">
+    <div>
+      <div class="eyebrow">Paper Brief</div>
+      <h1>{{ paper.title|clean_latex }}</h1>
+      <div class="paper-hero-meta">
+        <span>Score {{ "%.1f"|format(paper.relevance_score) }}</span>
+        <span>{{ paper.primary_category }}</span>
+        <span>{{ paper.published_at|format_dt }}</span>
+      </div>
+      <p class="paper-authors">{{ paper.authors|join(", ") }}</p>
+    </div>
+  </section>
+
+  <div class="page-layout">
+    <nav class="anchor-nav" aria-label="页内导航">
+      <span class="nav-label">页内导航</span>
+      <a href="#paper-actions">操作</a>
+      <a href="#summary-progress" data-progress-nav="summary-progress" hidden>生成进度</a>
+      <a href="#paper-meta">论文速览</a>
+      <a href="#paper-abstract">摘要</a>
+      <a href="#abstract-summary">摘要总结</a>
+      <a href="#full-text-summary">全文总结</a>
+      <span class="nav-label nav-label-secondary">相关页面</span>
+      <a class="nav-external" href="/?day={{ paper.fetched_for_date }}">回到主界面</a>
+    </nav>
+
+    <div class="page-main">
+      <section class="paper-command-bar anchor-target" id="paper-actions">
+        <div class="paper-action-group">
+          <span>页面与外部链接</span>
+          <a class="button" href="/?day={{ paper.fetched_for_date }}">回到主界面</a>
+          <a class="button secondary" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
+          {% if paper.pdf_url %}
+            <a class="button secondary" href="{{ paper.pdf_url }}" target="_blank" rel="noreferrer">PDF</a>
+          {% endif %}
+        </div>
+        <div class="paper-action-group paper-action-main">
+          <span>智能生成</span>
+          {% if summary %}
+            <a class="button" href="#abstract-summary">查看摘要总结</a>
+            <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="刷新中...">
+              <input type="hidden" name="force" value="true">
+              <button class="secondary" type="submit">刷新摘要</button>
+            </form>
+          {% else %}
+            <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="生成中...">
+              <button type="submit">生成摘要总结</button>
+            </form>
+          {% endif %}
+          {% if full_text_summary %}
+            <a class="button secondary" href="#full-text-summary">查看全文总结</a>
+            <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="刷新中...">
+              <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
+              <input type="hidden" name="force" value="true">
+              <button class="secondary" type="submit">刷新全文</button>
+            </form>
+          {% else %}
+            <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="提取中...">
+              <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
+              <button class="secondary" type="submit">生成全文总结</button>
+            </form>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="progress-panel summary-progress anchor-target" id="summary-progress" hidden>
+        <div class="progress-head">
+          <div>
+            <div class="progress-title" id="summary-progress-title" data-progress-title>正在生成单篇总结</div>
+            <div class="progress-message" id="summary-progress-message" data-progress-message>正在准备论文上下文。</div>
+          </div>
+          <div class="progress-percent" id="summary-progress-percent" data-progress-percent>0%</div>
+        </div>
+        <div class="progress-track" aria-label="总结生成进度">
+          <div class="progress-fill" id="summary-progress-fill" data-progress-fill style="width: 0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span><strong id="summary-progress-stage" data-progress-stage>准备中</strong></span>
+          <span>类型 <strong id="summary-progress-kind" data-progress-kind>单篇</strong></span>
+          <span>模型 <strong id="summary-progress-model" data-progress-model>智能模型</strong></span>
+        </div>
+      </section>
+
+      <section class="paper-overview anchor-target" id="paper-meta">
+        <div class="paper-facts">
+          <div class="paper-fact">
+            <span>arXiv ID</span>
+            <strong>{{ paper.arxiv_id }}</strong>
+          </div>
+          <div class="paper-fact">
+            <span>Score</span>
+            <strong>{{ "%.1f"|format(paper.relevance_score) }}</strong>
+          </div>
+          <div class="paper-fact">
+            <span>Primary category</span>
+            <strong>{{ paper.primary_category }}</strong>
+          </div>
+          <div class="paper-fact">
+            <span>Published</span>
+            <strong>{{ paper.published_at|format_dt }}</strong>
+          </div>
+        </div>
+
+        <article class="panel paper-tags-card">
+          <div class="section-head compact-head">
+            <div>
+              <div class="eyebrow">Signals</div>
+              <h2>分类与命中关键词</h2>
+            </div>
+          </div>
+          <div class="paper-signal-block">
+            <span class="signal-label">分类</span>
+            <div class="chips paper-category-list">
+              {% for category in paper.categories %}
+                <span>{{ category }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="paper-signal-block">
+            <span class="signal-label">命中关键词</span>
+            <div class="chips paper-keywords paper-match-tags">
+              {% for match in paper.matched_keywords %}
+                <span>{{ match.keyword }}</span>
+              {% else %}
+                <span>暂无命中</span>
+              {% endfor %}
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel paper-abstract-card anchor-target" id="paper-abstract">
+        <div class="section-head compact-head">
+          <div>
+            <div class="eyebrow">Abstract</div>
+            <h2>摘要</h2>
+          </div>
+          <div class="abstract-header-actions">
+            <span class="summary-badge">arXiv metadata</span>
+            {% if abstract_translation %}
+              <a class="button secondary" href="#abstract-translation">查看译文</a>
+              <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="刷新中...">
+                <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
+                <input type="hidden" name="force" value="true">
+                <button class="secondary" type="submit">刷新译文</button>
+              </form>
+            {% else %}
+              <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="翻译中...">
+                <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
+                <button class="secondary" type="submit">中文翻译</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        <p class="abstract">{{ paper.abstract }}</p>
+        {% if abstract_translation %}
+          <div class="abstract-translation" id="abstract-translation">
+            <div class="abstract-translation-head">
+              <div>
+                <div class="eyebrow">Chinese Translation</div>
+                <h3>中文译文</h3>
+              </div>
+              <span class="summary-badge">{{ abstract_translation.model|model_label }}</span>
+            </div>
+            <div class="summary-meta">
+              <span>{{ abstract_translation.generated_at|format_dt }}</span>
+              <span>忠实翻译 arXiv 摘要</span>
+            </div>
+            <p class="abstract translated-abstract">{{ abstract_translation.content }}</p>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="panel summary-card anchor-target" id="abstract-summary">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Smart Insight</div>
+            <h2>摘要版总结</h2>
+          </div>
+          {% if summary %}
+            <span class="summary-badge">{{ summary.model|model_label }}</span>
+          {% endif %}
+        </div>
+        {% if summary %}
+          <div class="summary-meta">
+            <span>基于 arXiv 元数据和摘要</span>
+            <span>{{ summary.generated_at|format_dt }}</span>
+          </div>
+          <article class="summary-view">{{ summary.content|summary_html }}</article>
+        {% else %}
+          <div class="empty-state">
+            <strong>还没有生成单篇总结</strong>
+            <span>点击上方“生成摘要总结”，系统会调用智能模型输出研究问题、方法、数据集、结果和局限性。</span>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="panel summary-card anchor-target" id="full-text-summary">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Full-text Insight</div>
+            <h2>全文版总结</h2>
+          </div>
+          {% if full_text_summary %}
+            <span class="summary-badge">{{ full_text_summary.model|model_label }}</span>
+          {% endif %}
+        </div>
+        {% if full_text_summary %}
+          <div class="summary-meta">
+            <span>基于 arXiv PDF 全文文本提取</span>
+            <span>{{ full_text_summary.generated_at|format_dt }}</span>
+            <span>{{ full_text_summary.used_chars }} / {{ full_text_summary.source_chars }} 字符{% if full_text_summary.truncated %}，已截断{% endif %}</span>
+          </div>
+          <article class="summary-view">{{ full_text_summary.content|summary_html }}</article>
+        {% else %}
+          <div class="empty-state">
+            <strong>还没有生成全文总结</strong>
+            <span>点击上方“生成全文总结”，系统会下载 PDF、提取正文，再调用智能模型生成更深入的总结。</span>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ day }} · 具身智读{% endblock %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <div class="eyebrow">Embodied research reader</div>
+      <h1>{{ day }} 论文</h1>
+      <p>{{ papers|length }} 篇命中当前分类和关键词配置{% if report %}，日报已生成{% else %}，日报未生成{% endif %}。</p>
+    </div>
+    <form class="toolbar" method="get" action="/">
+      <input type="date" name="day" value="{{ day }}">
+      <button type="submit">查看</button>
+    </form>
+  </section>
+
+  <div class="page-layout">
+    <nav class="anchor-nav" aria-label="页内导航">
+      <span class="nav-label">页内导航</span>
+      <a href="#day-actions">操作</a>
+      <a href="#fetch-progress" data-progress-nav="fetch-progress" hidden>抓取进度</a>
+      <a href="#day-overview">概览</a>
+      <a href="#paper-list">论文列表</a>
+      <span class="nav-label nav-label-secondary">相关页面</span>
+      <a class="nav-external" href="/daily/{{ day }}">打开日报</a>
+    </nav>
+
+    <div class="page-main">
+      <section class="actions anchor-target" id="day-actions">
+        <form method="post" action="/fetch" id="fetch-form" data-progress-fetch="true">
+          <input type="hidden" name="day" value="{{ day }}">
+          <button type="submit" id="fetch-button">抓取当天论文</button>
+        </form>
+        <form method="post" action="/daily/{{ day }}/summarize">
+          <input type="hidden" name="force" value="true">
+          <button type="submit">生成/刷新日报</button>
+        </form>
+        <a class="button secondary" href="/daily/{{ day }}">打开日报</a>
+      </section>
+
+      <section class="progress-panel anchor-target" id="fetch-progress" hidden>
+        <div class="progress-head">
+          <div>
+            <div class="progress-title">正在抓取 arXiv 论文</div>
+            <div class="progress-message" id="fetch-progress-message">正在准备检索条件。</div>
+          </div>
+          <div class="progress-percent" id="fetch-progress-percent">0%</div>
+        </div>
+        <div class="progress-track" aria-label="抓取进度">
+          <div class="progress-fill" id="fetch-progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span><strong id="fetch-progress-stage">准备中</strong></span>
+          <span>读取 <strong id="fetch-progress-fetched">0</strong></span>
+          <span>保存 <strong id="fetch-progress-saved">0</strong></span>
+          <span>排除 <strong id="fetch-progress-skipped">0</strong></span>
+        </div>
+      </section>
+
+      <section class="summary-strip anchor-target" id="day-overview">
+        <div>
+          <strong>{{ papers|length }}</strong>
+          <span>命中论文</span>
+        </div>
+        <div>
+          <strong>{{ "Ready" if report else "Pending" }}</strong>
+          <span>日报状态</span>
+        </div>
+        <div>
+          <strong>{{ day }}</strong>
+          <span>北京时间自然日</span>
+        </div>
+      </section>
+
+      <section class="table-wrap anchor-target" id="paper-list">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Score</th>
+              <th>论文</th>
+              <th>分类</th>
+              <th>命中关键词</th>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for paper in papers %}
+              <tr>
+                <td class="rank">{{ loop.index }}</td>
+                <td class="score">{{ "%.1f"|format(paper.relevance_score) }}</td>
+                <td>
+                  <a class="paper-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|clean_latex }}</a>
+                  <div class="muted">{{ paper.authors[:4]|join(", ") }}{% if paper.authors|length > 4 %} et al.{% endif %}</div>
+                </td>
+                <td><span class="category-pill">{{ paper.primary_category }}</span></td>
+                <td>
+                  <div class="chips paper-keywords">
+                    {% for match in paper.matched_keywords[:5] %}
+                      <span>{{ match.keyword }}</span>
+                    {% endfor %}
+                  </div>
+                </td>
+                <td class="nowrap">{{ paper.published_at.date() if paper.published_at else "-" }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="empty">
+                  <strong>当前日期还没有论文</strong>
+                  <span>先点击“抓取当天论文”，或切换到已有结果的日期。</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+{% endblock %}

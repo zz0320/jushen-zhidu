@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}具身智读{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/logo.svg') }}?v=20260515-26">
+    <link rel="shortcut icon" href="{{ url_for('static', path='/logo.svg') }}?v=20260515-26">
+    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260515-26">
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <script src="{{ url_for('static', path='/app.js') }}?v=20260515-26" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <img class="brand-mark" src="{{ url_for('static', path='/logo.svg') }}" alt="">
+        <span>具身智读</span>
+      </a>
+      <nav class="main-nav">
+        <a href="/">主界面</a>
+        <a href="/keywords">关键词</a>
+        <a href="/settings">智能设置</a>
+      </nav>
+    </header>
+    <main class="shell">
+      {% if message %}
+        <div class="notice">{{ message }}</div>
+      {% endif %}
+      {% if error %}
+        <div class="notice notice-error">{{ error }}</div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

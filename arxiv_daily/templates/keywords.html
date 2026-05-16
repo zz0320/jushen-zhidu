@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block title %}关键词配置 · 具身智读{% endblock %}
+{% block content %}
+  <section class="page-head">
+    <div>
+      <div class="eyebrow">Search configuration</div>
+      <h1>关键词配置</h1>
+      <p>分类先在 arXiv 侧收窄范围，关键词和排除词在本地做相关性评分和降噪。</p>
+    </div>
+  </section>
+
+  <section class="keyword-dashboard" aria-label="关键词配置概览">
+    <div>
+      <span>启用分类</span>
+      <strong>{{ keyword_stats.enabled_categories }} / {{ categories|length }}</strong>
+    </div>
+    <div>
+      <span>启用分组</span>
+      <strong>{{ keyword_stats.enabled_groups }} / {{ groups|length }}</strong>
+    </div>
+    <div>
+      <span>有效关键词</span>
+      <strong>{{ keyword_stats.include_keywords }}</strong>
+    </div>
+    <div>
+      <span>有效排除词</span>
+      <strong>{{ keyword_stats.exclude_keywords }}</strong>
+    </div>
+  </section>
+
+  <section class="keyword-workbench">
+    <aside class="panel keyword-side">
+      <div class="keyword-card-head">
+        <div>
+          <div class="eyebrow">arXiv Scope</div>
+          <h2>检索分类</h2>
+        </div>
+        <span class="mini-count">{{ categories|length }} 项</span>
+      </div>
+
+      <details class="keyword-editor" open>
+        <summary>新建关键词组</summary>
+        <form class="stack-form" method="post" action="/keywords/groups">
+          <label>名称 <input name="name" placeholder="VLA and Robot Foundation Models" required></label>
+          <label>权重 <input name="weight" type="number" step="0.1" value="1.0"></label>
+          <button type="submit">添加/更新组</button>
+        </form>
+      </details>
+
+      <details class="keyword-editor">
+        <summary>添加分类</summary>
+        <form class="inline-form keyword-add-form" method="post" action="/keywords/categories">
+          <input name="code" placeholder="cs.RO" required>
+          <button type="submit">添加</button>
+        </form>
+      </details>
+
+      <div class="side-subhead">当前分类</div>
+      <div class="category-chip-grid">
+        {% for category in categories %}
+          <div class="category-control {{ '' if category.enabled else 'is-disabled' }}">
+            <span class="category-pill {{ '' if category.enabled else 'disabled' }}">{{ category.code }}</span>
+            <div>
+              <form method="post" action="/keywords/categories/{{ category.id }}/toggle">
+                <button class="secondary" type="submit">{{ "禁用" if category.enabled else "启用" }}</button>
+              </form>
+              <form method="post" action="/keywords/categories/{{ category.id }}/delete">
+                <button class="danger" type="submit">删除</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </aside>
+
+    <section class="keyword-main">
+      <section class="keyword-section-head">
+        <div>
+          <div class="eyebrow">Rule Map</div>
+          <h2>匹配规则地图</h2>
+        </div>
+        <p>每个分组先展示实际生效的关键词和排除词；编辑入口收在卡片底部。</p>
+      </section>
+
+      <div class="keyword-rule-list">
+        {% for group in groups %}
+          {% set keywords = keywords_by_group[group.id] %}
+          {% set include_count = keywords|selectattr("kind", "equalto", "include")|list|length %}
+          {% set exclude_count = keywords|selectattr("kind", "equalto", "exclude")|list|length %}
+          <article class="panel keyword-rule-card {{ '' if group.enabled else 'is-disabled' }}">
+            <div class="rule-card-head">
+              <div>
+                <div class="rule-title-row">
+                  <h2 class="{{ '' if group.enabled else 'disabled' }}">{{ group.name }}</h2>
+                  <span class="status-pill {{ '' if group.enabled else 'disabled' }}">{{ "启用中" if group.enabled else "已禁用" }}</span>
+                </div>
+                <div class="rule-meta">
+                  <span>权重 {{ "%.1f"|format(group.weight) }}</span>
+                  <span>{{ include_count }} 个关键词</span>
+                  <span>{{ exclude_count }} 个排除词</span>
+                </div>
+              </div>
+              <div class="row-actions rule-actions">
+                <form method="post" action="/keywords/groups/{{ group.id }}/toggle">
+                  <button class="secondary" type="submit">{{ "禁用" if group.enabled else "启用" }}</button>
+                </form>
+                <form method="post" action="/keywords/groups/{{ group.id }}/delete">
+                  <button class="danger" type="submit">删除组</button>
+                </form>
+              </div>
+            </div>
+
+            <details class="keyword-editor rule-editor">
+              <summary>编辑 / 添加规则</summary>
+              <div class="keyword-tools">
+                <form class="inline-form compact-form" method="post" action="/keywords/groups/{{ group.id }}/weight">
+                  <label>权重</label>
+                  <input name="weight" type="number" step="0.1" value="{{ group.weight }}">
+                  <button class="secondary" type="submit">更新</button>
+                </form>
+
+                <form class="inline-form keyword-rule-form" method="post" action="/keywords/groups/{{ group.id }}/keywords">
+                  <input name="value" placeholder="world model" required>
+                  <select name="kind">
+                    <option value="include">关键词</option>
+                    <option value="exclude">排除词</option>
+                  </select>
+                  <button type="submit">添加规则</button>
+                </form>
+              </div>
+            </details>
+
+            <div class="rule-lanes">
+              <section class="rule-lane include-lane">
+                <div class="bucket-head">
+                  <strong>命中加分</strong>
+                  <span>include</span>
+                </div>
+                <div class="chips editable keyword-chip-list">
+                  {% for keyword in keywords if keyword.kind == "include" %}
+                    <span class="keyword-token {{ '' if keyword.enabled else 'disabled' }}">
+                      <span class="token-text">{{ keyword.value }}</span>
+                      <form method="post" action="/keywords/keywords/{{ keyword.id }}/toggle">
+                        <button title="toggle" type="submit">{{ "禁用" if keyword.enabled else "启用" }}</button>
+                      </form>
+                      <form method="post" action="/keywords/keywords/{{ keyword.id }}/delete">
+                        <button class="token-delete" title="delete" type="submit">×</button>
+                      </form>
+                    </span>
+                  {% else %}
+                    <span class="empty-token">还没有关键词</span>
+                  {% endfor %}
+                </div>
+              </section>
+
+              <section class="rule-lane exclude-lane">
+                <div class="bucket-head">
+                  <strong>命中过滤</strong>
+                  <span>exclude</span>
+                </div>
+                <div class="chips editable keyword-chip-list">
+                  {% for keyword in keywords if keyword.kind == "exclude" %}
+                    <span class="keyword-token exclude {{ '' if keyword.enabled else 'disabled' }}">
+                      <span class="token-text">{{ keyword.value }}</span>
+                      <form method="post" action="/keywords/keywords/{{ keyword.id }}/toggle">
+                        <button title="toggle" type="submit">{{ "禁用" if keyword.enabled else "启用" }}</button>
+                      </form>
+                      <form method="post" action="/keywords/keywords/{{ keyword.id }}/delete">
+                        <button class="token-delete" title="delete" type="submit">×</button>
+                      </form>
+                    </span>
+                  {% else %}
+                    <span class="empty-token">还没有排除词</span>
+                  {% endfor %}
+                </div>
+              </section>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+{% endblock %}

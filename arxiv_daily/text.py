@@ -1,0 +1,440 @@
+from __future__ import annotations
+
+import html
+import re
+from datetime import datetime
+from typing import Optional
+
+from markupsafe import Markup, escape
+
+ARXIV_ID_PATTERN = re.compile(r"(?<![\w/.-])(?P<prefix>arXiv:\s*)?(?P<id>\d{4}\.\d{4,5}(?:v\d+)?)(?![\w.-])", re.IGNORECASE)
+HTML_LINK_SKIP_PATTERN = re.compile(r"(<a\b[^>]*>.*?</a>|<code>.*?</code>)", re.IGNORECASE | re.DOTALL)
+MARKDOWN_LINK_SKIP_PATTERN = re.compile(r"(`[^`]*`|\[[^\]]+\]\([^)]+\))")
+
+GREEK_REPLACEMENTS = {
+    r"\alpha": "α",
+    r"\beta": "β",
+    r"\gamma": "γ",
+    r"\delta": "δ",
+    r"\epsilon": "ε",
+    r"\theta": "θ",
+    r"\lambda": "λ",
+    r"\mu": "μ",
+    r"\pi": "π",
+    r"\rho": "ρ",
+    r"\sigma": "σ",
+    r"\tau": "τ",
+    r"\phi": "φ",
+    r"\omega": "ω",
+    r"\Gamma": "Γ",
+    r"\Delta": "Δ",
+    r"\Theta": "Θ",
+    r"\Lambda": "Λ",
+    r"\Pi": "Π",
+    r"\Sigma": "Σ",
+    r"\Phi": "Φ",
+    r"\Omega": "Ω",
+}
+
+LATEX_SYMBOL_REPLACEMENTS = {
+    r"\leq": "≤",
+    r"\le": "≤",
+    r"\geq": "≥",
+    r"\ge": "≥",
+    r"\lt": "<",
+    r"\gt": ">",
+    r"\to": "→",
+    r"\rightarrow": "→",
+    r"\leftarrow": "←",
+    r"\times": "×",
+    r"\cdot": "·",
+    r"\pm": "±",
+    r"\approx": "≈",
+    r"\sim": "∼",
+    r"\infty": "∞",
+}
+
+LATEX_COMMANDS_WITH_TEXT = (
+    "mathrm",
+    "mathbf",
+    "mathit",
+    "mathsf",
+    "text",
+    "textrm",
+    "textit",
+    "textbf",
+    "emph",
+)
+
+
+def _clean_latex_fragment(value: str) -> str:
+    cleaned = value
+    for command, replacement in GREEK_REPLACEMENTS.items():
+        cleaned = cleaned.replace(command, replacement)
+    for command, replacement in LATEX_SYMBOL_REPLACEMENTS.items():
+        cleaned = cleaned.replace(command, replacement)
+    for command in LATEX_COMMANDS_WITH_TEXT:
+        cleaned = re.sub(rf"\\{command}\{{([^{{}}]+)\}}", r"\1", cleaned)
+    cleaned = re.sub(r"[_^]\{([^{}]+)\}", r"\1", cleaned)
+    cleaned = cleaned.replace(r"\&", "&").replace(r"\%", "%").replace(r"\_", "_")
+    cleaned = cleaned.replace(r"\,", " ").replace(r"\;", " ").replace(r"\:", " ")
+    cleaned = cleaned.replace("{", "").replace("}", "")
+    cleaned = re.sub(r"_([<>≤≥][^\s_]+)", r"\1", cleaned)
+    cleaned = re.sub(r"\\([A-Za-z]+)", r"\1", cleaned)
+    cleaned = re.sub(r"\s*([≤≥<>])\s*", r"\1", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip()
+
+
+def clean_latex_text(value: str) -> str:
+    """Convert common arXiv title LaTeX snippets to readable plain text."""
+    cleaned = html.unescape(value or "")
+    cleaned = re.sub(r"\$([^$]{1,120})\$", lambda match: _clean_latex_fragment(match.group(1)), cleaned)
+    cleaned = re.sub(r"\\\(([^)]{1,120})\\\)", lambda match: _clean_latex_fragment(match.group(1)), cleaned)
+    cleaned = _clean_latex_fragment(cleaned)
+    cleaned = cleaned.replace(" - ", " - ")
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip()
+
+
+def summary_to_html(value: str) -> Markup:
+    """Render a small, safe subset of markdown-like model output for summaries."""
+    lines = (value or "").splitlines()
+    html_parts = []
+    in_list = False
+    seen_section = False
+
+    def close_list() -> None:
+        nonlocal in_list
+        if in_list:
+            html_parts.append("</ul>")
+            in_list = False
+
+    i = 0
+    while i < len(lines):
+        raw_line = lines[i]
+        line = raw_line.strip()
+        if not line:
+            close_list()
+            i += 1
+            continue
+
+        if _is_table_line(line):
+            close_list()
+            table_lines = []
+            while i < len(lines) and _is_table_line(lines[i].strip()):
+                table_lines.append(lines[i].strip())
+                i += 1
+            html_parts.append(_render_table(table_lines))
+            continue
+
+        if _is_horizontal_rule(line):
+            close_list()
+            html_parts.append('<hr class="summary-divider">')
+            i += 1
+            continue
+
+        if line.startswith(">"):
+            close_list()
+            quote_lines = []
+            while i < len(lines) and lines[i].strip().startswith(">"):
+                quote_line = lines[i].strip()[1:].strip()
+                if quote_line:
+                    quote_lines.append(quote_line)
+                i += 1
+            callout = _render_callout(quote_lines)
+            if callout:
+                html_parts.append(callout)
+            continue
+
+        heading_match = re.match(r"^#{1,4}\s+(.+)$", line)
+        heading_text = heading_match.group(1).strip() if heading_match else line
+        numbered_heading = re.match(r"^(\d+)[.、]\s*(.+)$", heading_text)
+        bullet = re.match(r"^[-*]\s+(.+)$", line)
+
+        if heading_match and not numbered_heading:
+            close_list()
+            html_parts.append(f"<h3>{_inline_markup(heading_text)}</h3>")
+            seen_section = True
+        elif numbered_heading:
+            close_list()
+            index, text = numbered_heading.groups()
+            html_parts.append(
+                f"<h3><span class=\"summary-index\">{escape(index)}</span> {_inline_markup(text)}</h3>"
+            )
+            seen_section = True
+        elif bullet:
+            if not in_list:
+                html_parts.append("<ul>")
+                in_list = True
+            html_parts.append(f"<li>{_inline_markup(bullet.group(1))}</li>")
+        else:
+            close_list()
+            paragraph_class = _summary_paragraph_class(line, seen_section)
+            class_attr = f' class="{paragraph_class}"' if paragraph_class else ""
+            html_parts.append(f"<p{class_attr}>{_inline_markup(line)}</p>")
+        i += 1
+
+    close_list()
+    return Markup("\n".join(html_parts))
+
+
+def markdown_to_html(value: str) -> Markup:
+    """Render exported daily markdown into a readable, safe preview."""
+    lines = (value or "").splitlines()
+    html_parts = []
+    in_list = False
+    in_code = False
+    code_lines = []
+
+    def close_list() -> None:
+        nonlocal in_list
+        if in_list:
+            html_parts.append("</ul>")
+            in_list = False
+
+    def close_code() -> None:
+        nonlocal in_code, code_lines
+        if in_code:
+            html_parts.append(f"<pre><code>{escape(chr(10).join(code_lines))}</code></pre>")
+            code_lines = []
+            in_code = False
+
+    i = 0
+    while i < len(lines):
+        raw_line = lines[i]
+        line = raw_line.rstrip()
+        stripped = line.strip()
+
+        if stripped.startswith("```"):
+            close_list()
+            if in_code:
+                close_code()
+            else:
+                in_code = True
+                code_lines = []
+            i += 1
+            continue
+
+        if in_code:
+            code_lines.append(line)
+            i += 1
+            continue
+
+        if not stripped:
+            close_list()
+            i += 1
+            continue
+
+        if _is_table_line(stripped):
+            close_list()
+            table_lines = []
+            while i < len(lines) and _is_table_line(lines[i].strip()):
+                table_lines.append(lines[i].strip())
+                i += 1
+            html_parts.append(_render_table(table_lines))
+            continue
+
+        if _is_horizontal_rule(stripped):
+            close_list()
+            html_parts.append('<hr class="summary-divider">')
+            i += 1
+            continue
+
+        if stripped.startswith(">"):
+            close_list()
+            quote_lines = []
+            while i < len(lines) and lines[i].strip().startswith(">"):
+                quote_line = lines[i].strip()[1:].strip()
+                if quote_line:
+                    quote_lines.append(quote_line)
+                i += 1
+            callout = _render_callout(quote_lines)
+            if callout:
+                html_parts.append(callout)
+            continue
+
+        heading_match = re.match(r"^(#{1,4})\s+(.+)$", stripped)
+        bullet = re.match(r"^[-*]\s+(.+)$", stripped)
+        numbered = re.match(r"^\d+[.、]\s+(.+)$", stripped)
+
+        if heading_match:
+            close_list()
+            level = min(len(heading_match.group(1)), 3)
+            html_parts.append(f"<h{level}>{_inline_markup(heading_match.group(2))}</h{level}>")
+        elif bullet:
+            if not in_list:
+                html_parts.append("<ul>")
+                in_list = True
+            html_parts.append(f"<li>{_inline_markup(bullet.group(1))}</li>")
+        elif numbered:
+            close_list()
+            html_parts.append(f"<p class=\"numbered-line\">{_inline_markup(stripped)}</p>")
+        else:
+            close_list()
+            html_parts.append(f"<p>{_inline_markup(stripped)}</p>")
+        i += 1
+
+    close_list()
+    close_code()
+    return Markup("\n".join(html_parts))
+
+
+def strip_first_markdown_heading(value: str) -> str:
+    lines = (value or "").splitlines()
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    if lines and re.match(r"^#{1,3}\s+", lines[0].strip()):
+        lines.pop(0)
+        while lines and not lines[0].strip():
+            lines.pop(0)
+    return "\n".join(lines).strip()
+
+
+def format_datetime(value: Optional[datetime]) -> str:
+    if value is None:
+        return "-"
+    return value.strftime("%Y-%m-%d %H:%M")
+
+
+def link_arxiv_ids_markdown(value: str) -> str:
+    """Link arXiv identifiers in generated markdown without touching existing links or code."""
+    output_lines = []
+    in_code = False
+    for line in (value or "").splitlines():
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            output_lines.append(line)
+            continue
+        if in_code:
+            output_lines.append(line)
+            continue
+        output_lines.append(_link_arxiv_ids_markdown_line(line))
+    return "\n".join(output_lines)
+
+
+def _inline_markup(value: str) -> Markup:
+    safe = str(escape(_clean_inline_latex(value)))
+    safe = re.sub(r"&lt;br\s*/?&gt;", "<br>", safe, flags=re.IGNORECASE)
+    safe = re.sub(
+        r"\[([^\]]+)\]\((https?://[^)\s]+)\)",
+        r'<a href="\2" target="_blank" rel="noreferrer">\1</a>',
+        safe,
+    )
+    safe = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", safe)
+    safe = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"<em>\1</em>", safe)
+    safe = re.sub(r"`([^`]+)`", r"<code>\1</code>", safe)
+    safe = _link_arxiv_ids_html(safe)
+    return Markup(safe)
+
+
+def _clean_inline_latex(value: str) -> str:
+    parts = MARKDOWN_LINK_SKIP_PATTERN.split(value or "")
+    return "".join(
+        part if MARKDOWN_LINK_SKIP_PATTERN.fullmatch(part) else _clean_inline_latex_segment(part)
+        for part in parts
+    )
+
+
+def _clean_inline_latex_segment(value: str) -> str:
+    cleaned = re.sub(r"\$\$([^$]{1,240})\$\$", lambda match: _clean_latex_fragment(match.group(1)), value)
+    cleaned = re.sub(r"\$([^$\n]{1,160})\$", lambda match: _clean_latex_fragment(match.group(1)), cleaned)
+    cleaned = re.sub(r"\\\(([^)]{1,160})\\\)", lambda match: _clean_latex_fragment(match.group(1)), cleaned)
+    return cleaned
+
+
+def _link_arxiv_ids_html(value: str) -> str:
+    parts = HTML_LINK_SKIP_PATTERN.split(value)
+    return "".join(part if HTML_LINK_SKIP_PATTERN.fullmatch(part) else _link_arxiv_ids_html_segment(part) for part in parts)
+
+
+def _link_arxiv_ids_html_segment(value: str) -> str:
+    def replace(match: re.Match) -> str:
+        arxiv_id = match.group("id")
+        label = match.group(0)
+        return (
+            f'<a class="paper-ref" href="https://arxiv.org/abs/{arxiv_id}" '
+            f'target="_blank" rel="noreferrer">{label}</a>'
+        )
+
+    return ARXIV_ID_PATTERN.sub(replace, value)
+
+
+def _link_arxiv_ids_markdown_line(value: str) -> str:
+    parts = MARKDOWN_LINK_SKIP_PATTERN.split(value)
+    return "".join(
+        part if MARKDOWN_LINK_SKIP_PATTERN.fullmatch(part) else _link_arxiv_ids_markdown_segment(part)
+        for part in parts
+    )
+
+
+def _link_arxiv_ids_markdown_segment(value: str) -> str:
+    def replace(match: re.Match) -> str:
+        arxiv_id = match.group("id")
+        label = match.group(0)
+        return f"[{label}](https://arxiv.org/abs/{arxiv_id})"
+
+    return ARXIV_ID_PATTERN.sub(replace, value)
+
+
+def _summary_paragraph_class(line: str, seen_section: bool) -> str:
+    if seen_section:
+        return ""
+    if re.match(r"^\*\*.+\*\*$", line):
+        return "summary-lead"
+    if re.match(r"^\*[^*].+\*$", line):
+        return "summary-sublead"
+    if line.startswith(("（", "(")):
+        return "summary-note"
+    return ""
+
+
+def _is_horizontal_rule(line: str) -> bool:
+    return bool(re.fullmatch(r"[-*_]{3,}", line.strip()))
+
+
+def _is_table_line(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") and stripped.count("|") >= 1
+
+
+def _split_table_row(line: str) -> list[str]:
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def _is_table_separator(cells: list[str]) -> bool:
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.replace(" ", "")) for cell in cells)
+
+
+def _render_table(table_lines: list[str]) -> str:
+    rows = [_split_table_row(line) for line in table_lines if _is_table_line(line)]
+    if not rows:
+        return ""
+
+    header = []
+    body = rows
+    if len(rows) >= 2 and _is_table_separator(rows[1]):
+        header = rows[0]
+        body = rows[2:]
+
+    parts = ['<div class="summary-table-wrap"><table class="summary-table">']
+    if header:
+        parts.append("<thead><tr>")
+        parts.extend(f"<th>{_inline_markup(cell)}</th>" for cell in header)
+        parts.append("</tr></thead>")
+    if body:
+        parts.append("<tbody>")
+        for row in body:
+            parts.append("<tr>")
+            parts.extend(f"<td>{_inline_markup(cell)}</td>" for cell in row)
+            parts.append("</tr>")
+        parts.append("</tbody>")
+    parts.append("</table></div>")
+    return "".join(parts)
+
+
+def _render_callout(lines: list[str]) -> str:
+    if not lines:
+        return ""
+    content = "<br>".join(str(_inline_markup(line)) for line in lines)
+    return f'<blockquote class="summary-callout">{content}</blockquote>'

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}智能模型设置 · 具身智读{% endblock %}
+{% block content %}
+  <section class="page-head hero-head">
+    <div>
+      <div class="eyebrow">Intelligence settings</div>
+      <h1>智能模型设置</h1>
+      <p>在界面里配置智能模型调用参数，用于生成单篇论文总结、全文总结和当日日报。</p>
+    </div>
+  </section>
+
+  <section class="grid two">
+    <article class="panel status-panel">
+      <h2>当前状态</h2>
+      <dl>
+        <dt>API Key</dt>
+        <dd>
+          <span class="status-dot {{ 'ok' if settings_view.api_key_configured else 'warn' }}"></span>
+          {{ "已配置" if settings_view.api_key_configured else "未配置" }}
+        </dd>
+        <dt>Key 来源</dt><dd>{{ settings_view.api_key_source }}</dd>
+        <dt>Base URL</dt><dd>{{ settings_view.effective.qwen_base_url }}</dd>
+        <dt>模型</dt><dd>{{ settings_view.effective.qwen_model|model_label }}</dd>
+        <dt>Temperature</dt><dd>{{ settings_view.effective.qwen_temperature }}</dd>
+        <dt>摘要输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_single }} tokens</dd>
+        <dt>全文输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_full_text }} tokens</dd>
+        <dt>日报输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_daily }} tokens</dd>
+        <dt>日报论文数</dt><dd>{{ settings_view.effective.daily_top_n }} 篇</dd>
+        <dt>每篇摘要上限</dt><dd>{{ settings_view.effective.daily_abstract_chars }} 字符</dd>
+        <dt>PDF 输入上限</dt><dd>{{ settings_view.effective.full_text_max_chars }} 字符</dd>
+      </dl>
+    </article>
+
+    <article class="panel">
+      <h2>保存智能模型配置</h2>
+      <form class="stack-form settings-form" method="post" action="/settings/qwen">
+        <label>
+          API Key
+          <input type="password" name="api_key" placeholder="留空则保留当前已保存的 key 或使用环境变量">
+        </label>
+        <label class="check-row">
+          <input type="checkbox" name="clear_api_key" value="true">
+          <span>清除界面里保存的 API Key</span>
+        </label>
+        <label>
+          Base URL
+          <input name="base_url" value="{{ settings_view.effective.qwen_base_url }}" required>
+        </label>
+        <label>
+          模型 ID（可选）
+          <input name="model" value="" placeholder="留空保留当前模型；需要更换时输入模型 ID">
+          <small>论文很多或全文很长时，建议使用支持长上下文的模型；`max_tokens` 只控制输出长度，不等于输入上下文长度。</small>
+        </label>
+        <div class="form-grid">
+          <label>
+            Temperature
+            <input name="temperature" type="number" min="0" max="2" step="0.1" value="{{ settings_view.effective.qwen_temperature }}">
+          </label>
+          <label>
+            摘要总结输出 token
+            <input name="max_tokens_single" type="number" min="512" max="8192" step="128" value="{{ settings_view.effective.qwen_max_tokens_single }}">
+          </label>
+          <label>
+            全文总结输出 token
+            <input name="max_tokens_full_text" type="number" min="1024" max="32768" step="256" value="{{ settings_view.effective.qwen_max_tokens_full_text }}">
+          </label>
+          <label>
+            日报输出 token
+            <input name="max_tokens_daily" type="number" min="1024" max="32768" step="256" value="{{ settings_view.effective.qwen_max_tokens_daily }}">
+          </label>
+          <label>
+            日报论文数
+            <input name="daily_top_n" type="number" min="1" max="100" value="{{ settings_view.effective.daily_top_n }}">
+          </label>
+          <label>
+            日报每篇摘要字符
+            <input name="daily_abstract_chars" type="number" min="200" max="5000" step="100" value="{{ settings_view.effective.daily_abstract_chars }}">
+          </label>
+          <label>
+            全文 PDF 输入字符
+            <input name="full_text_max_chars" type="number" min="10000" max="300000" step="5000" value="{{ settings_view.effective.full_text_max_chars }}">
+          </label>
+        </div>
+        <div class="config-hint">
+          <strong>推荐长论文配置</strong>
+          <span>摘要输出 1800、全文输出 4096-8192、日报输出 4096-8192、日报论文数 30-50、每篇摘要 1000-1500 字符、PDF 输入 90000-150000 字符。</span>
+        </div>
+        <button type="submit">保存设置</button>
+      </form>
+    </article>
+  </section>
+{% endblock %}
