@@ -92,7 +92,7 @@ def test_generate_paper_full_text_summary_uses_extracted_pdf_text(tmp_path):
     assert summary.truncated is False
 
 
-def test_generate_abstract_translation_uses_abstract_only(tmp_path):
+def test_generate_abstract_translation_saves_title_and_abstract(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
     settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
@@ -110,12 +110,12 @@ def test_generate_abstract_translation_uses_abstract_only(tmp_path):
 
         def fake_completion(messages, max_tokens):
             assert "翻译成中文" in messages[1]["content"]
+            assert "Embodied Robot Translation" in messages[1]["content"]
             assert "A dexterous robot learns from teleoperation." in messages[1]["content"]
-            assert "Embodied Robot Translation" not in messages[1]["content"]
-            assert "项目符号" in messages[1]["content"]
+            assert "title_zh" in messages[1]["content"]
             assert max_tokens == settings.qwen_max_tokens_single
             return CompletionResult(
-                content="标题：不应保留的标题\n\n摘要：一个灵巧机器人使用 $\\pi_{0.5}$ 和 $\\pi_0$。",
+                content='{"title_zh":"具身机器人翻译","abstract_zh":"一个灵巧机器人使用 $\\\\pi_{0.5}$ 和 $\\\\pi_0$。"}',
                 model="fake-qwen",
             )
 
@@ -126,6 +126,7 @@ def test_generate_abstract_translation_uses_abstract_only(tmp_path):
             completion_fn=fake_completion,
         )
 
+        assert translation.title_content == "具身机器人翻译"
         assert translation.content == "一个灵巧机器人使用 π0.5 和 π0。"
         assert translation.model == "fake-qwen"
 

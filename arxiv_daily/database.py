@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
+from sqlalchemy import text
 from sqlalchemy.engine import Engine
 from sqlmodel import SQLModel, Session, create_engine
 
@@ -21,6 +22,21 @@ def build_engine(settings: Optional[Settings] = None) -> Engine:
 
 def create_db_and_tables(engine: Engine) -> None:
     SQLModel.metadata.create_all(engine)
+    _migrate_sqlite_schema(engine)
+
+
+def _migrate_sqlite_schema(engine: Engine) -> None:
+    if engine.dialect.name != "sqlite":
+        return
+    with engine.begin() as connection:
+        columns = connection.execute(text("PRAGMA table_info(paperabstracttranslation)")).mappings().all()
+        if not columns:
+            return
+        column_names = {str(column["name"]) for column in columns}
+        if "title_content" not in column_names:
+            connection.execute(
+                text("ALTER TABLE paperabstracttranslation ADD COLUMN title_content TEXT NOT NULL DEFAULT ''")
+            )
 
 
 def session_for(engine: Engine) -> Session:

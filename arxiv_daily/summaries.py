@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass
 from datetime import date
 from typing import Callable, List, Optional
@@ -9,7 +11,7 @@ from sqlmodel import Session, select
 from .config import Settings, get_settings
 from .models import DailyReport, Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary, utc_now
 from .pdf_text import FullTextExtraction, fetch_paper_full_text
-from .text import clean_latex_text, clean_translation_text
+from .text import clean_latex_text, clean_translation_text, clean_translation_title
 
 
 @dataclass(frozen=True)
@@ -116,13 +118,63 @@ def build_abstract_translation_messages(paper: Paper) -> List[dict]:
         {
             "role": "user",
             "content": (
-                "请将下面 arXiv Abstract 翻译成中文。\n"
-                "严格要求：只输出译文正文；不要输出标题、摘要、译文等标签；"
-                "不要添加项目符号、Markdown 标题或额外说明；保留必要英文术语、模型名、benchmark 名和链接。\n\n"
-                f"{clean_latex_text(paper.abstract)}"
+                "请将下面 arXiv 论文标题和 Abstract 翻译成中文。\n"
+                "严格要求：只输出 JSON，不要输出 Markdown、解释或额外文本；"
+                "JSON 字段必须是 title_zh 和 abstract_zh；保留必要英文术语、模型名、benchmark 名和链接。\n\n"
+                f"Title: {clean_latex_text(paper.title)}\n\n"
+                f"Abstract: {clean_latex_text(paper.abstract)}"
             ),
         },
     ]
+
+
+def parse_abstract_translation_result(content: str) -> tuple[str, str]:
+    raw = (content or "").strip()
+    json_text = _strip_json_fence(raw)
+    try:
+        payload = json.loads(json_text)
+    except json.JSONDecodeError:
+        payload = None
+    if isinstance(payload, dict):
+        title = clean_translation_title(
+            str(payload.get("title_zh") or payload.get("title") or payload.get("标题") or "")
+        )
+        abstract = clean_translation_text(
+            str(payload.get("abstract_zh") or payload.get("abstract") or payload.get("摘要") or payload.get("content") or "")
+        )
+        if title or abstract:
+            return title, abstract
+
+    return _parse_labeled_translation(raw)
+
+
+def _strip_json_fence(value: str) -> str:
+    text = value.strip()
+    match = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", text, flags=re.IGNORECASE | re.DOTALL)
+    return match.group(1).strip() if match else text
+
+
+def _parse_labeled_translation(value: str) -> tuple[str, str]:
+    lines = (value or "").splitlines()
+    title = ""
+    abstract_lines: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            if abstract_lines:
+                abstract_lines.append("")
+            continue
+        title_match = re.match(r"^(?:中文标题|标题译文|题目译文|标题|题目|Title)\s*[:：]\s*(.+)$", stripped, re.I)
+        if title_match and not title:
+            title = clean_translation_title(title_match.group(1))
+            continue
+        abstract_match = re.match(r"^(?:中文摘要|摘要译文|摘要|译文|Abstract|Translation)\s*[:：]\s*(.*)$", stripped, re.I)
+        if abstract_match:
+            abstract_lines.append(abstract_match.group(1))
+            continue
+        abstract_lines.append(stripped)
+    abstract = clean_translation_text("\n".join(abstract_lines).strip())
+    return title, abstract
 
 
 def build_full_text_paper_messages(paper: Paper, extraction: FullTextExtraction) -> List[dict]:
@@ -203,16 +255,22 @@ def generate_abstract_translation(
     existing = session.exec(
         select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id == arxiv_id)
     ).first()
-    if existing is not None and not force:
+    if existing is not None and not force and existing.title_content:
         return existing
 
     complete = completion_fn or (lambda messages, max_tokens: qwen_completion(settings, messages, max_tokens))
     result = complete(build_abstract_translation_messages(paper), settings.qwen_max_tokens_single)
-    content = clean_translation_text(result.content)
+    title_content, content = parse_abstract_translation_result(result.content)
     if existing is None:
-        translation = PaperAbstractTranslation(arxiv_id=arxiv_id, content=content, model=result.model)
+        translation = PaperAbstractTranslation(
+            arxiv_id=arxiv_id,
+            title_content=title_content,
+            content=content,
+            model=result.model,
+        )
     else:
         translation = existing
+        translation.title_content = title_content
         translation.content = content
         translation.model = result.model
         translation.generated_at = utc_now()

@@ -98,6 +98,7 @@ class PaperSummary(SQLModel, table=True):
 class PaperAbstractTranslation(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     arxiv_id: str = Field(foreign_key="paper.arxiv_id", index=True, unique=True)
+    title_content: str = Field(default="", sa_column=Column(Text))
     content: str = Field(sa_column=Column(Text))
     model: str
     generated_at: datetime = Field(default_factory=utc_now)

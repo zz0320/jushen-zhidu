@@ -162,6 +162,15 @@ a:hover {
   max-width: 980px;
 }
 
+.paper-title-translation {
+  color: var(--accent-dark);
+  font-size: 18px;
+  font-weight: 760;
+  line-height: 1.45;
+  margin-top: 10px;
+  max-width: 980px;
+}
+
 .page-layout {
   align-items: start;
   display: grid;
@@ -675,6 +684,39 @@ tr:last-child td {
     linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(250, 253, 252, 0.98)),
     radial-gradient(circle at 100% 0, rgba(13, 124, 114, 0.08), transparent 36%);
   padding: 20px;
+}
+
+.bilingual-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.bilingual-block {
+  background: #ffffff;
+  border: 1px solid rgba(213, 224, 229, 0.92);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.bilingual-block.translated {
+  background: linear-gradient(135deg, #f4fbf9, #fffaf0);
+  border-color: rgba(11, 132, 120, 0.18);
+}
+
+.bilingual-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 860;
+  letter-spacing: 0;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.bilingual-block h3 {
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.38;
+  margin: 0;
 }
 
 .abstract-header-actions {
@@ -2842,8 +2884,71 @@ button.ghost:hover,
   white-space: nowrap;
 }
 
+.paper-card-title-zh {
+  color: var(--accent-dark);
+  font-size: 14px;
+  font-weight: 760;
+  line-height: 1.45;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .paper-card-keywords {
   margin-top: 9px;
+}
+
+.paper-card-abstract {
+  border-top: 1px solid rgba(213, 224, 229, 0.86);
+  margin-top: 10px;
+  padding-top: 8px;
+}
+
+.paper-card-abstract summary {
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 820;
+  list-style-position: inside;
+}
+
+.paper-card-abstract summary:hover {
+  color: var(--accent-dark);
+}
+
+.paper-card-abstract-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.paper-card-abstract-grid > div {
+  background: #f8fbfa;
+  border: 1px solid rgba(213, 224, 229, 0.88);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.paper-card-abstract-grid span {
+  color: var(--accent-dark);
+  display: block;
+  font-size: 11px;
+  font-weight: 860;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.paper-card-abstract-grid p {
+  color: #2b3a48;
+  display: -webkit-box;
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
 }
 
 .paper-card-actions {
@@ -2985,6 +3090,10 @@ button.ghost:hover,
     flex-direction: row;
     grid-column: 2;
     justify-content: flex-start;
+  }
+
+  .paper-card-abstract-grid {
+    grid-template-columns: 1fr;
   }
 }
 

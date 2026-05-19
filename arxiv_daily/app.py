@@ -41,6 +41,7 @@ from .summaries import (
 )
 from .text import (
     clean_latex_text,
+    clean_translation_title,
     clean_translation_text,
     format_datetime,
     markdown_to_html,
@@ -51,6 +52,7 @@ from .text import (
 PACKAGE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(PACKAGE_DIR / "templates"))
 templates.env.filters["clean_latex"] = clean_latex_text
+templates.env.filters["translation_title"] = clean_translation_title
 templates.env.filters["translation_text"] = clean_translation_text
 templates.env.filters["summary_html"] = summary_to_html
 templates.env.filters["markdown_html"] = markdown_to_html
@@ -205,6 +207,13 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             .where(Paper.fetched_for_date == target_day.isoformat())
             .order_by(Paper.relevance_score.desc(), Paper.published_at.desc())
         ).all()
+        paper_ids = [paper.arxiv_id for paper in papers]
+        translations = (
+            session.exec(select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id.in_(paper_ids))).all()
+            if paper_ids
+            else []
+        )
+        translations_by_paper = {translation.arxiv_id: translation for translation in translations}
         report = session.exec(select(DailyReport).where(DailyReport.report_date == target_day.isoformat())).first()
         return templates.TemplateResponse(
             "index.html",
@@ -212,6 +221,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "request": request,
                 "day": target_day.isoformat(),
                 "papers": papers,
+                "translations_by_paper": translations_by_paper,
                 "report": report,
                 "message": message,
                 "error": error,
@@ -417,7 +427,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         force: bool = Form(False),
     ) -> Dict[str, object]:
         redirect_url = f"/papers/{arxiv_id}"
-        job_id = create_summary_job("paper_abstract_translation", "摘要中文翻译", redirect_url)
+        job_id = create_summary_job("paper_abstract_translation", "题目与摘要中文翻译", redirect_url)
 
         def worker() -> None:
             with Session(engine) as worker_session:
@@ -437,7 +447,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                     existing = worker_session.exec(
                         select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id == arxiv_id)
                     ).first()
-                    if existing is not None and not force:
+                    if existing is not None and not force and existing.title_content:
                         translation = existing
                         reused_existing = True
                         update_summary_job(
@@ -445,7 +455,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             stage="saving",
                             stage_label=_summary_stage_label("saving"),
                             percent=88,
-                            message="已找到现有摘要译文，正在刷新页面。",
+                            message="已找到现有题目与摘要译文，正在刷新页面。",
                             model=_model_display_name(translation.model),
                         )
                     else:
@@ -455,7 +465,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             stage="calling_model",
                             stage_label=_summary_stage_label("calling_model"),
                             percent=42,
-                            message="正在调用智能模型翻译摘要。",
+                            message="正在调用智能模型翻译题目和摘要。",
                             model=_model_display_name(runtime_settings.qwen_model),
                         )
                         translation = generate_abstract_translation(
@@ -469,7 +479,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                         stage="saving",
                         stage_label=_summary_stage_label("saving"),
                         percent=88,
-                        message="正在保存中文翻译。" if force or existing is None else "正在读取已有中文翻译。",
+                        message="正在保存中文翻译。" if force or not reused_existing else "正在读取已有中文翻译。",
                     )
                 except Exception as exc:  # pragma: no cover - runtime model path
                     error_message = _summary_error_message(exc)
@@ -490,7 +500,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                     stage_label=_summary_stage_label("complete"),
                     percent=100,
                     model=_model_display_name(translation.model),
-                    message="已使用现有摘要译文，正在刷新页面。" if reused_existing else "摘要翻译已生成，正在刷新页面。",
+                    message="已使用现有题目与摘要译文，正在刷新页面。" if reused_existing else "题目与摘要翻译已生成，正在刷新页面。",
                 )
 
         threading.Thread(target=worker, name=f"translate-abstract-{job_id}", daemon=True).start()

@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from arxiv_daily.text import (
     clean_latex_text,
+    clean_translation_title,
     clean_translation_text,
     format_datetime,
     link_arxiv_ids_markdown,
@@ -39,6 +40,10 @@ def test_clean_translation_text_removes_model_labels_and_latex():
     assert "π0" in cleaned
     assert "π_0" not in cleaned
     assert "61.2%" in cleaned
+
+
+def test_clean_translation_title_removes_title_label():
+    assert clean_translation_title("中文标题：DexHoldem：使用灵巧具身系统玩德州扑克") == "DexHoldem：使用灵巧具身系统玩德州扑克"
 
 
 def test_summary_to_html_renders_numbered_sections_safely():

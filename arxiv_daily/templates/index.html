@@ -149,6 +149,7 @@
 
       <section class="paper-feed anchor-target" id="paper-list" aria-label="论文列表">
         {% for paper in papers %}
+          {% set translation = translations_by_paper.get(paper.arxiv_id) %}
           <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
             <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
@@ -163,6 +164,9 @@
                 {% endif %}
               </div>
               <a class="paper-title paper-card-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|clean_latex }}</a>
+              {% if translation and translation.title_content %}
+                <div class="paper-card-title-zh">{{ translation.title_content|translation_title }}</div>
+              {% endif %}
               <div class="muted paper-card-authors">{{ paper.authors[:5]|join(", ") }}{% if paper.authors|length > 5 %} et al.{% endif %}</div>
               <div class="chips paper-keywords paper-card-keywords">
                 {% for match in paper.matched_keywords[:6] %}
@@ -171,6 +175,23 @@
                   <span>暂无关键词</span>
                 {% endfor %}
               </div>
+              <details class="paper-card-abstract">
+                <summary>中英文摘要</summary>
+                <div class="paper-card-abstract-grid">
+                  <div>
+                    <span>English</span>
+                    <p>{{ paper.abstract|clean_latex }}</p>
+                  </div>
+                  <div>
+                    <span>中文</span>
+                    {% if translation %}
+                      <p>{{ translation.content|translation_text }}</p>
+                    {% else %}
+                      <p class="muted">进入详情页后可生成题目与摘要中文翻译。</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </details>
             </div>
             <div class="paper-card-actions">
               <a class="button compact-button" href="/papers/{{ paper.arxiv_id }}">阅读</a>

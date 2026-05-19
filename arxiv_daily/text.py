@@ -76,6 +76,10 @@ TRANSLATION_BODY_HEADING_PATTERN = re.compile(
     r"^\s*(?:#{1,6}\s*)?(?:中文译文|译文|摘要|Abstract|Translation|Summary)\s*$",
     re.IGNORECASE,
 )
+TRANSLATION_TITLE_CLEAN_PATTERN = re.compile(
+    r"^\s*(?:#{1,6}\s*)?(?:中文标题|标题译文|题目译文|论文标题|标题|题目|Title)\s*[:：]\s*",
+    re.IGNORECASE,
+)
 
 
 def _clean_latex_fragment(value: str) -> str:
@@ -125,6 +129,14 @@ def clean_translation_text(value: str) -> str:
         if cleaned == text:
             break
         text = cleaned
+    return clean_latex_text(text)
+
+
+def clean_translation_title(value: str) -> str:
+    """Normalize model-generated title translations for compact display."""
+    text = (value or "").strip()
+    text = TRANSLATION_TITLE_CLEAN_PATTERN.sub("", text).strip()
+    text = text.strip("\"'“”‘’")
     return clean_latex_text(text)
 
 

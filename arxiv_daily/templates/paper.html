@@ -5,6 +5,9 @@
     <div>
       <div class="eyebrow">Paper Brief</div>
       <h1>{{ paper.title|clean_latex }}</h1>
+      {% if abstract_translation and abstract_translation.title_content %}
+        <p class="paper-title-translation">{{ abstract_translation.title_content|translation_title }}</p>
+      {% endif %}
       <div class="paper-hero-meta">
         <span>Score {{ "%.1f"|format(paper.relevance_score) }}</span>
         <span>{{ paper.primary_category }}</span>
@@ -25,7 +28,7 @@
       <a href="#abstract-translation-progress" data-progress-nav="abstract-translation-progress" hidden>译文进度</a>
       <a href="#full-text-progress" data-progress-nav="full-text-progress" hidden>全文进度</a>
       <a href="#paper-meta">论文速览</a>
-      <a href="#paper-abstract">摘要</a>
+      <a href="#paper-abstract">题目与摘要</a>
       <a href="#abstract-summary">摘要总结</a>
       <a href="#full-text-summary">全文总结</a>
       <span class="nav-label nav-label-secondary">相关页面</span>
@@ -104,8 +107,8 @@
       <section class="progress-panel summary-progress anchor-target" id="abstract-translation-progress" hidden>
         <div class="progress-head">
           <div>
-            <div class="progress-title" data-progress-title>正在生成中文译文</div>
-            <div class="progress-message" data-progress-message>正在准备英文摘要。</div>
+            <div class="progress-title" data-progress-title>正在翻译题目与摘要</div>
+            <div class="progress-message" data-progress-message>正在准备英文题目和摘要。</div>
           </div>
           <div class="progress-percent" data-progress-percent>0%</div>
         </div>
@@ -114,7 +117,7 @@
         </div>
         <div class="progress-meta">
           <span><strong data-progress-stage>准备中</strong></span>
-          <span>类型 <strong data-progress-kind>中文译文</strong></span>
+          <span>类型 <strong data-progress-kind>题目与摘要翻译</strong></span>
           <span>模型 <strong data-progress-model>智能模型</strong></span>
         </div>
       </section>
@@ -188,8 +191,8 @@
       <section class="panel paper-abstract-card anchor-target" id="paper-abstract">
         <div class="section-head compact-head">
           <div>
-            <div class="eyebrow">Abstract</div>
-            <h2>摘要</h2>
+            <div class="eyebrow">Title & Abstract</div>
+            <h2>题目与摘要</h2>
           </div>
           <div class="abstract-header-actions">
             <span class="summary-badge">arXiv metadata</span>
@@ -198,29 +201,44 @@
               <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-progress-panel="abstract-translation-progress" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="刷新中...">
                 <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
                 <input type="hidden" name="force" value="true">
-                <button class="secondary" type="submit">刷新译文</button>
+                <button class="secondary" type="submit">刷新翻译</button>
               </form>
             {% else %}
               <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-progress-panel="abstract-translation-progress" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="翻译中...">
                 <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
-                <button class="secondary" type="submit">中文翻译</button>
+                <button class="secondary" type="submit">翻译题目与摘要</button>
               </form>
             {% endif %}
           </div>
         </div>
-        <p class="abstract">{{ paper.abstract|clean_latex }}</p>
+        <div class="bilingual-stack">
+          <article class="bilingual-block">
+            <div class="bilingual-label">English Title</div>
+            <h3>{{ paper.title|clean_latex }}</h3>
+          </article>
+          {% if abstract_translation and abstract_translation.title_content %}
+            <article class="bilingual-block translated">
+              <div class="bilingual-label">中文题目</div>
+              <h3>{{ abstract_translation.title_content|translation_title }}</h3>
+            </article>
+          {% endif %}
+          <article class="bilingual-block">
+            <div class="bilingual-label">English Abstract</div>
+            <p class="abstract">{{ paper.abstract|clean_latex }}</p>
+          </article>
+        </div>
         {% if abstract_translation %}
           <div class="abstract-translation" id="abstract-translation">
             <div class="abstract-translation-head">
               <div>
                 <div class="eyebrow">Chinese Translation</div>
-                <h3>中文译文</h3>
+                <h3>中文摘要</h3>
               </div>
               <span class="summary-badge">{{ abstract_translation.model|model_label }}</span>
             </div>
             <div class="summary-meta">
               <span>{{ abstract_translation.generated_at|format_dt }}</span>
-              <span>忠实翻译 arXiv 摘要</span>
+              <span>忠实翻译 arXiv 题目和摘要</span>
             </div>
             <p class="abstract translated-abstract">{{ abstract_translation.content|translation_text }}</p>
           </div>
