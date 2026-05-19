@@ -39,11 +39,19 @@ from .summaries import (
     generate_paper_full_text_summary,
     generate_paper_summary,
 )
-from .text import clean_latex_text, format_datetime, markdown_to_html, strip_first_markdown_heading, summary_to_html
+from .text import (
+    clean_latex_text,
+    clean_translation_text,
+    format_datetime,
+    markdown_to_html,
+    strip_first_markdown_heading,
+    summary_to_html,
+)
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(PACKAGE_DIR / "templates"))
 templates.env.filters["clean_latex"] = clean_latex_text
+templates.env.filters["translation_text"] = clean_translation_text
 templates.env.filters["summary_html"] = summary_to_html
 templates.env.filters["markdown_html"] = markdown_to_html
 templates.env.filters["format_dt"] = format_datetime

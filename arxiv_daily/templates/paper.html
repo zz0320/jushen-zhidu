@@ -208,7 +208,7 @@
             {% endif %}
           </div>
         </div>
-        <p class="abstract">{{ paper.abstract }}</p>
+        <p class="abstract">{{ paper.abstract|clean_latex }}</p>
         {% if abstract_translation %}
           <div class="abstract-translation" id="abstract-translation">
             <div class="abstract-translation-head">
@@ -222,7 +222,7 @@
               <span>{{ abstract_translation.generated_at|format_dt }}</span>
               <span>忠实翻译 arXiv 摘要</span>
             </div>
-            <p class="abstract translated-abstract">{{ abstract_translation.content }}</p>
+            <p class="abstract translated-abstract">{{ abstract_translation.content|translation_text }}</p>
           </div>
         {% endif %}
       </section>

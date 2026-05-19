@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from arxiv_daily.text import (
     clean_latex_text,
+    clean_translation_text,
     format_datetime,
     link_arxiv_ids_markdown,
     markdown_to_html,
@@ -14,10 +15,30 @@ def test_clean_latex_text_converts_arxiv_math_title():
     assert clean_latex_text(r"VGGT-$\Omega$: A Robot Benchmark") == "VGGT-Ω: A Robot Benchmark"
     assert clean_latex_text("VGGT-$Ω$") == "VGGT-Ω"
     assert clean_latex_text(r"History $o_{\leq t}$ and $a_{<t}$") == "History o≤t and a<t"
+    assert clean_latex_text(r"Policies $\pi_{0.5}$ and $\pi_0$") == "Policies π0.5 and π0"
 
 
 def test_clean_latex_text_unwraps_text_commands():
     assert clean_latex_text(r"\textbf{Robot} \& \mathrm{World} Models") == "Robot & World Models"
+
+
+def test_clean_translation_text_removes_model_labels_and_latex():
+    raw = (
+        r"标题：DexHoldem：使用灵巧具身系统玩德州扑克"
+        "\n\n"
+        r"摘要：在基础单元执行任务中，$\pi_{0.5}$ 与 $\pi_0$ 取得最高任务完成率（$61.2\%$）。"
+    )
+
+    cleaned = clean_translation_text(raw)
+
+    assert not cleaned.startswith("标题")
+    assert "摘要：" not in cleaned
+    assert "$" not in cleaned
+    assert r"\pi" not in cleaned
+    assert "π0.5" in cleaned
+    assert "π0" in cleaned
+    assert "π_0" not in cleaned
+    assert "61.2%" in cleaned
 
 
 def test_summary_to_html_renders_numbered_sections_safely():

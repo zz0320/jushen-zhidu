@@ -111,9 +111,13 @@ def test_generate_abstract_translation_uses_abstract_only(tmp_path):
         def fake_completion(messages, max_tokens):
             assert "翻译成中文" in messages[1]["content"]
             assert "A dexterous robot learns from teleoperation." in messages[1]["content"]
+            assert "Embodied Robot Translation" not in messages[1]["content"]
             assert "项目符号" in messages[1]["content"]
             assert max_tokens == settings.qwen_max_tokens_single
-            return CompletionResult(content="一个灵巧机器人从遥操作中学习。", model="fake-qwen")
+            return CompletionResult(
+                content="标题：不应保留的标题\n\n摘要：一个灵巧机器人使用 $\\pi_{0.5}$ 和 $\\pi_0$。",
+                model="fake-qwen",
+            )
 
         translation = generate_abstract_translation(
             session,
@@ -122,7 +126,7 @@ def test_generate_abstract_translation_uses_abstract_only(tmp_path):
             completion_fn=fake_completion,
         )
 
-        assert translation.content == "一个灵巧机器人从遥操作中学习。"
+        assert translation.content == "一个灵巧机器人使用 π0.5 和 π0。"
         assert translation.model == "fake-qwen"
 
 

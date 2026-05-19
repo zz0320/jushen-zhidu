@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from .config import Settings, get_settings
 from .models import DailyReport, Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary, utc_now
 from .pdf_text import FullTextExtraction, fetch_paper_full_text
-from .text import clean_latex_text
+from .text import clean_latex_text, clean_translation_text
 
 
 @dataclass(frozen=True)
@@ -116,9 +116,10 @@ def build_abstract_translation_messages(paper: Paper) -> List[dict]:
         {
             "role": "user",
             "content": (
-                "请将下面 arXiv 摘要翻译成中文。只输出译文，不要添加标题、项目符号或额外说明。\n\n"
-                f"Title: {clean_latex_text(paper.title)}\n"
-                f"Abstract: {paper.abstract}"
+                "请将下面 arXiv Abstract 翻译成中文。\n"
+                "严格要求：只输出译文正文；不要输出标题、摘要、译文等标签；"
+                "不要添加项目符号、Markdown 标题或额外说明；保留必要英文术语、模型名、benchmark 名和链接。\n\n"
+                f"{clean_latex_text(paper.abstract)}"
             ),
         },
     ]
@@ -207,11 +208,12 @@ def generate_abstract_translation(
 
     complete = completion_fn or (lambda messages, max_tokens: qwen_completion(settings, messages, max_tokens))
     result = complete(build_abstract_translation_messages(paper), settings.qwen_max_tokens_single)
+    content = clean_translation_text(result.content)
     if existing is None:
-        translation = PaperAbstractTranslation(arxiv_id=arxiv_id, content=result.content, model=result.model)
+        translation = PaperAbstractTranslation(arxiv_id=arxiv_id, content=content, model=result.model)
     else:
         translation = existing
-        translation.content = result.content
+        translation.content = content
         translation.model = result.model
         translation.generated_at = utc_now()
     session.add(translation)

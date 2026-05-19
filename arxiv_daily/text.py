@@ -35,6 +35,7 @@ GREEK_REPLACEMENTS = {
     r"\Phi": "Φ",
     r"\Omega": "Ω",
 }
+GREEK_CHARACTERS = "".join(GREEK_REPLACEMENTS.values())
 
 LATEX_SYMBOL_REPLACEMENTS = {
     r"\leq": "≤",
@@ -66,6 +67,16 @@ LATEX_COMMANDS_WITH_TEXT = (
     "emph",
 )
 
+TRANSLATION_TITLE_LABEL_PATTERN = re.compile(r"^\s*(?:#{1,6}\s*)?(?:标题|题目|Title)\s*[:：]", re.IGNORECASE)
+TRANSLATION_BODY_LABEL_PATTERN = re.compile(
+    r"^\s*(?:#{1,6}\s*)?(?:中文译文|译文|摘要|Abstract|Translation|Summary)\s*[:：]\s*",
+    re.IGNORECASE,
+)
+TRANSLATION_BODY_HEADING_PATTERN = re.compile(
+    r"^\s*(?:#{1,6}\s*)?(?:中文译文|译文|摘要|Abstract|Translation|Summary)\s*$",
+    re.IGNORECASE,
+)
+
 
 def _clean_latex_fragment(value: str) -> str:
     cleaned = value
@@ -76,6 +87,7 @@ def _clean_latex_fragment(value: str) -> str:
     for command in LATEX_COMMANDS_WITH_TEXT:
         cleaned = re.sub(rf"\\{command}\{{([^{{}}]+)\}}", r"\1", cleaned)
     cleaned = re.sub(r"[_^]\{([^{}]+)\}", r"\1", cleaned)
+    cleaned = re.sub(rf"([{re.escape(GREEK_CHARACTERS)}])_([A-Za-z0-9.]+)", r"\1\2", cleaned)
     cleaned = cleaned.replace(r"\&", "&").replace(r"\%", "%").replace(r"\_", "_")
     cleaned = cleaned.replace(r"\,", " ").replace(r"\;", " ").replace(r"\:", " ")
     cleaned = cleaned.replace("{", "").replace("}", "")
@@ -95,6 +107,42 @@ def clean_latex_text(value: str) -> str:
     cleaned = cleaned.replace(" - ", " - ")
     cleaned = re.sub(r"\s+", " ", cleaned)
     return cleaned.strip()
+
+
+def clean_translation_text(value: str) -> str:
+    """Normalize model-generated abstract translations for compact display."""
+    text = (value or "").strip()
+    text = _drop_leading_translation_title(text)
+    for _ in range(4):
+        lines = text.splitlines()
+        while lines and not lines[0].strip():
+            lines.pop(0)
+        if lines and TRANSLATION_BODY_HEADING_PATTERN.match(lines[0].strip()):
+            lines.pop(0)
+            text = "\n".join(lines).strip()
+            continue
+        cleaned = TRANSLATION_BODY_LABEL_PATTERN.sub("", text).strip()
+        if cleaned == text:
+            break
+        text = cleaned
+    return clean_latex_text(text)
+
+
+def _drop_leading_translation_title(value: str) -> str:
+    lines = (value or "").splitlines()
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    if not lines or not TRANSLATION_TITLE_LABEL_PATTERN.match(lines[0]):
+        return "\n".join(lines).strip()
+
+    body_label = re.search(r"(?:中文译文|译文|摘要|Abstract|Translation|Summary)\s*[:：]", lines[0], re.IGNORECASE)
+    if body_label:
+        lines[0] = lines[0][body_label.start() :]
+    else:
+        lines.pop(0)
+        while lines and not lines[0].strip():
+            lines.pop(0)
+    return "\n".join(lines).strip()
 
 
 def summary_to_html(value: str) -> Markup:
