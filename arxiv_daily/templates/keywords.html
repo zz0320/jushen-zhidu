@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 {% block title %}关键词配置 · 具身智读{% endblock %}
 {% block content %}
-  <section class="page-head">
+  <section class="page-head workspace-head">
     <div>
-      <div class="eyebrow">Search configuration</div>
-      <h1>关键词配置</h1>
+      <div class="eyebrow">Search rules</div>
+      <h1>检索规则</h1>
       <p>分类先在 arXiv 侧收窄范围，关键词和排除词在本地做相关性评分和降噪。</p>
+    </div>
+    <div class="hero-controls">
+      <a class="button secondary compact-button" href="/">回到论文雷达</a>
+      <a class="button ghost compact-button" href="/settings">智能设置</a>
     </div>
   </section>
 
@@ -32,8 +36,8 @@
     <aside class="panel keyword-side">
       <div class="keyword-card-head">
         <div>
-          <div class="eyebrow">arXiv Scope</div>
-          <h2>检索分类</h2>
+          <div class="eyebrow">Scope builder</div>
+          <h2>规则入口</h2>
         </div>
         <span class="mini-count">{{ categories|length }} 项</span>
       </div>
@@ -55,7 +59,7 @@
         </form>
       </details>
 
-      <div class="side-subhead">当前分类</div>
+      <div class="side-subhead">arXiv 分类</div>
       <div class="category-chip-grid">
         {% for category in categories %}
           <div class="category-control {{ '' if category.enabled else 'is-disabled' }}">
@@ -76,10 +80,10 @@
     <section class="keyword-main">
       <section class="keyword-section-head">
         <div>
-          <div class="eyebrow">Rule Map</div>
-          <h2>匹配规则地图</h2>
+          <div class="eyebrow">Rule map</div>
+          <h2>关键词组</h2>
         </div>
-        <p>每个分组先展示实际生效的关键词和排除词；编辑入口收在卡片底部。</p>
+        <p>每个分组就是一类研究方向；左侧关键词加分，右侧排除词降噪。</p>
       </section>
 
       <div class="keyword-rule-list">

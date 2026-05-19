@@ -245,7 +245,38 @@
     applyFilter();
   };
 
+  const setupSettingsPresets = () => {
+    const presetButtons = Array.from(document.querySelectorAll("[data-settings-preset]"));
+    if (!presetButtons.length) {
+      return;
+    }
+
+    const fields = {
+      single: document.querySelector("[name='max_tokens_single']"),
+      fullText: document.querySelector("[name='max_tokens_full_text']"),
+      daily: document.querySelector("[name='max_tokens_daily']"),
+      topN: document.querySelector("[name='daily_top_n']"),
+      abstractChars: document.querySelector("[name='daily_abstract_chars']"),
+      fullTextChars: document.querySelector("[name='full_text_max_chars']"),
+    };
+
+    presetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (fields.single) fields.single.value = button.dataset.single || fields.single.value;
+        if (fields.fullText) fields.fullText.value = button.dataset.fullText || fields.fullText.value;
+        if (fields.daily) fields.daily.value = button.dataset.daily || fields.daily.value;
+        if (fields.topN) fields.topN.value = button.dataset.topN || fields.topN.value;
+        if (fields.abstractChars) fields.abstractChars.value = button.dataset.abstractChars || fields.abstractChars.value;
+        if (fields.fullTextChars) fields.fullTextChars.value = button.dataset.fullTextChars || fields.fullTextChars.value;
+
+        presetButtons.forEach((item) => item.classList.remove("is-applied"));
+        button.classList.add("is-applied");
+      });
+    });
+  };
+
   setupFetchProgress();
   setupSummaryProgress();
   setupPaperFilter();
+  setupSettingsPresets();
 })();

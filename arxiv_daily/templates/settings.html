@@ -9,9 +9,15 @@
     </div>
   </section>
 
-  <section class="grid two">
+  <section class="settings-layout">
     <article class="panel status-panel">
-      <h2>当前状态</h2>
+      <div class="section-head compact-head">
+        <div>
+          <div class="eyebrow">Runtime</div>
+          <h2>当前状态</h2>
+        </div>
+        <span class="summary-badge">{{ "已连接" if settings_view.api_key_configured else "待配置" }}</span>
+      </div>
       <dl>
         <dt>API Key</dt>
         <dd>
@@ -31,8 +37,13 @@
       </dl>
     </article>
 
-    <article class="panel">
-      <h2>保存智能模型配置</h2>
+    <article class="panel settings-editor">
+      <div class="section-head compact-head">
+        <div>
+          <div class="eyebrow">Model controls</div>
+          <h2>保存智能模型配置</h2>
+        </div>
+      </div>
       <form class="stack-form settings-form" method="post" action="/settings/qwen">
         <label>
           API Key
@@ -51,6 +62,26 @@
           <input name="model" value="" placeholder="留空保留当前模型；需要更换时输入模型 ID">
           <small>论文很多或全文很长时，建议使用支持长上下文的模型；`max_tokens` 只控制输出长度，不等于输入上下文长度。</small>
         </label>
+        <section class="preset-panel" aria-label="推荐参数预设">
+          <div>
+            <span class="action-label">推荐预设</span>
+            <strong>按使用场景一键填充参数</strong>
+          </div>
+          <div class="preset-grid">
+            <button class="preset-card" type="button" data-settings-preset data-single="1600" data-full-text="4096" data-daily="4096" data-top-n="30" data-abstract-chars="1000" data-full-text-chars="70000">
+              <strong>日常快读</strong>
+              <span>速度优先，适合每天扫论文。</span>
+            </button>
+            <button class="preset-card" type="button" data-settings-preset data-single="1800" data-full-text="8192" data-daily="6144" data-top-n="40" data-abstract-chars="1200" data-full-text-chars="120000">
+              <strong>均衡推荐</strong>
+              <span>覆盖更多候选，输出更完整。</span>
+            </button>
+            <button class="preset-card" type="button" data-settings-preset data-single="2400" data-full-text="12000" data-daily="8192" data-top-n="60" data-abstract-chars="1500" data-full-text-chars="180000">
+              <strong>深度研究</strong>
+              <span>论文多、全文长时使用。</span>
+            </button>
+          </div>
+        </section>
         <div class="form-grid">
           <label>
             Temperature

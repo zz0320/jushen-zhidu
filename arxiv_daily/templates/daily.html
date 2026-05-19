@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 日报 · 具身智读{% endblock %}
 {% block content %}
-  <section class="page-head">
+  <section class="page-head workspace-head">
     <div>
       <div class="eyebrow">Daily digest</div>
-      <h1>{{ day }} 日报</h1>
+      <h1>{{ day }} 智能日报</h1>
       <p>{{ papers|length }} 篇候选论文{% if report %}，由 {{ report.model|model_label }} 生成{% else %}，尚未生成智能日报{% endif %}。</p>
     </div>
     <div class="hero-controls">
@@ -19,26 +19,55 @@
   </section>
 
   <div class="page-layout">
-    <nav class="anchor-nav" aria-label="页内导航">
-      <span class="nav-label">页内导航</span>
-      <a href="#daily-actions">操作</a>
+    <nav class="anchor-nav workflow-nav" aria-label="日报工作流">
+      <span class="nav-label">日报流程</span>
+      <div class="nav-kpi">
+        <strong>{{ papers|length }}</strong>
+        <span>候选论文</span>
+      </div>
+      <div class="nav-kpi">
+        <strong>{{ "Ready" if report else "Pending" }}</strong>
+        <span>生成状态</span>
+      </div>
+      <a href="#daily-actions">1. 生成与导出</a>
       <a href="#summary-progress" data-progress-nav="summary-progress" hidden>生成进度</a>
-      <a href="#daily-report">日报正文</a>
-      <a href="#markdown-preview">Markdown</a>
+      <a href="#daily-report">2. 阅读日报</a>
+      <a href="#markdown-preview">3. Markdown</a>
       <span class="nav-label nav-label-secondary">相关页面</span>
       <a class="nav-external" href="/?day={{ day }}">回到主界面</a>
     </nav>
 
     <div class="page-main">
-      <section class="actions anchor-target" id="daily-actions">
-        <form method="post" action="/daily/{{ day }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/daily/{{ day }}" data-running-label="生成中...">
-          <input type="hidden" name="force" value="true">
-          <button type="submit">生成/刷新日报</button>
-        </form>
-        <form method="post" action="/daily/{{ day }}/export">
-          <button class="secondary" type="submit">导出 Markdown</button>
-        </form>
-        <a class="button secondary" href="/?day={{ day }}">回到主界面</a>
+      <section class="actions action-dock digest-dock anchor-target" id="daily-actions">
+        <div class="action-card primary-action">
+          <div>
+            <span class="action-label">Digest</span>
+            <strong>{{ "刷新日报" if report else "生成日报" }}</strong>
+            <p>重新整理当天论文，生成趋势、重点论文和深读建议。</p>
+          </div>
+          <form method="post" action="/daily/{{ day }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/daily/{{ day }}" data-running-label="生成中...">
+            <input type="hidden" name="force" value="true">
+            <button type="submit">{{ "刷新日报" if report else "生成日报" }}</button>
+          </form>
+        </div>
+        <div class="action-card">
+          <div>
+            <span class="action-label">Export</span>
+            <strong>Markdown</strong>
+            <p>保存为可复制、可归档的日报文本。</p>
+          </div>
+          <form method="post" action="/daily/{{ day }}/export">
+            <button class="secondary" type="submit">导出 Markdown</button>
+          </form>
+        </div>
+        <div class="action-card quiet-action">
+          <div>
+            <span class="action-label">Source</span>
+            <strong>候选论文</strong>
+            <p>回到当天论文雷达继续筛选。</p>
+          </div>
+          <a class="button secondary" href="/?day={{ day }}">回到论文雷达</a>
+        </div>
       </section>
 
       <section class="progress-panel summary-progress anchor-target" id="summary-progress" hidden>
