@@ -214,6 +214,18 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             else []
         )
         translations_by_paper = {translation.arxiv_id: translation for translation in translations}
+        paper_summaries = (
+            session.exec(select(PaperSummary).where(PaperSummary.arxiv_id.in_(paper_ids))).all()
+            if paper_ids
+            else []
+        )
+        summaries_by_paper = {summary.arxiv_id: summary for summary in paper_summaries}
+        full_text_summaries = (
+            session.exec(select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id.in_(paper_ids))).all()
+            if paper_ids
+            else []
+        )
+        full_text_summaries_by_paper = {summary.arxiv_id: summary for summary in full_text_summaries}
         report = session.exec(select(DailyReport).where(DailyReport.report_date == target_day.isoformat())).first()
         return templates.TemplateResponse(
             "index.html",
@@ -222,6 +234,8 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "day": target_day.isoformat(),
                 "papers": papers,
                 "translations_by_paper": translations_by_paper,
+                "summaries_by_paper": summaries_by_paper,
+                "full_text_summaries_by_paper": full_text_summaries_by_paper,
                 "report": report,
                 "message": message,
                 "error": error,

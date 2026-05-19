@@ -99,8 +99,8 @@
       <section class="progress-panel summary-progress anchor-target" id="summary-progress" hidden>
         <div class="progress-head">
           <div>
-            <div class="progress-title" id="summary-progress-title" data-progress-title>正在生成当日日报</div>
-            <div class="progress-message" id="summary-progress-message" data-progress-message>正在准备当天论文上下文。</div>
+            <div class="progress-title" id="summary-progress-title" data-progress-title>正在执行智能任务</div>
+            <div class="progress-message" id="summary-progress-message" data-progress-message>正在准备上下文。</div>
           </div>
           <div class="progress-percent" id="summary-progress-percent" data-progress-percent>0%</div>
         </div>
@@ -109,8 +109,8 @@
         </div>
         <div class="progress-meta">
           <span><strong id="summary-progress-stage" data-progress-stage>准备中</strong></span>
-          <span>类型 <strong id="summary-progress-kind" data-progress-kind>日报</strong></span>
-          <span>候选 <strong>{{ papers|length }}</strong> 篇</span>
+          <span>任务 <strong id="summary-progress-kind" data-progress-kind>智能生成</strong></span>
+          <span>当前列表 <strong>{{ papers|length }}</strong> 篇</span>
           <span>模型 <strong id="summary-progress-model" data-progress-model>智能模型</strong></span>
         </div>
       </section>
@@ -134,7 +134,7 @@
         <section class="list-tools" aria-label="论文列表工具">
           <label>
             <span>快速筛选</span>
-            <input data-paper-filter type="search" placeholder="搜索标题、作者、分类或关键词">
+            <input data-paper-filter type="search" placeholder="搜索标题、作者、单位、分类或关键词">
           </label>
           <div class="list-count">
             <strong data-paper-filter-count>{{ papers|length }}</strong>
@@ -150,6 +150,8 @@
       <section class="paper-feed anchor-target" id="paper-list" aria-label="论文列表">
         {% for paper in papers %}
           {% set translation = translations_by_paper.get(paper.arxiv_id) %}
+          {% set paper_summary = summaries_by_paper.get(paper.arxiv_id) %}
+          {% set paper_full_text_summary = full_text_summaries_by_paper.get(paper.arxiv_id) %}
           <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ (paper.affiliations|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
             <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
@@ -197,8 +199,36 @@
               </details>
             </div>
             <div class="paper-card-actions">
-              <a class="button compact-button" href="/papers/{{ paper.arxiv_id }}">阅读</a>
-              <a class="paper-link" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
+              <div class="paper-card-primary-actions">
+                <a class="button compact-button" href="/papers/{{ paper.arxiv_id }}">阅读</a>
+                <a class="paper-link" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
+              </div>
+              <div class="paper-card-ai-actions" aria-label="智能快捷动作">
+                <span>智能</span>
+                {% if translation %}
+                  <a class="ai-chip done" href="/papers/{{ paper.arxiv_id }}#abstract-translation">译文</a>
+                {% else %}
+                  <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-progress-panel="summary-progress" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="翻译中...">
+                    <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
+                    <button class="ai-chip" type="submit">翻译</button>
+                  </form>
+                {% endif %}
+                {% if paper_summary %}
+                  <a class="ai-chip done" href="/papers/{{ paper.arxiv_id }}#abstract-summary">摘要</a>
+                {% else %}
+                  <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-progress-panel="summary-progress" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="生成中...">
+                    <button class="ai-chip" type="submit">摘要</button>
+                  </form>
+                {% endif %}
+                {% if paper_full_text_summary %}
+                  <a class="ai-chip done" href="/papers/{{ paper.arxiv_id }}#full-text-summary">全文</a>
+                {% else %}
+                  <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-progress-panel="summary-progress" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="提取中...">
+                    <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
+                    <button class="ai-chip" type="submit">全文</button>
+                  </form>
+                {% endif %}
+              </div>
             </div>
           </article>
         {% else %}

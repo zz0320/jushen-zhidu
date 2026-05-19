@@ -2780,7 +2780,7 @@ button.ghost:hover,
   box-shadow: 0 10px 26px rgba(18, 35, 50, 0.065);
   display: grid;
   gap: 14px;
-  grid-template-columns: 74px minmax(0, 1fr) 74px;
+  grid-template-columns: 74px minmax(0, 1fr) 112px;
   min-height: 116px;
   padding: 14px 15px 14px 13px;
   position: relative;
@@ -2961,28 +2961,89 @@ button.ghost:hover,
 
 .paper-card-abstract-grid p {
   color: #2b3a48;
-  display: -webkit-box;
+  display: block;
   font-size: 13px;
   line-height: 1.55;
   margin: 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  overflow: visible;
 }
 
 .paper-card-actions {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+  align-content: center;
+  display: grid;
+  gap: 9px;
   justify-content: center;
-  min-width: 74px;
+  min-width: 112px;
 }
 
-.paper-card-actions .button {
+.paper-card-primary-actions {
+  display: grid;
+  gap: 7px;
+}
+
+.paper-card-actions .button,
+.paper-card-actions .paper-link {
   border-radius: 10px;
   min-height: 34px;
   padding: 6px 10px;
+}
+
+.paper-card-ai-actions {
+  background: linear-gradient(135deg, rgba(239, 249, 252, 0.96), rgba(255, 243, 239, 0.86));
+  border: 1px solid rgba(194, 228, 239, 0.9);
+  border-radius: 12px;
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+}
+
+.paper-card-ai-actions > span {
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-weight: 880;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.paper-card-ai-actions form {
+  margin: 0;
+}
+
+.ai-chip {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(184, 200, 216, 0.92);
+  border-radius: 9px;
+  box-shadow: none;
+  color: #243648;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 820;
+  justify-content: center;
+  line-height: 1.1;
+  min-height: 28px;
+  padding: 5px 8px;
+  width: 100%;
+}
+
+button.ai-chip {
+  background: #ffffff;
+  border-color: rgba(184, 200, 216, 0.92);
+  color: #243648;
+}
+
+.ai-chip:hover,
+button.ai-chip:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 8px 16px rgba(8, 126, 164, 0.16);
+  color: #ffffff;
+}
+
+.ai-chip.done {
+  background: #eef9fc;
+  border-color: #c2e4ef;
+  color: var(--accent-dark);
 }
 
 .paper-link {
@@ -3106,9 +3167,27 @@ button.ghost:hover,
 
   .paper-card-actions {
     align-items: stretch;
-    flex-direction: row;
     grid-column: 2;
+    grid-template-columns: auto minmax(180px, 1fr);
     justify-content: flex-start;
+  }
+
+  .paper-card-primary-actions {
+    grid-template-columns: repeat(2, minmax(74px, 1fr));
+  }
+
+  .paper-card-ai-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .paper-card-ai-actions form {
+    flex: 1 1 58px;
+  }
+
+  .ai-chip {
+    min-width: 58px;
   }
 
   .paper-card-abstract-grid {
@@ -3139,6 +3218,11 @@ button.ghost:hover,
 
   .paper-card-actions {
     grid-column: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .paper-card-primary-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .nav-kpi {

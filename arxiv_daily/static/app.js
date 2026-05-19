@@ -206,6 +206,7 @@
           message: "任务已创建，正在整理上下文。",
           percent: 3,
         });
+        panel.scrollIntoView({ behavior: "smooth", block: "start" });
 
         try {
           const response = await fetch(jobUrl, {
