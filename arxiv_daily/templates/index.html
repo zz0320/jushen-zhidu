@@ -182,18 +182,28 @@
               </div>
               {% if paper_summary or paper_full_text_summary %}
                 <section class="paper-card-insights" aria-label="智能总结预览">
-                  <div class="paper-card-insight-grid">
+                  <div class="paper-card-insights-head">
+                    <span>智能速览</span>
+                    <a href="/papers/{{ paper.arxiv_id }}{% if paper_summary %}#abstract-summary{% else %}#full-text-summary{% endif %}">进入详情</a>
+                  </div>
+                  <div class="paper-card-insight-stack">
                     {% if paper_summary %}
-                      <a class="paper-insight-card" href="/papers/{{ paper.arxiv_id }}#abstract-summary">
-                        <span>摘要总结</span>
-                        <p>{{ paper_summary.content|summary_excerpt(260) }}</p>
-                      </a>
+                      <article class="paper-insight-row">
+                        <div class="paper-insight-row-head">
+                          <span>摘要总结</span>
+                          <a href="/papers/{{ paper.arxiv_id }}#abstract-summary">细看</a>
+                        </div>
+                        <p>{{ paper_summary.content|summary_excerpt(440) }}</p>
+                      </article>
                     {% endif %}
                     {% if paper_full_text_summary %}
-                      <a class="paper-insight-card full-text" href="/papers/{{ paper.arxiv_id }}#full-text-summary">
-                        <span>全文总结</span>
-                        <p>{{ paper_full_text_summary.content|summary_excerpt(280) }}</p>
-                      </a>
+                      <article class="paper-insight-row full-text">
+                        <div class="paper-insight-row-head">
+                          <span>全文总结</span>
+                          <a href="/papers/{{ paper.arxiv_id }}#full-text-summary">细看</a>
+                        </div>
+                        <p>{{ paper_full_text_summary.content|summary_excerpt(520) }}</p>
+                      </article>
                     {% endif %}
                   </div>
                 </section>
