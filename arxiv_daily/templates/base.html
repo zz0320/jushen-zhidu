@@ -4,17 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}具身智读{% endblock %}</title>
-    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/logo.svg') }}?v=20260519-13">
-    <link rel="shortcut icon" href="{{ url_for('static', path='/logo.svg') }}?v=20260519-13">
-    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260519-13">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/logo.svg') }}?v=20260519-14">
+    <link rel="shortcut icon" href="{{ url_for('static', path='/logo.svg') }}?v=20260519-14">
+    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260519-14">
     <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
-    <script src="{{ url_for('static', path='/app.js') }}?v=20260519-13" defer></script>
+    <script src="{{ url_for('static', path='/app.js') }}?v=20260519-14" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
     <header class="topbar">
       <a class="brand" href="/">
-        <img class="brand-mark" src="{{ url_for('static', path='/logo.svg') }}?v=20260519-13" alt="">
+        <img class="brand-mark" src="{{ url_for('static', path='/logo.svg') }}?v=20260519-14" alt="">
         <span>具身智读</span>
       </a>
       {% set current_path = request.url.path %}

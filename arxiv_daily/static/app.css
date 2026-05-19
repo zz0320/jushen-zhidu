@@ -1572,6 +1572,26 @@ dd {
   padding: 18px 20px;
 }
 
+.compact-summary-card {
+  padding: 14px 16px;
+}
+
+.compact-summary-card .section-head {
+  align-items: center;
+  margin: -1px 0 8px;
+  padding-bottom: 8px;
+}
+
+.compact-summary-card .section-head h2 {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.compact-summary-card .eyebrow {
+  font-size: 11px;
+  margin-bottom: 3px;
+}
+
 .summary-badge {
   background: var(--gold-soft);
   border: 1px solid rgba(217, 157, 36, 0.35);
@@ -1591,6 +1611,11 @@ dd {
   margin-bottom: 12px;
 }
 
+.compact-summary-card .summary-meta {
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
 .summary-meta span {
   background: #f4f8f7;
   border: 1px solid var(--line);
@@ -1599,12 +1624,24 @@ dd {
   padding: 4px 9px;
 }
 
+.compact-summary-card .summary-meta span,
+.compact-summary-card .summary-badge {
+  font-size: 11.5px;
+  padding: 3px 8px;
+}
+
 .summary-view {
   color: #1b2733;
   display: grid;
   font-size: 15px;
   gap: 9px;
   line-height: 1.58;
+}
+
+.compact-summary-view {
+  font-size: 14px;
+  gap: 6px;
+  line-height: 1.48;
 }
 
 .summary-view h3 {
@@ -1617,6 +1654,14 @@ dd {
   line-height: 1.35;
   margin: 10px 0 0;
   padding-top: 14px;
+}
+
+.compact-summary-view h3 {
+  font-size: 15px;
+  gap: 7px;
+  line-height: 1.26;
+  margin-top: 7px;
+  padding-top: 9px;
 }
 
 .summary-view h3:first-child {
@@ -1638,10 +1683,21 @@ dd {
   width: 21px;
 }
 
+.compact-summary-view .summary-index {
+  font-size: 10px;
+  height: 18px;
+  width: 18px;
+}
+
 .summary-view p {
   line-height: 1.62;
   margin: 0;
   max-width: 96ch;
+}
+
+.compact-summary-view p {
+  line-height: 1.5;
+  max-width: 110ch;
 }
 
 .summary-lead {
@@ -1653,9 +1709,20 @@ dd {
   padding: 10px 12px;
 }
 
+.compact-summary-view .summary-lead {
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.48;
+  padding: 7px 9px;
+}
+
 .summary-sublead {
   color: #405568;
   font-size: 15px;
+}
+
+.compact-summary-view .summary-sublead {
+  font-size: 13.5px;
 }
 
 .summary-note {
@@ -1666,11 +1733,20 @@ dd {
   padding: 8px 10px;
 }
 
+.compact-summary-view .summary-note {
+  border-radius: 9px;
+  padding: 6px 8px;
+}
+
 .summary-divider {
   border: 0;
   border-top: 1px solid rgba(195, 209, 216, 0.75);
   margin: 2px 0;
   width: 100%;
+}
+
+.compact-summary-view .summary-divider {
+  margin: 0;
 }
 
 .summary-callout {
@@ -1684,6 +1760,13 @@ dd {
   padding: 10px 12px;
 }
 
+.compact-summary-view .summary-callout {
+  border-left-width: 3px;
+  border-radius: 10px;
+  line-height: 1.5;
+  padding: 7px 9px;
+}
+
 .summary-view ul {
   display: grid;
   gap: 5px;
@@ -1691,8 +1774,17 @@ dd {
   padding-left: 22px;
 }
 
+.compact-summary-view ul {
+  gap: 3px;
+  padding-left: 18px;
+}
+
 .summary-view li {
   line-height: 1.58;
+}
+
+.compact-summary-view li {
+  line-height: 1.46;
 }
 
 .summary-view li::marker {

@@ -258,7 +258,7 @@
         {% endif %}
       </section>
 
-      <section class="panel summary-card anchor-target" id="abstract-summary">
+      <section class="panel summary-card compact-summary-card anchor-target" id="abstract-summary">
         <div class="section-head">
           <div>
             <div class="eyebrow">Smart Insight</div>
@@ -273,7 +273,7 @@
             <span>基于 arXiv 元数据和摘要</span>
             <span>{{ summary.generated_at|format_dt }}</span>
           </div>
-          <article class="summary-view">{{ summary.content|summary_html }}</article>
+          <article class="summary-view compact-summary-view">{{ summary.content|summary_html }}</article>
         {% else %}
           <div class="empty-state">
             <strong>还没有生成单篇总结</strong>
@@ -282,7 +282,7 @@
         {% endif %}
       </section>
 
-      <section class="panel summary-card anchor-target" id="full-text-summary">
+      <section class="panel summary-card compact-summary-card anchor-target" id="full-text-summary">
         <div class="section-head">
           <div>
             <div class="eyebrow">Full-text Insight</div>
@@ -298,7 +298,7 @@
             <span>{{ full_text_summary.generated_at|format_dt }}</span>
             <span>{{ full_text_summary.used_chars }} / {{ full_text_summary.source_chars }} 字符{% if full_text_summary.truncated %}，已截断{% endif %}</span>
           </div>
-          <article class="summary-view">{{ full_text_summary.content|summary_html }}</article>
+          <article class="summary-view compact-summary-view">{{ full_text_summary.content|summary_html }}</article>
         {% else %}
           <div class="empty-state">
             <strong>还没有生成全文总结</strong>
