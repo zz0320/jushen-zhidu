@@ -2716,25 +2716,49 @@ button.ghost:hover,
 
 .paper-feed {
   display: grid;
-  gap: 10px;
+  gap: 9px;
 }
 
 .paper-card {
   align-items: stretch;
-  background: rgba(255, 255, 255, 0.96);
+  background:
+    linear-gradient(90deg, rgba(11, 132, 120, 0.10), transparent 8px),
+    rgba(255, 255, 255, 0.97);
   border: 1px solid rgba(189, 205, 213, 0.86);
-  border-radius: 18px;
-  box-shadow: var(--shadow-soft);
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(18, 35, 50, 0.065);
   display: grid;
-  gap: 16px;
-  grid-template-columns: 82px minmax(0, 1fr) auto;
-  padding: 16px;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
+  gap: 14px;
+  grid-template-columns: 74px minmax(0, 1fr) 74px;
+  min-height: 116px;
+  padding: 14px 15px 14px 13px;
+  position: relative;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease, background 0.16s ease;
+}
+
+.paper-card::before {
+  background: var(--accent);
+  border-radius: 999px;
+  content: "";
+  height: calc(100% - 28px);
+  left: 0;
+  opacity: 0.72;
+  position: absolute;
+  top: 14px;
+  width: 4px;
+}
+
+.paper-card.score-warm::before {
+  background: var(--gold);
+}
+
+.paper-card.score-cool::before {
+  background: #9aa8b6;
 }
 
 .paper-card:hover {
   border-color: rgba(11, 132, 120, 0.26);
-  box-shadow: 0 18px 40px rgba(18, 35, 50, 0.10);
+  box-shadow: 0 16px 34px rgba(18, 35, 50, 0.09);
   transform: translateY(-1px);
 }
 
@@ -2742,38 +2766,42 @@ button.ghost:hover,
   display: none;
 }
 
-.paper-card-score {
-  align-items: center;
-  background: linear-gradient(180deg, #f5fbfa, #ffffff);
+.paper-card-rank {
+  align-content: center;
+  background: #f6faf9;
   border: 1px solid rgba(213, 224, 229, 0.92);
-  border-radius: 14px;
+  border-radius: 13px;
   display: grid;
+  gap: 3px;
   justify-items: center;
-  padding: 10px 8px;
+  padding: 9px 7px;
 }
 
-.paper-card-score span {
+.paper-card-rank span {
   color: #758397;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 860;
+  line-height: 1;
 }
 
-.paper-card-score strong {
+.paper-card-rank strong {
   color: var(--accent-dark);
-  font-size: 22px;
+  font-size: 21px;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
 
-.paper-card-score em {
-  color: var(--muted);
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 760;
-  text-transform: uppercase;
+.score-warm .paper-card-rank strong {
+  color: #9b690d;
 }
 
-.paper-card-body {
+.score-cool .paper-card-rank strong {
+  color: #566779;
+}
+
+.paper-card-main {
+  align-content: center;
+  display: grid;
   min-width: 0;
 }
 
@@ -2784,31 +2812,74 @@ button.ghost:hover,
   flex-wrap: wrap;
   font-size: 12px;
   font-weight: 760;
-  gap: 8px;
-  margin-bottom: 7px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.paper-card-meta > span:not(.category-pill) {
+  background: #f6faf9;
+  border: 1px solid rgba(213, 224, 229, 0.86);
+  border-radius: 999px;
+  line-height: 1.15;
+  padding: 4px 8px;
 }
 
 .paper-card-title {
+  display: -webkit-box;
   font-size: 16px;
-  max-width: 76ch;
+  line-height: 1.32;
+  max-width: 82ch;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .paper-card-authors {
   font-size: 14px;
   margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .paper-card-keywords {
-  margin-top: 10px;
+  margin-top: 9px;
 }
 
 .paper-card-actions {
-  align-items: end;
+  align-items: stretch;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   justify-content: center;
-  min-width: 92px;
+  min-width: 74px;
+}
+
+.paper-card-actions .button {
+  border-radius: 10px;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.paper-link {
+  align-items: center;
+  background: #f7faf9;
+  border: 1px solid rgba(213, 224, 229, 0.92);
+  border-radius: 10px;
+  color: #33465a;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 820;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 9px;
+}
+
+.paper-link:hover {
+  background: #ffffff;
+  border-color: rgba(11, 132, 120, 0.28);
+  color: var(--accent-dark);
+  text-decoration: none;
 }
 
 .paper-empty {
@@ -2906,7 +2977,7 @@ button.ghost:hover,
   }
 
   .paper-card {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 64px minmax(0, 1fr);
   }
 
   .paper-card-actions {
@@ -2931,7 +3002,7 @@ button.ghost:hover,
     grid-template-columns: 1fr;
   }
 
-  .paper-card-score {
+  .paper-card-rank {
     align-items: center;
     display: flex;
     gap: 9px;

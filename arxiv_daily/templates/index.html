@@ -149,21 +149,23 @@
 
       <section class="paper-feed anchor-target" id="paper-list" aria-label="论文列表">
         {% for paper in papers %}
-          <article class="paper-card" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
-            <div class="paper-card-score">
+          <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
+            <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
               <strong>{{ "%.1f"|format(paper.relevance_score) }}</strong>
-              <em>score</em>
             </div>
-            <div class="paper-card-body">
+            <div class="paper-card-main">
               <div class="paper-card-meta">
                 <span class="category-pill">{{ paper.primary_category }}</span>
                 <span>{{ paper.published_at.date() if paper.published_at else "-" }}</span>
+                {% if paper.matched_keywords %}
+                  <span>{{ paper.matched_keywords|length }} 个命中词</span>
+                {% endif %}
               </div>
               <a class="paper-title paper-card-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|clean_latex }}</a>
               <div class="muted paper-card-authors">{{ paper.authors[:5]|join(", ") }}{% if paper.authors|length > 5 %} et al.{% endif %}</div>
               <div class="chips paper-keywords paper-card-keywords">
-                {% for match in paper.matched_keywords[:7] %}
+                {% for match in paper.matched_keywords[:6] %}
                   <span>{{ match.keyword }}</span>
                 {% else %}
                   <span>暂无关键词</span>
@@ -172,7 +174,7 @@
             </div>
             <div class="paper-card-actions">
               <a class="button compact-button" href="/papers/{{ paper.arxiv_id }}">阅读</a>
-              <a class="button secondary compact-button" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
+              <a class="paper-link" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
             </div>
           </article>
         {% else %}
