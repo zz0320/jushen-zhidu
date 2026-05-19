@@ -150,7 +150,7 @@
       <section class="paper-feed anchor-target" id="paper-list" aria-label="论文列表">
         {% for paper in papers %}
           {% set translation = translations_by_paper.get(paper.arxiv_id) %}
-          <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
+          <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ (paper.affiliations|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
             <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
               <strong>{{ "%.1f"|format(paper.relevance_score) }}</strong>
@@ -168,6 +168,9 @@
                 <div class="paper-card-title-zh">{{ translation.title_content|translation_title }}</div>
               {% endif %}
               <div class="muted paper-card-authors">{{ paper.authors[:5]|join(", ") }}{% if paper.authors|length > 5 %} et al.{% endif %}</div>
+              {% if paper.affiliations %}
+                <div class="muted paper-card-affiliations">单位：{{ paper.affiliations[:3]|join("；") }}{% if paper.affiliations|length > 3 %} 等{% endif %}</div>
+              {% endif %}
               <div class="chips paper-keywords paper-card-keywords">
                 {% for match in paper.matched_keywords[:6] %}
                   <span>{{ match.keyword }}</span>

@@ -26,6 +26,7 @@ class ArxivEntry:
     title: str
     abstract: str
     authors: List[str]
+    affiliations: List[str]
     primary_category: str
     categories: List[str]
     published_at: Optional[datetime]
@@ -71,6 +72,17 @@ def _parse_dt(value: str) -> Optional[datetime]:
         return None
 
 
+def _unique_strings(values: Iterable[str]) -> List[str]:
+    unique: List[str] = []
+    seen = set()
+    for value in values:
+        text = re.sub(r"\s+", " ", value or "").strip()
+        if text and text not in seen:
+            seen.add(text)
+            unique.append(text)
+    return unique
+
+
 def parse_atom_feed(xml_text: str) -> List[ArxivEntry]:
     root = ET.fromstring(xml_text)
     entries: List[ArxivEntry] = []
@@ -97,11 +109,17 @@ def parse_atom_feed(xml_text: str) -> List[ArxivEntry]:
         if not primary_category and categories:
             primary_category = categories[0]
 
-        authors = [
-            _text(author, f"{ATOM_NS}name")
-            for author in entry.findall(f"{ATOM_NS}author")
-            if _text(author, f"{ATOM_NS}name")
-        ]
+        authors: List[str] = []
+        affiliations: List[str] = []
+        for author in entry.findall(f"{ATOM_NS}author"):
+            author_name = _text(author, f"{ATOM_NS}name")
+            if author_name:
+                authors.append(author_name)
+            for affiliation in author.findall(f"{ARXIV_NS}affiliation"):
+                affiliation_text = _text(affiliation, ".")
+                if affiliation_text:
+                    affiliations.append(affiliation_text)
+        affiliations = _unique_strings(affiliations)
 
         entries.append(
             ArxivEntry(
@@ -109,6 +127,7 @@ def parse_atom_feed(xml_text: str) -> List[ArxivEntry]:
                 title=_text(entry, f"{ATOM_NS}title"),
                 abstract=_text(entry, f"{ATOM_NS}summary"),
                 authors=authors,
+                affiliations=affiliations,
                 primary_category=primary_category,
                 categories=categories,
                 published_at=_parse_dt(_text(entry, f"{ATOM_NS}published")),
@@ -147,6 +166,7 @@ def _upsert_paper(
         "title": entry.title,
         "abstract": entry.abstract,
         "authors_json": json.dumps(entry.authors, ensure_ascii=False),
+        "affiliations_json": json.dumps(entry.affiliations, ensure_ascii=False),
         "primary_category": entry.primary_category,
         "categories_json": json.dumps(entry.categories, ensure_ascii=False),
         "published_at": entry.published_at,

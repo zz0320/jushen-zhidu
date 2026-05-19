@@ -247,6 +247,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             fetch_jobs[job_id] = {
                 "id": job_id,
                 "day": day,
+                "redirect_url": f"/?day={urllib.parse.quote(day)}",
                 "status": "queued",
                 "stage": "queued",
                 "stage_label": "等待开始",
@@ -289,6 +290,11 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             settings,
                             progress_callback=progress,
                         )
+                    current_count = len(
+                        worker_session.exec(
+                            select(Paper.arxiv_id).where(Paper.fetched_for_date == target_day.isoformat())
+                        ).all()
+                    )
                 except Exception as exc:  # pragma: no cover - runtime network path
                     error_message = _fetch_error_message(exc)
                     update_job(
@@ -310,6 +316,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                     skipped_no_keyword=result.skipped_no_keyword,
                     skipped_excluded=result.skipped_excluded,
                     query=result.query,
+                    current_count=current_count,
                     message=_message_from_fetch(result),
                 )
 

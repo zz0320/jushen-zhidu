@@ -25,6 +25,7 @@ def test_generate_paper_summary_uses_injected_completion(tmp_path):
                 arxiv_id="2605.00001v1",
                 title="Robot Dataset Benchmark",
                 abstract="A robot dataset benchmark for manipulation.",
+                affiliations_json='["Embodied AI Lab"]',
                 fetched_for_date="2026-05-15",
             )
         )
@@ -32,6 +33,7 @@ def test_generate_paper_summary_uses_injected_completion(tmp_path):
 
         def fake_completion(messages, max_tokens):
             assert "Robot Dataset Benchmark" in messages[1]["content"]
+            assert "Affiliations: Embodied AI Lab" in messages[1]["content"]
             assert max_tokens == settings.qwen_max_tokens_single
             return CompletionResult(content="基于 arXiv 元数据和摘要。总结。", model="fake-qwen")
 

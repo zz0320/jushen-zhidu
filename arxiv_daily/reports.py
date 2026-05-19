@@ -36,13 +36,20 @@ def render_daily_markdown(session: Session, report_date: date) -> str:
         authors = ", ".join(paper.authors[:6])
         if len(paper.authors) > 6:
             authors += " et al."
-        lines.extend(
+        affiliations = "; ".join(paper.affiliations[:6])
+        if len(paper.affiliations) > 6:
+            affiliations += " 等"
+        paper_lines = [
+            f"### {index}. {clean_latex_text(paper.title)}",
+            "",
+            f"- arXiv: [{paper.arxiv_id}]({paper.abs_url})",
+            f"- PDF: {paper.pdf_url or '-'}",
+            f"- Authors: {authors}",
+        ]
+        if affiliations:
+            paper_lines.append(f"- Affiliations: {affiliations}")
+        paper_lines.extend(
             [
-                f"### {index}. {clean_latex_text(paper.title)}",
-                "",
-                f"- arXiv: [{paper.arxiv_id}]({paper.abs_url})",
-                f"- PDF: {paper.pdf_url or '-'}",
-                f"- Authors: {authors}",
                 f"- Category: {paper.primary_category}",
                 f"- Score: {paper.relevance_score}",
                 f"- Matched keywords: {paper.matched_terms or '-'}",
@@ -51,6 +58,7 @@ def render_daily_markdown(session: Session, report_date: date) -> str:
                 "",
             ]
         )
+        lines.extend(paper_lines)
     return "\n".join(lines).strip() + "\n"
 
 

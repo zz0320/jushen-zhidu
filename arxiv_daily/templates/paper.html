@@ -17,6 +17,9 @@
         {% endif %}
       </div>
       <p class="paper-authors">{{ paper.authors|join(", ") }}</p>
+      {% if paper.affiliations %}
+        <p class="paper-affiliations">单位：{{ paper.affiliations|join("；") }}</p>
+      {% endif %}
     </div>
   </section>
 
@@ -164,9 +167,19 @@
           <div class="section-head compact-head">
             <div>
               <div class="eyebrow">Signals</div>
-              <h2>分类与命中关键词</h2>
+              <h2>机构、分类与命中关键词</h2>
             </div>
           </div>
+          {% if paper.affiliations %}
+            <div class="paper-signal-block">
+              <span class="signal-label">单位</span>
+              <div class="chips paper-affiliation-list">
+                {% for affiliation in paper.affiliations %}
+                  <span>{{ affiliation }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
           <div class="paper-signal-block">
             <span class="signal-label">分类</span>
             <div class="chips paper-category-list">

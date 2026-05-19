@@ -162,6 +162,14 @@ a:hover {
   max-width: 980px;
 }
 
+.paper-affiliations {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 5px;
+  max-width: 980px;
+}
+
 .paper-title-translation {
   color: var(--accent-dark);
   font-size: 18px;
@@ -663,7 +671,8 @@ tr:last-child td {
   gap: 6px;
 }
 
-.paper-category-list span {
+.paper-category-list span,
+.paper-affiliation-list span {
   background: #f3f6f8;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2884,6 +2893,16 @@ button.ghost:hover,
   white-space: nowrap;
 }
 
+.paper-card-affiliations {
+  color: #516477;
+  font-size: 12.5px;
+  font-weight: 680;
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .paper-card-title-zh {
   color: var(--accent-dark);
   font-size: 14px;
@@ -3240,7 +3259,8 @@ button.ghost:hover,
 }
 
 .paper-tags-card .paper-keywords span,
-.paper-tags-card .paper-category-list span {
+.paper-tags-card .paper-category-list span,
+.paper-tags-card .paper-affiliation-list span {
   min-height: 23px;
   padding: 3px 7px;
 }
@@ -3404,6 +3424,7 @@ select:focus {
 }
 
 .paper-category-list span,
+.paper-affiliation-list span,
 .category-pill {
   background: #edf3f8;
   border-color: #d5e1ed;

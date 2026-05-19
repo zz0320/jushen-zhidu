@@ -55,6 +55,7 @@ class Paper(SQLModel, table=True):
     title: str
     abstract: str = Field(sa_column=Column(Text))
     authors_json: str = Field(default="[]", sa_column=Column(Text))
+    affiliations_json: str = Field(default="[]", sa_column=Column(Text))
     primary_category: str = Field(default="", index=True)
     categories_json: str = Field(default="[]", sa_column=Column(Text))
     published_at: Optional[datetime] = Field(default=None, index=True)
@@ -72,6 +73,17 @@ class Paper(SQLModel, table=True):
     @property
     def authors(self) -> List[str]:
         return [str(item) for item in _loads_list(self.authors_json)]
+
+    @property
+    def affiliations(self) -> List[str]:
+        values: List[str] = []
+        seen = set()
+        for item in _loads_list(self.affiliations_json):
+            text = str(item).strip()
+            if text and text not in seen:
+                seen.add(text)
+                values.append(text)
+        return values
 
     @property
     def categories(self) -> List[str]:

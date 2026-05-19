@@ -29,14 +29,21 @@ def _migrate_sqlite_schema(engine: Engine) -> None:
     if engine.dialect.name != "sqlite":
         return
     with engine.begin() as connection:
-        columns = connection.execute(text("PRAGMA table_info(paperabstracttranslation)")).mappings().all()
-        if not columns:
-            return
-        column_names = {str(column["name"]) for column in columns}
-        if "title_content" not in column_names:
-            connection.execute(
-                text("ALTER TABLE paperabstracttranslation ADD COLUMN title_content TEXT NOT NULL DEFAULT ''")
-            )
+        abstract_translation_columns = connection.execute(
+            text("PRAGMA table_info(paperabstracttranslation)")
+        ).mappings().all()
+        if abstract_translation_columns:
+            column_names = {str(column["name"]) for column in abstract_translation_columns}
+            if "title_content" not in column_names:
+                connection.execute(
+                    text("ALTER TABLE paperabstracttranslation ADD COLUMN title_content TEXT NOT NULL DEFAULT ''")
+                )
+
+        paper_columns = connection.execute(text("PRAGMA table_info(paper)")).mappings().all()
+        if paper_columns:
+            column_names = {str(column["name"]) for column in paper_columns}
+            if "affiliations_json" not in column_names:
+                connection.execute(text("ALTER TABLE paper ADD COLUMN affiliations_json TEXT NOT NULL DEFAULT '[]'"))
 
 
 def session_for(engine: Engine) -> Session:

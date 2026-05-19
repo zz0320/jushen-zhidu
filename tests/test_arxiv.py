@@ -16,8 +16,14 @@ ATOM = """<?xml version="1.0" encoding="UTF-8"?>
     <published>2026-05-15T12:00:00Z</published>
     <title>World Models for Vision-Language-Action Robot Manipulation</title>
     <summary>We introduce a robot dataset and benchmark for embodied intelligence.</summary>
-    <author><name>Alice Chen</name></author>
-    <author><name>Bob Li</name></author>
+    <author>
+      <name>Alice Chen</name>
+      <arxiv:affiliation>Embodied AI Lab, Test University</arxiv:affiliation>
+    </author>
+    <author>
+      <name>Bob Li</name>
+      <arxiv:affiliation>Robotics Institute</arxiv:affiliation>
+    </author>
     <category term="cs.RO" />
     <category term="cs.LG" />
     <arxiv:primary_category term="cs.RO" />
@@ -35,6 +41,7 @@ def test_parse_atom_feed_extracts_entry():
     assert entries[0].arxiv_id == "2605.00001v1"
     assert entries[0].title == "World Models for Vision-Language-Action Robot Manipulation"
     assert entries[0].authors == ["Alice Chen", "Bob Li"]
+    assert entries[0].affiliations == ["Embodied AI Lab, Test University", "Robotics Institute"]
     assert entries[0].primary_category == "cs.RO"
     assert entries[0].pdf_url == "http://arxiv.org/pdf/2605.00001v1"
 
@@ -61,6 +68,7 @@ def test_fetch_papers_scores_and_saves_relevant_paper():
         paper = session.get(__import__("arxiv_daily.models").models.Paper, "2605.00001v1")
         assert paper is not None
         assert paper.relevance_score > 0
+        assert paper.affiliations == ["Embodied AI Lab, Test University", "Robotics Institute"]
         assert "world" in paper.matched_terms.lower()
 
 

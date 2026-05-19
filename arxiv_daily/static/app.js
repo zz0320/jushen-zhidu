@@ -1,6 +1,21 @@
 (() => {
   const numberText = (value) => String(value || 0);
 
+  const navigateWithMessage = (target, message) => {
+    const url = new URL(target || window.location.href, window.location.origin);
+    if (message) {
+      url.searchParams.set("message", message);
+    }
+    url.searchParams.set("_refresh", String(Date.now()));
+    const previousHref = window.location.href;
+    window.location.assign(url.toString());
+    window.setTimeout(() => {
+      if (window.location.href === previousHref) {
+        window.location.reload();
+      }
+    }, 1500);
+  };
+
   const setProgress = (panel, nodes, job) => {
     const percent = Math.max(0, Math.min(100, Number(job.percent || 0)));
     panel.hidden = false;
@@ -60,8 +75,9 @@
 
       if (job.status === "completed") {
         window.setTimeout(() => {
-          const url = `/?day=${encodeURIComponent(day)}&message=${encodeURIComponent("抓取完成，论文列表已刷新。")}`;
-          window.location.assign(url);
+          const target = job.redirect_url || `/?day=${encodeURIComponent(day)}`;
+          const countText = job.current_count ? `当前共 ${job.current_count} 篇。` : "";
+          navigateWithMessage(target, `抓取完成，论文列表已刷新。${countText}`);
         }, 900);
         return;
       }
@@ -163,8 +179,7 @@
         if (job.status === "completed") {
           window.setTimeout(() => {
             const target = job.redirect_url || window.location.pathname;
-            const joiner = target.includes("?") ? "&" : "?";
-            window.location.assign(`${target}${joiner}message=${encodeURIComponent("总结已生成，页面已刷新。")}`);
+            navigateWithMessage(target, "总结已生成，页面已刷新。");
           }, 900);
           return;
         }

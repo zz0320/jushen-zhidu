@@ -27,11 +27,16 @@ def _paper_context(paper: Paper) -> str:
     authors = ", ".join(paper.authors[:8])
     if len(paper.authors) > 8:
         authors += " et al."
+    affiliations = "; ".join(paper.affiliations[:6])
+    if len(paper.affiliations) > 6:
+        affiliations += " 等"
+    affiliation_line = f"Affiliations: {affiliations}" if affiliations else "Affiliations: not available from arXiv metadata"
     return "\n".join(
         [
             f"arXiv ID: {paper.arxiv_id}",
             f"Title: {clean_latex_text(paper.title)}",
             f"Authors: {authors}",
+            affiliation_line,
             f"Primary category: {paper.primary_category}",
             f"Categories: {', '.join(paper.categories)}",
             f"Matched keywords: {paper.matched_terms}",
@@ -340,20 +345,26 @@ def _daily_context(papers: List[Paper], abstract_chars: int) -> str:
         authors = ", ".join(paper.authors[:5])
         if len(paper.authors) > 5:
             authors += " et al."
+        affiliations = "; ".join(paper.affiliations[:4])
+        if len(paper.affiliations) > 4:
+            affiliations += " 等"
         abstract = _truncate_text(paper.abstract, abstract_chars)
-        blocks.append(
-            "\n".join(
-                [
-                    f"{index}. {clean_latex_text(paper.title)}",
-                    f"   arXiv: {paper.arxiv_id}",
-                    f"   Authors: {authors}",
-                    f"   Category: {paper.primary_category}",
-                    f"   Score: {paper.relevance_score}",
-                    f"   Keywords: {paper.matched_terms}",
-                    f"   Abstract: {abstract}",
-                ]
-            )
+        lines = [
+            f"{index}. {clean_latex_text(paper.title)}",
+            f"   arXiv: {paper.arxiv_id}",
+            f"   Authors: {authors}",
+        ]
+        if affiliations:
+            lines.append(f"   Affiliations: {affiliations}")
+        lines.extend(
+            [
+                f"   Category: {paper.primary_category}",
+                f"   Score: {paper.relevance_score}",
+                f"   Keywords: {paper.matched_terms}",
+                f"   Abstract: {abstract}",
+            ]
         )
+        blocks.append("\n".join(lines))
     return "\n\n".join(blocks)
 
 
