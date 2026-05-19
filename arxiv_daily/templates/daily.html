@@ -7,6 +7,15 @@
       <h1>{{ day }} 日报</h1>
       <p>{{ papers|length }} 篇候选论文{% if report %}，由 {{ report.model|model_label }} 生成{% else %}，尚未生成智能日报{% endif %}。</p>
     </div>
+    <div class="hero-controls">
+      <div class="date-jump" aria-label="日报日期快捷跳转">
+        <a class="button secondary compact-button" href="/daily/{{ previous_day }}">前一天</a>
+        <a class="button secondary compact-button" href="/daily/{{ next_day }}">后一天</a>
+        {% if latest_day and latest_day != day %}
+          <a class="button ghost compact-button" href="/daily/{{ latest_day }}">最近有结果</a>
+        {% endif %}
+      </div>
+    </div>
   </section>
 
   <div class="page-layout">

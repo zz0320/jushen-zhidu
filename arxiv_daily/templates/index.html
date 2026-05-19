@@ -7,10 +7,19 @@
       <h1>{{ day }} 论文</h1>
       <p>{{ papers|length }} 篇命中当前分类和关键词配置{% if report %}，日报已生成{% else %}，日报未生成{% endif %}。</p>
     </div>
-    <form class="toolbar" method="get" action="/">
-      <input type="date" name="day" value="{{ day }}">
-      <button type="submit">查看</button>
-    </form>
+    <div class="hero-controls">
+      <form class="toolbar" method="get" action="/">
+        <input type="date" name="day" value="{{ day }}">
+        <button type="submit">查看</button>
+      </form>
+      <div class="date-jump" aria-label="日期快捷跳转">
+        <a class="button secondary compact-button" href="/?day={{ previous_day }}">前一天</a>
+        <a class="button secondary compact-button" href="/?day={{ next_day }}">后一天</a>
+        {% if latest_day and latest_day != day %}
+          <a class="button ghost compact-button" href="/?day={{ latest_day }}">最近有结果</a>
+        {% endif %}
+      </div>
+    </div>
   </section>
 
   <div class="page-layout">
@@ -71,6 +80,23 @@
         </div>
       </section>
 
+      {% if papers %}
+        <section class="list-tools" aria-label="论文列表工具">
+          <label>
+            <span>快速筛选</span>
+            <input data-paper-filter type="search" placeholder="输入标题、作者、分类或关键词">
+          </label>
+          <div class="list-count">
+            <strong data-paper-filter-count>{{ papers|length }}</strong>
+            <span>/ {{ papers|length }} 篇</span>
+          </div>
+        </section>
+        <div class="empty-state paper-filter-empty" data-paper-filter-empty hidden>
+          <strong>没有匹配的论文</strong>
+          <span>换一个关键词，或清空筛选框查看全部结果。</span>
+        </div>
+      {% endif %}
+
       <section class="table-wrap anchor-target" id="paper-list">
         <table>
           <thead>
@@ -85,7 +111,7 @@
           </thead>
           <tbody>
             {% for paper in papers %}
-              <tr>
+              <tr data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
                 <td class="rank">{{ loop.index }}</td>
                 <td class="score">{{ "%.1f"|format(paper.relevance_score) }}</td>
                 <td>
@@ -107,6 +133,9 @@
                 <td colspan="6" class="empty">
                   <strong>当前日期还没有论文</strong>
                   <span>先点击“抓取当天论文”，或切换到已有结果的日期。</span>
+                  {% if latest_day and latest_day != day %}
+                    <a class="button secondary empty-action" href="/?day={{ latest_day }}">查看最近有结果日期 {{ latest_day }}</a>
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}

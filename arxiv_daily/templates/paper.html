@@ -9,6 +9,9 @@
         <span>Score {{ "%.1f"|format(paper.relevance_score) }}</span>
         <span>{{ paper.primary_category }}</span>
         <span>{{ paper.published_at|format_dt }}</span>
+        {% if paper_position and paper_count %}
+          <span>第 {{ paper_position }} / {{ paper_count }} 篇</span>
+        {% endif %}
       </div>
       <p class="paper-authors">{{ paper.authors|join(", ") }}</p>
     </div>
@@ -25,6 +28,12 @@
       <a href="#full-text-summary">全文总结</a>
       <span class="nav-label nav-label-secondary">相关页面</span>
       <a class="nav-external" href="/?day={{ paper.fetched_for_date }}">回到主界面</a>
+      {% if previous_paper %}
+        <a href="/papers/{{ previous_paper.arxiv_id }}">上一篇论文</a>
+      {% endif %}
+      {% if next_paper %}
+        <a href="/papers/{{ next_paper.arxiv_id }}">下一篇论文</a>
+      {% endif %}
     </nav>
 
     <div class="page-main">
@@ -32,6 +41,12 @@
         <div class="paper-action-group">
           <span>页面与外部链接</span>
           <a class="button" href="/?day={{ paper.fetched_for_date }}">回到主界面</a>
+          {% if previous_paper %}
+            <a class="button secondary" href="/papers/{{ previous_paper.arxiv_id }}">上一篇</a>
+          {% endif %}
+          {% if next_paper %}
+            <a class="button secondary" href="/papers/{{ next_paper.arxiv_id }}">下一篇</a>
+          {% endif %}
           <a class="button secondary" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
           {% if paper.pdf_url %}
             <a class="button secondary" href="{{ paper.pdf_url }}" target="_blank" rel="noreferrer">PDF</a>

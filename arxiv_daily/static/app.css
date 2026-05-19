@@ -2360,6 +2360,100 @@ tbody tr:hover {
   transform: none;
 }
 
+.hero-controls {
+  align-items: flex-end;
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+}
+
+.date-jump {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.compact-button {
+  font-size: 13px;
+  min-height: 34px;
+  padding: 6px 11px;
+}
+
+button.ghost,
+.button.ghost {
+  background: linear-gradient(135deg, #f3fbf9, #fff9eb);
+  border-color: rgba(11, 132, 120, 0.18);
+  box-shadow: 0 7px 16px rgba(18, 35, 50, 0.055);
+  color: var(--accent-dark);
+}
+
+button.ghost:hover,
+.button.ghost:hover {
+  background: linear-gradient(135deg, #eaf8f5, #fff4dc);
+  border-color: rgba(11, 132, 120, 0.28);
+}
+
+.list-tools {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(189, 205, 213, 0.86);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.list-tools label {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 10px;
+  min-width: 0;
+}
+
+.list-tools label span {
+  color: var(--muted);
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 820;
+}
+
+.list-tools input {
+  flex: 1 1 auto;
+  min-width: 220px;
+}
+
+.list-count {
+  align-items: baseline;
+  background: #f5f9f8;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  min-height: 34px;
+  padding: 6px 11px;
+}
+
+.list-count strong {
+  color: var(--accent-dark);
+  font-size: 16px;
+}
+
+.paper-filter-empty {
+  margin-bottom: 12px;
+}
+
+.empty-action {
+  margin-top: 12px;
+}
+
 .markdown-panel summary,
 .keyword-editor summary {
   transition: background 0.16s ease, color 0.16s ease;
@@ -2453,9 +2547,25 @@ tbody tr:hover {
   .toolbar,
   .actions,
   .paper-action-group,
+  .hero-controls,
+  .date-jump,
+  .list-tools,
+  .list-tools label,
   .inline-form {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .hero-controls {
+    justify-items: stretch;
+  }
+
+  .date-jump {
+    justify-content: stretch;
+  }
+
+  .list-tools input {
+    min-width: 0;
   }
 
   button,

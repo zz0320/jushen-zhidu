@@ -3,7 +3,7 @@ from __future__ import annotations
 import threading
 import urllib.parse
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, Generator, Optional
 
@@ -58,6 +58,21 @@ def _model_display_name(value: object) -> str:
 
 
 templates.env.filters["model_label"] = _model_display_name
+
+
+def _latest_day_with_papers(session: Session) -> str:
+    latest_paper = session.exec(
+        select(Paper).order_by(Paper.fetched_for_date.desc(), Paper.published_at.desc())
+    ).first()
+    return latest_paper.fetched_for_date if latest_paper else ""
+
+
+def _day_nav_context(target_day: date, session: Session) -> Dict[str, str]:
+    return {
+        "previous_day": (target_day - timedelta(days=1)).isoformat(),
+        "next_day": (target_day + timedelta(days=1)).isoformat(),
+        "latest_day": _latest_day_with_papers(session),
+    }
 
 
 def _redirect(path: str, **query: object) -> RedirectResponse:
@@ -192,6 +207,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "report": report,
                 "message": message,
                 "error": error,
+                **_day_nav_context(target_day, session),
             },
         )
 
@@ -886,11 +902,30 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         full_text_summary = session.exec(
             select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id == arxiv_id)
         ).first()
+        day_papers = session.exec(
+            select(Paper)
+            .where(Paper.fetched_for_date == paper.fetched_for_date)
+            .order_by(Paper.relevance_score.desc(), Paper.published_at.desc())
+        ).all()
+        paper_position = next(
+            (index for index, day_paper in enumerate(day_papers) if day_paper.arxiv_id == paper.arxiv_id),
+            None,
+        )
+        previous_paper = day_papers[paper_position - 1] if paper_position not in (None, 0) else None
+        next_paper = (
+            day_papers[paper_position + 1]
+            if paper_position is not None and paper_position + 1 < len(day_papers)
+            else None
+        )
         return templates.TemplateResponse(
             "paper.html",
             {
                 "request": request,
                 "paper": paper,
+                "paper_position": paper_position + 1 if paper_position is not None else None,
+                "paper_count": len(day_papers),
+                "previous_paper": previous_paper,
+                "next_paper": next_paper,
                 "summary": summary,
                 "abstract_translation": abstract_translation,
                 "full_text_summary": full_text_summary,
@@ -961,6 +996,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "markdown_preview": markdown_preview,
                 "message": message,
                 "error": error,
+                **_day_nav_context(target_day, session),
             },
         )
 

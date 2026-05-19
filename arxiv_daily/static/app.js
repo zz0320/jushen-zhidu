@@ -210,6 +210,42 @@
     });
   };
 
+  const setupPaperFilter = () => {
+    const input = document.querySelector("[data-paper-filter]");
+    if (!input) {
+      return;
+    }
+
+    const rows = Array.from(document.querySelectorAll("[data-paper-row]"));
+    const countNode = document.querySelector("[data-paper-filter-count]");
+    const emptyNode = document.querySelector("[data-paper-filter-empty]");
+
+    const applyFilter = () => {
+      const query = input.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      rows.forEach((row) => {
+        const haystack = row.dataset.paperSearch || "";
+        const matched = !query || haystack.includes(query);
+        row.hidden = !matched;
+        if (matched) {
+          visibleCount += 1;
+        }
+      });
+
+      if (countNode) {
+        countNode.textContent = numberText(visibleCount);
+      }
+      if (emptyNode) {
+        emptyNode.hidden = !query || visibleCount > 0;
+      }
+    };
+
+    input.addEventListener("input", applyFilter);
+    applyFilter();
+  };
+
   setupFetchProgress();
   setupSummaryProgress();
+  setupPaperFilter();
 })();
