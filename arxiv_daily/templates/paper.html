@@ -21,7 +21,9 @@
     <nav class="anchor-nav" aria-label="页内导航">
       <span class="nav-label">页内导航</span>
       <a href="#paper-actions">操作</a>
-      <a href="#summary-progress" data-progress-nav="summary-progress" hidden>生成进度</a>
+      <a href="#paper-summary-progress" data-progress-nav="paper-summary-progress" hidden>摘要进度</a>
+      <a href="#abstract-translation-progress" data-progress-nav="abstract-translation-progress" hidden>译文进度</a>
+      <a href="#full-text-progress" data-progress-nav="full-text-progress" hidden>全文进度</a>
       <a href="#paper-meta">论文速览</a>
       <a href="#paper-abstract">摘要</a>
       <a href="#abstract-summary">摘要总结</a>
@@ -56,24 +58,24 @@
           <span>智能生成</span>
           {% if summary %}
             <a class="button" href="#abstract-summary">查看摘要总结</a>
-            <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="刷新中...">
+            <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-progress-panel="paper-summary-progress" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="刷新中...">
               <input type="hidden" name="force" value="true">
               <button class="secondary" type="submit">刷新摘要</button>
             </form>
           {% else %}
-            <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="生成中...">
+            <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-progress-panel="paper-summary-progress" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="生成中...">
               <button type="submit">生成摘要总结</button>
             </form>
           {% endif %}
           {% if full_text_summary %}
             <a class="button secondary" href="#full-text-summary">查看全文总结</a>
-            <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="刷新中...">
+            <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-progress-panel="full-text-progress" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="刷新中...">
               <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
               <input type="hidden" name="force" value="true">
               <button class="secondary" type="submit">刷新全文</button>
             </form>
           {% else %}
-            <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="提取中...">
+            <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-progress-panel="full-text-progress" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="提取中...">
               <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
               <button class="secondary" type="submit">生成全文总结</button>
             </form>
@@ -81,21 +83,57 @@
         </div>
       </section>
 
-      <section class="progress-panel summary-progress anchor-target" id="summary-progress" hidden>
+      <section class="progress-panel summary-progress anchor-target" id="paper-summary-progress" hidden>
         <div class="progress-head">
           <div>
-            <div class="progress-title" id="summary-progress-title" data-progress-title>正在生成单篇总结</div>
-            <div class="progress-message" id="summary-progress-message" data-progress-message>正在准备论文上下文。</div>
+            <div class="progress-title" data-progress-title>正在生成摘要总结</div>
+            <div class="progress-message" data-progress-message>正在准备论文摘要上下文。</div>
           </div>
-          <div class="progress-percent" id="summary-progress-percent" data-progress-percent>0%</div>
+          <div class="progress-percent" data-progress-percent>0%</div>
         </div>
-        <div class="progress-track" aria-label="总结生成进度">
-          <div class="progress-fill" id="summary-progress-fill" data-progress-fill style="width: 0%"></div>
+        <div class="progress-track" aria-label="摘要总结生成进度">
+          <div class="progress-fill" data-progress-fill style="width: 0%"></div>
         </div>
         <div class="progress-meta">
-          <span><strong id="summary-progress-stage" data-progress-stage>准备中</strong></span>
-          <span>类型 <strong id="summary-progress-kind" data-progress-kind>单篇</strong></span>
-          <span>模型 <strong id="summary-progress-model" data-progress-model>智能模型</strong></span>
+          <span><strong data-progress-stage>准备中</strong></span>
+          <span>类型 <strong data-progress-kind>摘要总结</strong></span>
+          <span>模型 <strong data-progress-model>智能模型</strong></span>
+        </div>
+      </section>
+
+      <section class="progress-panel summary-progress anchor-target" id="abstract-translation-progress" hidden>
+        <div class="progress-head">
+          <div>
+            <div class="progress-title" data-progress-title>正在生成中文译文</div>
+            <div class="progress-message" data-progress-message>正在准备英文摘要。</div>
+          </div>
+          <div class="progress-percent" data-progress-percent>0%</div>
+        </div>
+        <div class="progress-track" aria-label="摘要翻译进度">
+          <div class="progress-fill" data-progress-fill style="width: 0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span><strong data-progress-stage>准备中</strong></span>
+          <span>类型 <strong data-progress-kind>中文译文</strong></span>
+          <span>模型 <strong data-progress-model>智能模型</strong></span>
+        </div>
+      </section>
+
+      <section class="progress-panel summary-progress anchor-target" id="full-text-progress" hidden>
+        <div class="progress-head">
+          <div>
+            <div class="progress-title" data-progress-title>正在生成全文总结</div>
+            <div class="progress-message" data-progress-message>正在准备 PDF 全文提取。</div>
+          </div>
+          <div class="progress-percent" data-progress-percent>0%</div>
+        </div>
+        <div class="progress-track" aria-label="全文总结生成进度">
+          <div class="progress-fill" data-progress-fill style="width: 0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span><strong data-progress-stage>准备中</strong></span>
+          <span>类型 <strong data-progress-kind>全文总结</strong></span>
+          <span>模型 <strong data-progress-model>智能模型</strong></span>
         </div>
       </section>
 
@@ -157,13 +195,13 @@
             <span class="summary-badge">arXiv metadata</span>
             {% if abstract_translation %}
               <a class="button secondary" href="#abstract-translation">查看译文</a>
-              <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="刷新中...">
+              <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-progress-panel="abstract-translation-progress" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="刷新中...">
                 <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
                 <input type="hidden" name="force" value="true">
                 <button class="secondary" type="submit">刷新译文</button>
               </form>
             {% else %}
-              <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="翻译中...">
+              <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-progress-panel="abstract-translation-progress" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="翻译中...">
                 <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
                 <button class="secondary" type="submit">中文翻译</button>
               </form>
