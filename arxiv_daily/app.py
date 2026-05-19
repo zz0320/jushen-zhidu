@@ -355,7 +355,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @app.post("/summary-jobs/papers/{arxiv_id:path}")
     def start_paper_summary_job(arxiv_id: str, force: bool = Form(False)) -> Dict[str, object]:
-        redirect_url = f"/papers/{arxiv_id}"
+        redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#abstract-summary"
         job_id = create_summary_job("paper", "单篇研究摘要", redirect_url)
 
         def worker() -> None:
@@ -433,7 +433,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         arxiv_id: str = Form(...),
         force: bool = Form(False),
     ) -> Dict[str, object]:
-        redirect_url = f"/papers/{arxiv_id}"
+        redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#abstract-translation"
         job_id = create_summary_job("paper_abstract_translation", "题目与摘要中文翻译", redirect_url)
 
         def worker() -> None:
@@ -518,7 +518,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         arxiv_id: str = Form(...),
         force: bool = Form(False),
     ) -> Dict[str, object]:
-        redirect_url = f"/papers/{arxiv_id}"
+        redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#full-text-summary"
         job_id = create_summary_job("paper_full_text", "单篇全文总结", redirect_url)
 
         def worker() -> None:

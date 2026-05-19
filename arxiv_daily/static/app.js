@@ -179,7 +179,7 @@
         if (job.status === "completed") {
           window.setTimeout(() => {
             const target = job.redirect_url || window.location.pathname;
-            navigateWithMessage(target, "总结已生成，页面已刷新。");
+            navigateWithMessage(target, "总结已生成，已定位到结果区。");
           }, 900);
           return;
         }
