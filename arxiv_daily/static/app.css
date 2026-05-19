@@ -3127,3 +3127,137 @@ button.ghost:hover,
     gap: 8px;
   }
 }
+
+/* Paper detail top workspace: compact command bar and metadata dashboard. */
+.paper-command-bar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  padding: 10px 12px;
+}
+
+.paper-action-group {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex: 0 1 auto;
+  gap: 7px;
+  padding: 0;
+}
+
+.paper-action-main {
+  background: transparent;
+  flex: 1 1 480px;
+  justify-content: flex-end;
+}
+
+.paper-action-group > span {
+  align-items: center;
+  background: #f5f9f8;
+  border: 1px solid rgba(213, 224, 229, 0.92);
+  border-radius: 999px;
+  color: #516477;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  min-height: 34px;
+  padding: 6px 9px;
+}
+
+.paper-action-group button,
+.paper-action-group .button,
+.paper-action-group .button.secondary {
+  border-radius: 10px;
+  min-height: 34px;
+  padding: 6px 11px;
+}
+
+.paper-overview {
+  gap: 12px;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.45fr);
+  margin-bottom: 16px;
+}
+
+.paper-facts {
+  gap: 8px;
+}
+
+.paper-fact {
+  border-radius: 13px;
+  min-height: 82px;
+  padding: 11px 12px;
+}
+
+.paper-fact span {
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.paper-fact strong {
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.paper-tags-card {
+  align-self: stretch;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 0;
+  padding: 14px 16px;
+}
+
+.paper-tags-card .section-head {
+  margin: 0;
+  padding-bottom: 10px;
+}
+
+.paper-tags-card h2 {
+  font-size: 17px;
+}
+
+.paper-signal-block {
+  align-items: start;
+  display: grid;
+  gap: 8px 12px;
+  grid-template-columns: 82px minmax(0, 1fr);
+  margin-top: 0;
+}
+
+.paper-signal-block + .paper-signal-block {
+  border-top: 1px solid rgba(213, 224, 229, 0.78);
+  padding-top: 2px;
+}
+
+.paper-signal-block .signal-label {
+  line-height: 1.9;
+}
+
+.paper-tags-card .chips {
+  gap: 5px;
+}
+
+.paper-tags-card .paper-keywords span,
+.paper-tags-card .paper-category-list span {
+  min-height: 23px;
+  padding: 3px 7px;
+}
+
+@media (max-width: 900px) {
+  .paper-command-bar,
+  .paper-action-group,
+  .paper-action-main {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .paper-action-main {
+    justify-content: flex-start;
+  }
+
+  .paper-signal-block {
+    grid-template-columns: 1fr;
+  }
+}
