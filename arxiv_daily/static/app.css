@@ -3010,6 +3010,59 @@ button.ghost:hover,
   margin-top: 9px;
 }
 
+.paper-card-insights {
+  border-top: 1px solid rgba(213, 224, 229, 0.78);
+  margin-top: 10px;
+  padding-top: 9px;
+}
+
+.paper-card-insight-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.paper-insight-card {
+  background: linear-gradient(135deg, #f7fbff, #fff8f5);
+  border: 1px solid rgba(194, 228, 239, 0.92);
+  border-radius: 12px;
+  color: #203040;
+  display: grid;
+  gap: 5px;
+  min-height: 96px;
+  padding: 9px 10px;
+}
+
+.paper-insight-card:hover {
+  border-color: rgba(8, 126, 164, 0.32);
+  box-shadow: 0 10px 20px rgba(23, 45, 73, 0.08);
+  color: #203040;
+  text-decoration: none;
+}
+
+.paper-insight-card.full-text {
+  background: linear-gradient(135deg, #f8fbfa, #fff3ef);
+}
+
+.paper-insight-card span {
+  color: var(--accent-dark);
+  font-size: 11px;
+  font-weight: 880;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.paper-insight-card p {
+  color: #29384a;
+  display: -webkit-box;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
 .paper-card-abstract {
   border-top: 1px solid rgba(213, 224, 229, 0.86);
   margin-top: 10px;
@@ -3057,7 +3110,8 @@ button.ghost:hover,
   font-size: 13px;
   line-height: 1.55;
   margin: 0;
-  overflow: visible;
+  max-height: 220px;
+  overflow: auto;
 }
 
 .paper-card-actions {
@@ -3283,6 +3337,10 @@ button.ai-chip:hover {
   }
 
   .paper-card-abstract-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .paper-card-insight-grid {
     grid-template-columns: 1fr;
   }
 }

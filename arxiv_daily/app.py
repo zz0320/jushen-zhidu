@@ -45,6 +45,7 @@ from .text import (
     clean_translation_text,
     format_datetime,
     markdown_to_html,
+    summary_excerpt,
     strip_first_markdown_heading,
     summary_to_html,
 )
@@ -55,6 +56,7 @@ templates.env.filters["clean_latex"] = clean_latex_text
 templates.env.filters["translation_title"] = clean_translation_title
 templates.env.filters["translation_text"] = clean_translation_text
 templates.env.filters["summary_html"] = summary_to_html
+templates.env.filters["summary_excerpt"] = summary_excerpt
 templates.env.filters["markdown_html"] = markdown_to_html
 templates.env.filters["format_dt"] = format_datetime
 templates.env.filters["strip_first_heading"] = strip_first_markdown_heading

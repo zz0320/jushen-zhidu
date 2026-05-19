@@ -140,6 +140,37 @@ def clean_translation_title(value: str) -> str:
     return clean_latex_text(text)
 
 
+def summary_excerpt(value: str, max_chars: int = 280) -> str:
+    """Turn model-generated markdown-ish summaries into a compact plain-text preview."""
+    max_chars = max(40, int(max_chars or 280))
+    text = re.sub(r"```.*?```", " ", value or "", flags=re.DOTALL)
+    text = re.sub(r"!\[[^\]]*]\([^)]+\)", " ", text)
+    text = re.sub(r"\[([^\]]+)]\([^)]+\)", r"\1", text)
+    text = re.sub(r"`([^`]*)`", r"\1", text)
+    text = re.sub(r"(\*\*|__)(.*?)\1", r"\2", text)
+    text = re.sub(r"(\*|_)(.*?)\1", r"\2", text)
+    lines = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or _is_horizontal_rule(line) or _is_table_line(line):
+            continue
+        line = re.sub(r"^#{1,6}\s+", "", line)
+        line = re.sub(r"^>\s*", "", line)
+        line = re.sub(r"^[-*]\s+", "", line)
+        line = re.sub(r"^\d+[.、]\s*", "", line)
+        if line:
+            lines.append(line)
+    plain = clean_latex_text(" ".join(lines))
+    if len(plain) <= max_chars:
+        return plain
+    cutoff = max_chars
+    for index in range(max_chars, max(int(max_chars * 0.65), 1), -1):
+        if plain[index - 1] in "。.!?！？；;，, ":
+            cutoff = index
+            break
+    return plain[:cutoff].rstrip(" ，,；;") + "..."
+
+
 def _drop_leading_translation_title(value: str) -> str:
     lines = (value or "").splitlines()
     while lines and not lines[0].strip():

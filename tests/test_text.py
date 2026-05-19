@@ -8,6 +8,7 @@ from arxiv_daily.text import (
     link_arxiv_ids_markdown,
     markdown_to_html,
     strip_first_markdown_heading,
+    summary_excerpt,
     summary_to_html,
 )
 
@@ -92,6 +93,24 @@ def test_summary_to_html_renders_daily_markdown_blocks():
     assert "incomplete row" in html
     assert "---" not in html
     assert "&gt;" not in html
+
+
+def test_summary_excerpt_compacts_markdown_summary():
+    content = """# 摘要
+
+1. 研究问题
+机器人需要完成复杂操作，并保持稳定。
+
+- **方法**：使用 VLA 策略。
+- 结果见 [arXiv](https://arxiv.org/abs/2605.00001v1)。
+"""
+
+    excerpt = summary_excerpt(content, 45)
+
+    assert "研究问题" in excerpt
+    assert "VLA 策略" in excerpt
+    assert "[" not in excerpt
+    assert len(excerpt) <= 48
 
 
 def test_format_datetime_removes_microseconds():

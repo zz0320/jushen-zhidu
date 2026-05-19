@@ -180,8 +180,26 @@
                   <span>暂无关键词</span>
                 {% endfor %}
               </div>
+              {% if paper_summary or paper_full_text_summary %}
+                <section class="paper-card-insights" aria-label="智能总结预览">
+                  <div class="paper-card-insight-grid">
+                    {% if paper_summary %}
+                      <a class="paper-insight-card" href="/papers/{{ paper.arxiv_id }}#abstract-summary">
+                        <span>摘要总结</span>
+                        <p>{{ paper_summary.content|summary_excerpt(260) }}</p>
+                      </a>
+                    {% endif %}
+                    {% if paper_full_text_summary %}
+                      <a class="paper-insight-card full-text" href="/papers/{{ paper.arxiv_id }}#full-text-summary">
+                        <span>全文总结</span>
+                        <p>{{ paper_full_text_summary.content|summary_excerpt(280) }}</p>
+                      </a>
+                    {% endif %}
+                  </div>
+                </section>
+              {% endif %}
               <details class="paper-card-abstract">
-                <summary>中英文摘要</summary>
+                <summary>原始中英文摘要</summary>
                 <div class="paper-card-abstract-grid">
                   <div>
                     <span>English</span>
