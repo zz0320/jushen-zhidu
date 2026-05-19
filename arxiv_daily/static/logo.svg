@@ -3,21 +3,20 @@
   <desc id="desc">A compact mark combining a book, embodied intelligence node, and orbit.</desc>
   <defs>
     <linearGradient id="base" x1="16" y1="12" x2="82" y2="86" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0F766E"/>
-      <stop offset="1" stop-color="#164E63"/>
+      <stop offset="0" stop-color="#087EA4"/>
+      <stop offset="1" stop-color="#163B5C"/>
     </linearGradient>
     <linearGradient id="page" x1="25" y1="36" x2="72" y2="68" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#F8FAFC"/>
-      <stop offset="1" stop-color="#DDF4EF"/>
+      <stop offset="0" stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#DFF4FF"/>
     </linearGradient>
   </defs>
   <rect x="8" y="8" width="80" height="80" rx="20" fill="url(#base)"/>
   <path d="M24 37c9-4 18-3 24 3v32c-7-6-15-8-24-4V37z" fill="url(#page)"/>
   <path d="M48 40c6-6 15-7 24-3v31c-9-4-17-2-24 4V40z" fill="#FFFFFF"/>
-  <path d="M48 40v32" stroke="#0F766E" stroke-width="3" stroke-linecap="round"/>
-  <path d="M29 45c5-1 10 0 14 3M29 54c5-1 10 0 14 3M53 48c4-3 9-4 14-3M53 57c4-3 9-4 14-3" stroke="#0F766E" stroke-width="3" stroke-linecap="round" opacity=".75"/>
-  <circle cx="48" cy="25" r="7" fill="#F6C85F"/>
-  <path d="M24 27c15-11 39-11 52 1" fill="none" stroke="#B9E6DD" stroke-width="4" stroke-linecap="round"/>
-  <path d="M20 71c11 8 44 10 58-1" fill="none" stroke="#F6C85F" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+  <path d="M48 40v32" stroke="#087EA4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M29 45c5-1 10 0 14 3M29 54c5-1 10 0 14 3M53 48c4-3 9-4 14-3M53 57c4-3 9-4 14-3" stroke="#087EA4" stroke-width="3" stroke-linecap="round" opacity=".75"/>
+  <circle cx="48" cy="25" r="7" fill="#FF7A5C"/>
+  <path d="M24 27c15-11 39-11 52 1" fill="none" stroke="#BFEAF3" stroke-width="4" stroke-linecap="round"/>
+  <path d="M20 71c11 8 44 10 58-1" fill="none" stroke="#FF9A7F" stroke-width="4" stroke-linecap="round" opacity=".92"/>
 </svg>
-
