@@ -45,5 +45,4 @@ arxiv_daily = [
   "static/*.css",
   "static/*.js",
   "static/*.svg",
-  "static/fonts/*",
 ]
