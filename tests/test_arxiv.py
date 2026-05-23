@@ -1,11 +1,13 @@
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import httpx
 from sqlmodel import Session, SQLModel, create_engine
 
-from arxiv_daily.arxiv import build_search_query, fetch_papers_for_date, parse_atom_feed
+from arxiv_daily.arxiv import FetchQuotaExceeded, build_search_query, fetch_papers_for_date, fetch_quota_status, parse_atom_feed
 from arxiv_daily.config import Settings
 from arxiv_daily.defaults import init_default_config
+from arxiv_daily.models import ArxivFetchRun
 
 ATOM = """<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"
@@ -50,7 +52,9 @@ def test_build_search_query_uses_categories_and_submitted_date():
     query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 15), "Asia/Shanghai")
 
     assert "(cat:cs.RO OR cat:cs.CV)" in query
-    assert "submittedDate:[202605141600 TO 202605151559]" in query
+    assert "submittedDate:[202605141600 TO 202605142359]" in query
+    assert "submittedDate:[202605150000 TO 202605151559]" in query
+    assert " OR " in query
 
 
 def test_fetch_papers_scores_and_saves_relevant_paper():
@@ -94,6 +98,155 @@ def test_fetch_papers_reports_progress():
     assert events[-1]["stage"] == "complete"
     assert events[-1]["percent"] == 100
     assert any(event["stage"] == "processing" for event in events)
+
+
+def test_fetch_papers_uses_cached_page_on_repeated_query(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    with Session(engine) as session:
+        init_default_config(session)
+        calls = []
+        events = []
+
+        def fake_get(*args, **kwargs):
+            calls.append(kwargs)
+            return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
+
+        first = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        second = fetch_papers_for_date(
+            session,
+            date(2026, 5, 15),
+            settings=settings,
+            http_get=fake_get,
+            progress_callback=events.append,
+        )
+
+    assert first.network_requests == 1
+    assert second.network_requests == 0
+    assert second.cached_pages == 1
+    assert len(calls) == 1
+    assert any(event["stage"] == "cached" for event in events)
+
+
+def test_fetch_papers_force_refresh_ignores_cached_page(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path, arxiv_daily_network_fetch_limit=2)
+    with Session(engine) as session:
+        init_default_config(session)
+        calls = []
+
+        def fake_get(*args, **kwargs):
+            calls.append(kwargs)
+            return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
+
+        fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        result = fetch_papers_for_date(
+            session,
+            date(2026, 5, 15),
+            settings=settings,
+            http_get=fake_get,
+            force_refresh=True,
+        )
+
+    assert result.network_requests == 1
+    assert result.cached_pages == 0
+    assert result.saved == 0
+    assert result.daily_network_fetch_used == 1
+    assert len(calls) == 2
+
+
+def test_fetch_papers_blocks_realtime_refresh_after_daily_limit(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path, arxiv_daily_network_fetch_limit=1)
+    with Session(engine) as session:
+        init_default_config(session)
+        calls = []
+
+        def fake_get(*args, **kwargs):
+            calls.append(kwargs)
+            return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
+
+        first = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        cached = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        try:
+            fetch_papers_for_date(
+                session,
+                date(2026, 5, 15),
+                settings=settings,
+                http_get=fake_get,
+                force_refresh=True,
+            )
+        except FetchQuotaExceeded as exc:
+            error = str(exc)
+        else:  # pragma: no cover - assertion guard
+            error = ""
+
+    assert first.daily_network_fetch_used == 1
+    assert cached.network_requests == 0
+    assert cached.daily_network_fetch_used == 1
+    assert len(calls) == 1
+    assert "今日实时抓取次数已用完" in error
+
+
+def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path, arxiv_daily_network_fetch_limit=5)
+    run_date = datetime.now(ZoneInfo(settings.timezone)).date().isoformat()
+    with Session(engine) as session:
+        session.add(
+            ArxivFetchRun(
+                target_date="2026-05-15",
+                run_date=run_date,
+                status="failed",
+                network_requests=0,
+                message="服务重启后任务已中止。",
+            )
+        )
+        session.add(
+            ArxivFetchRun(
+                target_date="2026-05-15",
+                run_date=run_date,
+                status="failed",
+                network_requests=1,
+                message="arXiv request failed.",
+            )
+        )
+        session.add(
+            ArxivFetchRun(
+                target_date="2026-05-15",
+                run_date=run_date,
+                status="completed",
+                network_requests=1,
+                saved_papers=0,
+                message="No matching new papers.",
+            )
+        )
+        session.add(
+            ArxivFetchRun(
+                target_date="2026-05-15",
+                run_date=run_date,
+                status="completed",
+                network_requests=1,
+                saved_papers=2,
+            )
+        )
+        session.add(
+            ArxivFetchRun(
+                target_date="2026-05-15",
+                run_date=run_date,
+                status="running",
+            )
+        )
+        session.commit()
+
+        status = fetch_quota_status(session, date(2026, 5, 15), settings)
+
+    assert status.used == 1
+    assert status.remaining == 4
 
 
 def test_fetch_papers_retries_429_with_wait(tmp_path):

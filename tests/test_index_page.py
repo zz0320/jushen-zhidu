@@ -1,12 +1,21 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 
 from arxiv_daily.app import create_app
 from arxiv_daily.config import Settings
-from arxiv_daily.models import Paper, PaperFullTextSummary, PaperSummary
+from arxiv_daily.dates import arxiv_date_range, arxiv_submitted_date_query
+from arxiv_daily.models import (
+    ArxivFetchRun,
+    ArxivPageCache,
+    DailyReport,
+    Paper,
+    PaperAbstractTranslation,
+    PaperFullTextSummary,
+    PaperSummary,
+)
 
 
 def test_index_paper_card_exposes_ai_actions(tmp_path):
@@ -40,10 +49,11 @@ def test_index_paper_card_exposes_ai_actions(tmp_path):
     html = TestClient(app).get("/?day=2026-05-19").text
 
     assert "Robotics Institute" in html
-    assert "data-summary-job-url=\"/summary-jobs/paper-abstract-translation\"" in html
-    assert "data-summary-job-url=\"/summary-jobs/papers/2605.18722v1\"" in html
-    assert "data-summary-job-url=\"/summary-jobs/paper-full-text\"" in html
-    assert "正在执行智能任务" in html
+    assert "data-summary-job-url=\"/summary-jobs/papers/2605.18722v1/all\"" in html
+    assert "生成三项" in html
+    assert "data-summary-job-url=\"/summary-jobs/paper-abstract-translation\"" not in html
+    assert "data-summary-job-url=\"/summary-jobs/paper-full-text\"" not in html
+    assert "data-progress-summary=\"true\"" in html
 
 
 def test_index_paper_card_shows_summary_previews(tmp_path):
@@ -90,3 +100,341 @@ def test_index_paper_card_shows_summary_previews(tmp_path):
     assert "全文总结" in html
     assert "机器人需要在复杂环境中完成稳健操作" in html
     assert "全文显示了更完整的实验细节" in html
+
+
+def test_index_paper_card_renders_full_insight_blocks(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    app = create_app(settings=settings, engine=engine)
+    long_body = "\n".join(
+        [
+            "1. 研究问题",
+            "这是一段用于拉长总览内容的说明。" * 18,
+            "2. 方法概述",
+            "模型通过视觉提示和语言条件共同完成预测。" * 18,
+            "最终完整展示标记",
+        ]
+    )
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18728v1",
+                title="Long Insight Preview",
+                abstract="A robot paper abstract.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=18.0,
+            )
+        )
+        session.add(PaperSummary(arxiv_id="2605.18728v1", content=long_body, model="fake-qwen"))
+        session.add(PaperFullTextSummary(arxiv_id="2605.18728v1", content=long_body, model="fake-qwen"))
+        session.commit()
+
+    html = TestClient(app).get("/?day=2026-05-19").text
+
+    assert "paper-card-insights-expanded" in html
+    assert "paper-insight-disclosure" in html
+    assert "<summary class=\"paper-insight-row-head\">" in html
+    assert "展开查看更多" in html
+    assert "这是一段用于拉长总览内容的说明" in html
+    assert "paper-insight-content" in html
+    assert "最终完整展示标记" in html
+
+
+def test_daily_report_actions_reflect_existing_report(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(DailyReport(report_date="2026-05-19", content="日报已生成。", model="fake-qwen", paper_count=0))
+        session.commit()
+
+    client = TestClient(app)
+    index_html = client.get("/?day=2026-05-19").text
+    daily_html = client.get("/daily/2026-05-19").text
+
+    assert "daily-ready-action" in index_html
+    assert "刷新日报" in index_html
+    assert 'data-completed-label="已刷新"' in index_html
+    assert "daily-ready-action" in daily_html
+    assert "刷新日报" in daily_html
+    assert 'data-completed-label="已刷新"' in daily_html
+
+
+def test_daily_report_renders_dynamic_paper_forest(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18729v1",
+                title="Forest VLA Paper",
+                abstract="A vision-language-action robot policy.",
+                primary_category="cs.RO",
+                fetched_for_date="2026-05-22",
+                relevance_score=20.0,
+                matched_keywords_json='[{"keyword":"vla","group":"VLA and Robot Foundation Models"}]',
+            )
+        )
+        session.add(
+            Paper(
+                arxiv_id="2605.18730v1",
+                title="Forest Benchmark Paper",
+                abstract="A dataset benchmark for embodied evaluation.",
+                primary_category="cs.RO",
+                fetched_for_date="2026-05-21",
+                relevance_score=10.0,
+                matched_keywords_json='[{"keyword":"benchmark","group":"Datasets and Benchmarks"}]',
+            )
+        )
+        session.add(DailyReport(report_date="2026-05-22", content="日报已生成。", model="fake-qwen", paper_count=1))
+        session.commit()
+
+    html = TestClient(app).get("/daily/2026-05-22").text
+
+    assert "按天穿行灵境树林" in html
+    assert "所有论文生长在同一片灵境森林" in html
+    assert "fantasy-forest-system" in html
+    assert "forest-material-system" in html
+    assert "forest-mosaic.css" in html
+    assert "forest-depth-layers" in html
+    assert "/generated/forest-materials/ai-tree-radiant-maple.png" in html
+    assert "20260523-ai-forest-assets" in html
+    assert "Forest VLA Paper" in html
+    assert "paper-unified-field" in html
+    assert "paper-plot-inspector" in html
+    assert "Auto 9x9" in html
+    assert "data-field-size-control=\"9\"" in html
+    assert "data-paper-title=\"Forest VLA Paper\"" in html
+    assert "--tree-tilt:" in html
+    assert "--tree-scale:" in html
+    assert "--tile-tilt:" in html
+    assert "paper-tile-surface" in html
+    assert "data-paper-shape=\"radiant-maple\"" in html
+    assert "data-paper-land=" in html
+    assert "paper-tree-shape-radiant-maple" in html
+    assert "paper-tree-model paper-tree-vla" in html
+    assert "paper-tree-grass" in html
+    assert "date-tree" in html
+    assert "date-tree-asset" in html
+    assert "date-field-block" in html
+    assert "daily-branch-map-thumb" in html
+    assert "daily-branch-tree-icon" in html
+    assert "daily-branch-node-vla" in html
+
+
+def test_paper_detail_uses_combined_insight_action(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18725v1",
+                title="Paper Detail Action",
+                abstract="A robot paper abstract.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=18.0,
+            )
+        )
+        session.add(
+            PaperAbstractTranslation(
+                arxiv_id="2605.18725v1",
+                title_content="论文详情动作",
+                content="一段中文摘要。",
+                model="fake-qwen",
+            )
+        )
+        session.add(
+            PaperSummary(
+                arxiv_id="2605.18725v1",
+                content="摘要总结内容。",
+                model="fake-qwen",
+            )
+        )
+        session.add(
+            PaperFullTextSummary(
+                arxiv_id="2605.18725v1",
+                content="全文总结内容。",
+                model="fake-qwen",
+                figures_json='[{"url":"/static/generated/figures/2605.18725v1-figure-1-p2.png","page":2,"index":1,"caption":"PDF 第 2 页图片摘选"}]',
+            )
+        )
+        session.commit()
+
+    html = TestClient(app).get("/papers/2605.18725v1").text
+
+    assert "当日总览" in html
+    assert "action=\"/papers/2605.18725v1/summarize-all\"" in html
+    assert "data-summary-job-url=\"/summary-jobs/papers/2605.18725v1/all\"" in html
+    assert "刷新三项" in html
+    assert "文字总结" in html
+    assert "关键图片总结" in html
+    assert "paper-figure-album" in html
+    assert "data-gallery-image" in html
+    assert "paper-figure-strip" not in html
+    assert "/static/generated/figures/2605.18725v1-figure-1-p2.png" in html
+    assert "data-summary-job-url=\"/summary-jobs/paper-abstract-translation\"" not in html
+    assert "data-summary-job-url=\"/summary-jobs/paper-full-text\"" not in html
+
+
+def test_papers_workspace_lists_day_papers(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18724v1",
+                title="Paper Workspace Entry",
+                abstract="A robot paper abstract.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=18.0,
+                matched_keywords_json='[{"keyword":"robot","group":"Robotics","weight":2.5,"kind":"include"}]',
+            )
+        )
+        session.commit()
+
+    html = TestClient(app).get("/papers?day=2026-05-19").text
+
+    assert "单篇论文" in html
+    assert "Paper Workspace Entry" in html
+    assert "Paper not found" not in html
+
+
+def test_clear_daily_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    app = create_app(settings=settings, engine=engine)
+    day = "2026-05-19"
+    other_day = "2026-05-20"
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18726v1",
+                title="Daily cache target",
+                abstract="A target day paper.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date=day,
+                relevance_score=18.0,
+            )
+        )
+        session.add(
+            Paper(
+                arxiv_id="2605.18727v1",
+                title="Other day paper",
+                abstract="An other day paper.",
+                authors_json='["Bob Lee"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date=other_day,
+                relevance_score=10.0,
+            )
+        )
+        session.add(PaperAbstractTranslation(arxiv_id="2605.18726v1", title_content="目标", content="译文", model="fake"))
+        session.add(PaperSummary(arxiv_id="2605.18726v1", content="摘要", model="fake"))
+        session.add(PaperFullTextSummary(arxiv_id="2605.18726v1", content="全文", model="fake"))
+        session.add(PaperSummary(arxiv_id="2605.18727v1", content="其他日摘要", model="fake"))
+        session.add(DailyReport(report_date=day, content="日报", model="fake", paper_count=1))
+        session.add(DailyReport(report_date=other_day, content="其他日报", model="fake", paper_count=1))
+        session.add(
+            ArxivPageCache(
+                cache_key="target-cache",
+                query=f"(cat:cs.RO) AND submittedDate:{arxiv_date_range(date(2026, 5, 19), settings.timezone)}",
+                start=0,
+                page_size=100,
+                response_text="<feed />",
+            )
+        )
+        session.add(
+            ArxivPageCache(
+                cache_key="target-cache-split",
+                query=f"(cat:cs.RO) AND {arxiv_submitted_date_query(date(2026, 5, 19), settings.timezone)}",
+                start=0,
+                page_size=100,
+                response_text="<feed />",
+            )
+        )
+        session.add(
+            ArxivPageCache(
+                cache_key="other-cache",
+                query=f"(cat:cs.RO) AND submittedDate:{arxiv_date_range(date(2026, 5, 20), settings.timezone)}",
+                start=0,
+                page_size=100,
+                response_text="<feed />",
+            )
+        )
+        session.add(ArxivFetchRun(target_date=day, run_date=day, status="completed", network_requests=1))
+        session.commit()
+
+    response = TestClient(app).post(f"/daily-cache/{day}/clear", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"].startswith(f"/?day={day}&message=")
+    with Session(engine) as session:
+        assert session.get(Paper, "2605.18726v1") is None
+        assert session.get(Paper, "2605.18727v1") is not None
+        assert session.exec(select(PaperSummary).where(PaperSummary.arxiv_id == "2605.18726v1")).first() is None
+        assert session.exec(select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id == "2605.18726v1")).first() is None
+        assert session.exec(select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id == "2605.18726v1")).first() is None
+        assert session.exec(select(DailyReport).where(DailyReport.report_date == day)).first() is None
+        assert session.get(ArxivPageCache, "target-cache") is None
+        assert session.get(ArxivPageCache, "target-cache-split") is None
+        assert session.get(ArxivPageCache, "other-cache") is not None
+        assert session.exec(select(ArxivFetchRun).where(ArxivFetchRun.target_date == day)).first() is not None
+
+
+def test_app_startup_marks_stale_fetch_runs_failed(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    with Session(engine) as session:
+        SQLModel.metadata.create_all(engine)
+        session.add(ArxivFetchRun(target_date="2026-05-19", run_date="2026-05-19", status="running"))
+        session.commit()
+
+    create_app(settings=settings, engine=engine)
+
+    with Session(engine) as session:
+        run = session.exec(select(ArxivFetchRun).where(ArxivFetchRun.target_date == "2026-05-19")).first()
+        assert run is not None
+        assert run.status == "failed"
+        assert "服务重启" in run.message

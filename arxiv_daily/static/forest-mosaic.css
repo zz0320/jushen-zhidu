@@ -1,0 +1,818 @@
+/* Paper-level autumn plot mosaic loaded after app.css. */
+.forest-material-system {
+  --material-ai-board: url("/static/generated/forest-materials/ai-grove-scene.png");
+  --material-grove-scene: url("/static/generated/forest-materials/ai-grove-scene.png");
+  --material-moss: url("/static/generated/forest-materials/moss-tile.svg");
+  --material-flora: url("/static/generated/forest-materials/glow-flora.svg");
+  --tile-sunlit-moss: url("/static/generated/forest-materials/ai-tile-sunlit-moss.png");
+  --tile-deep-moss: url("/static/generated/forest-materials/ai-tile-deep-moss.png");
+  --tile-leaf-carpet: url("/static/generated/forest-materials/ai-tile-leaf-carpet.png");
+  --tile-flower-moss: url("/static/generated/forest-materials/ai-tile-flower-moss.png");
+  --tile-path-stone: url("/static/generated/forest-materials/ai-tile-path-stone.png");
+  --tile-wood-root: url("/static/generated/forest-materials/ai-tile-wood-root.png");
+  --tile-mist-moss: url("/static/generated/forest-materials/ai-tile-mist-moss.png");
+  --tile-archive-stone: url("/static/generated/forest-materials/ai-tile-archive-stone.png");
+  --autumn-ink: #2f281d;
+  --autumn-muted: #6d5f49;
+  --autumn-gold: #f4c46d;
+  --autumn-ember: #9d5b2f;
+}
+
+.daily-date-grove.forest-material-system,
+.daily-paper-forest.fantasy-forest-system.forest-material-system {
+  background-color: #f1dfaa !important;
+  background-image:
+    linear-gradient(180deg, rgba(255, 240, 190, 0.5), rgba(121, 74, 35, 0.13)),
+    var(--material-ai-board),
+    radial-gradient(ellipse at 18% 12%, rgba(255, 221, 132, 0.38), transparent 42%),
+    linear-gradient(180deg, #fff0c4 0%, #e6c987 48%, #a58650 100%) !important;
+  background-position: center, center, center, center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover, cover, auto, auto !important;
+  border-color: rgba(133, 92, 46, 0.32) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -54px 96px rgba(116, 73, 34, 0.2),
+    0 30px 76px rgba(79, 54, 31, 0.16) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage {
+  display: block !important;
+  position: relative;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-unified-field {
+  background:
+    linear-gradient(180deg, rgba(255, 246, 216, 0.86), rgba(84, 58, 31, 0.24)),
+    var(--material-grove-scene) center / cover no-repeat !important;
+  border-color: rgba(95, 63, 33, 0.56) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.54),
+    0 18px 44px rgba(57, 39, 22, 0.2) !important;
+  overflow: hidden;
+  padding: 12px !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-unified-field::before {
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(255, 231, 165, 0.22), transparent 32%),
+    linear-gradient(180deg, rgba(23, 19, 14, 0), rgba(23, 19, 14, 0.22)) !important;
+  z-index: 0;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-head {
+  background: rgba(255, 247, 224, 0.8);
+  border: 1px solid rgba(117, 77, 39, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(40, 27, 14, 0.12);
+  padding: 10px 12px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage .paper-plot-inspector {
+  backdrop-filter: blur(10px) saturate(1.2);
+  background: rgba(255, 244, 213, 0.88) !important;
+  border-color: rgba(111, 69, 36, 0.32) !important;
+  box-shadow:
+    0 18px 36px rgba(43, 28, 14, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58) !important;
+  position: absolute !important;
+  right: 18px;
+  top: 88px;
+  width: min(300px, 36%);
+  z-index: 28;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard {
+  aspect-ratio: 1000 / 690 !important;
+  background-color: #6f623d !important;
+  background-image:
+    linear-gradient(180deg, rgba(255, 232, 169, 0.05), rgba(18, 15, 10, 0.2)),
+    radial-gradient(ellipse at 50% 58%, rgba(109, 92, 42, 0.42), rgba(64, 82, 43, 0.18) 28%, transparent 54%),
+    radial-gradient(ellipse at 50% 48%, rgba(255, 211, 112, 0.12), transparent 42%),
+    var(--material-grove-scene) !important;
+  background-position: center, center, center, center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover, 76% 68%, auto, cover !important;
+  border-color: rgba(54, 37, 22, 0.68) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 230, 164, 0.18),
+    inset 0 -48px 72px rgba(24, 18, 12, 0.28),
+    0 8px 0 #4d3928,
+    0 16px 0 #2f241b,
+    0 26px 34px rgba(38, 27, 15, 0.25) !important;
+  gap: 0 !important;
+  margin-bottom: 18px !important;
+  min-height: clamp(420px, 48vw, 620px);
+  padding: clamp(24px, 2.8vw, 42px) clamp(36px, 4.2vw, 62px) clamp(34px, 4.4vw, 64px) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard::before {
+  background:
+    linear-gradient(135deg, rgba(255, 238, 182, 0.16), transparent 34%),
+    radial-gradient(ellipse at 50% 58%, rgba(38, 58, 32, 0.34), rgba(91, 84, 40, 0.22) 38%, transparent 62%),
+    radial-gradient(ellipse at 5% 10%, rgba(20, 14, 9, 0.28), transparent 28%),
+    radial-gradient(ellipse at 92% 88%, rgba(18, 12, 8, 0.38), transparent 36%) !important;
+  inset: 0 !important;
+  opacity: 1 !important;
+  z-index: 0 !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard::after {
+  display: none !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree {
+  --tile-top: #c8ac63;
+  --tile-mid: #7f7b47;
+  --tile-edge: #7b5435;
+  --tile-edge-dark: #4b3326;
+  --tile-detail: rgba(255, 224, 143, 0.38);
+  --tile-image: var(--tile-sunlit-moss);
+  --shape-lift: 0px;
+  --shape-width: min(180px, 260%);
+  --shape-height: 132%;
+  background: transparent !important;
+  box-shadow: none !important;
+  align-self: stretch;
+  display: grid;
+  justify-self: stretch;
+  min-height: 0;
+  min-width: 0;
+  overflow: visible;
+  z-index: auto !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link {
+  border-radius: 6px;
+  display: grid !important;
+  height: 100%;
+  min-height: 0;
+  overflow: visible;
+  place-items: end center;
+  perspective: 620px;
+  position: relative;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link::before {
+  background: transparent !important;
+  border: 1px solid rgba(255, 222, 142, 0);
+  border-radius: 10px;
+  box-shadow: none;
+  inset: 5px;
+  z-index: 7;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link::after {
+  background: radial-gradient(ellipse at 50% 56%, rgba(44, 31, 20, 0.26), rgba(44, 31, 20, 0.1) 54%, transparent 70%) !important;
+  bottom: 2%;
+  opacity: 0.55 !important;
+  z-index: 0;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tile-surface {
+  background: var(--tile-image) center / contain no-repeat !important;
+  border: 0;
+  border-radius: 0;
+  bottom: 0;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 14px 10px rgba(35, 22, 12, 0.34))
+    drop-shadow(0 0 8px rgba(218, 177, 83, 0.1))
+    saturate(0.98);
+  height: clamp(70px, 132%, 142px);
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  transform:
+    translateX(-50%)
+    translateY(12px)
+    rotate(0deg)
+    scale(calc(1.04 * var(--scene-scale, 1)));
+  transform-origin: 50% 90%;
+  transition: filter 180ms ease, transform 180ms ease;
+  width: min(196px, 232%);
+  z-index: var(--tile-z, 1);
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tile-surface::before,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tile-surface::after {
+  display: none;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tile-surface i {
+  display: none;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-sunlit-moss {
+  --tile-image: var(--tile-sunlit-moss);
+  --tile-top: #c8ac63;
+  --tile-mid: #7f914e;
+  --tile-edge: #82623f;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-deep-moss {
+  --tile-image: var(--tile-deep-moss);
+  --tile-top: #879e57;
+  --tile-mid: #536d43;
+  --tile-edge: #594632;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-leaf-carpet {
+  --tile-image: var(--tile-leaf-carpet);
+  --tile-top: #d59a43;
+  --tile-mid: #8d6e39;
+  --tile-edge: #684329;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-flower-moss {
+  --tile-image: var(--tile-flower-moss);
+  --tile-top: #bba85c;
+  --tile-mid: #6f8a4e;
+  --tile-edge: #73543a;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-path-stone {
+  --tile-image: var(--tile-path-stone);
+  --tile-top: #b49b75;
+  --tile-mid: #777055;
+  --tile-edge: #5b4a38;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-wood-root {
+  --tile-image: var(--tile-wood-root);
+  --tile-top: #a97742;
+  --tile-mid: #755132;
+  --tile-edge: #5d3d2b;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-mist-moss {
+  --tile-image: var(--tile-mist-moss);
+  --tile-top: #b9ad6c;
+  --tile-mid: #6f7d55;
+  --tile-edge: #5b5140;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-archive-stone {
+  --tile-image: var(--tile-archive-stone);
+  --tile-top: #b99b6a;
+  --tile-mid: #75664b;
+  --tile-edge: #594735;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-radiant-maple {
+  --shape-width: min(188px, 280%);
+  --shape-height: 138%;
+  --shape-lift: -8px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-tall-cypress,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-sentinel-pine {
+  --shape-width: min(148px, 222%);
+  --shape-height: 176%;
+  --shape-lift: -16px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-wide-oak,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-harvest-oak {
+  --shape-width: min(208px, 304%);
+  --shape-height: 134%;
+  --shape-lift: -7px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-slender-birch,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-glow-willow {
+  --shape-width: min(162px, 238%);
+  --shape-height: 168%;
+  --shape-lift: -15px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-archive-grove,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-twin-canopy {
+  --shape-width: min(204px, 292%);
+  --shape-height: 148%;
+  --shape-lift: -10px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-mist-pine,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-stone-pine {
+  --shape-width: min(162px, 236%);
+  --shape-height: 172%;
+  --shape-lift: -14px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-spiral-sapling,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tree-shape-quiet-shrub {
+  --shape-width: min(164px, 242%);
+  --shape-height: 112%;
+  --shape-lift: -2px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-asset {
+  bottom: clamp(28px, 38%, 56px) !important;
+  filter: drop-shadow(0 18px 12px rgba(29, 19, 11, 0.34)) saturate(1.06) contrast(1.03) !important;
+  height: clamp(88px, var(--shape-height), 220px) !important;
+  object-fit: contain !important;
+  transform:
+    translateX(calc(-50% + var(--tree-shift-x, 0px)))
+    translateY(var(--tree-shift-y, 0px))
+    rotate(var(--tree-tilt, 0deg))
+    scale(calc(var(--tree-scale, 1) * var(--scene-scale, 1) * 1.18)) !important;
+  translate: 0 var(--shape-lift) !important;
+  width: var(--shape-width) !important;
+  z-index: var(--tree-z, 4) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-visual {
+  z-index: var(--tree-z, 4) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-crown,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-trunk,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-ground,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-leaves,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-grass {
+  display: none !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link:hover .paper-tile-surface,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link:focus-visible .paper-tile-surface,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree.is-paper-active .paper-tile-surface {
+  filter:
+    drop-shadow(0 16px 12px rgba(48, 35, 20, 0.28))
+    drop-shadow(0 0 16px rgba(255, 215, 132, 0.58));
+  transform:
+    translateX(-50%)
+    translateY(6px)
+    rotate(0deg)
+    scale(calc(1.13 * var(--scene-scale, 1)));
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link:hover::before,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-link:focus-visible::before,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree.is-paper-active .paper-tree-link::before {
+  border-color: rgba(255, 222, 142, 0.66) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 248, 214, 0.22), 0 0 18px rgba(255, 213, 123, 0.22);
+  opacity: 1 !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node strong,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node em {
+  color: #3a2a1a !important;
+  text-shadow: none !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node:hover,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node:focus-visible,
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node.is-active {
+  background: rgba(255, 246, 222, 0.92) !important;
+  border-color: rgba(154, 91, 48, 0.52) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    0 10px 24px rgba(74, 45, 24, 0.12) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-tree-icon {
+  filter: drop-shadow(0 6px 7px rgba(48, 30, 16, 0.18)) saturate(1.04) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-asset {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage .paper-plot-inspector {
+    margin-top: 12px;
+    position: static !important;
+    width: auto;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard {
+    aspect-ratio: 4 / 5 !important;
+    min-height: 520px;
+    padding: 20px 14px 28px !important;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .paper-tile-surface {
+    height: clamp(48px, 104%, 86px);
+    transform:
+      translateX(-50%)
+      translateY(8px)
+      rotate(0deg)
+      scale(calc(0.96 * var(--scene-scale, 1)));
+    width: min(126px, 204%);
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard .paper-tree-asset {
+    bottom: clamp(18px, 30%, 32px) !important;
+    height: clamp(42px, var(--shape-height), 104px) !important;
+    width: min(var(--shape-width), 126px) !important;
+  }
+}
+
+/* Daily forest classification management layer. */
+.daily-forest-hero.forest-material-system {
+  align-items: stretch;
+  background-color: #efe0b4 !important;
+  background-image:
+    linear-gradient(90deg, rgba(255, 246, 214, 0.92), rgba(255, 246, 214, 0.54) 42%, rgba(54, 43, 25, 0.08)),
+    var(--material-ai-board),
+    radial-gradient(ellipse at 16% 20%, rgba(255, 225, 139, 0.52), transparent 42%) !important;
+  background-position: center, center, center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover, cover, auto !important;
+  border: 1px solid rgba(125, 86, 42, 0.26) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -44px 80px rgba(68, 56, 32, 0.18),
+    0 28px 58px rgba(54, 42, 24, 0.12) !important;
+  display: grid !important;
+  gap: clamp(18px, 4vw, 40px) !important;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, auto) !important;
+  margin-bottom: 18px !important;
+  min-height: 288px;
+  overflow: hidden;
+  padding: clamp(22px, 4vw, 42px) !important;
+  position: relative;
+}
+
+.daily-forest-hero.forest-material-system::after {
+  background:
+    linear-gradient(90deg, rgba(255, 248, 222, 0.76), transparent 58%),
+    radial-gradient(ellipse at 74% 48%, rgba(255, 214, 126, 0.16), transparent 34%);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.daily-forest-hero > *:not(.forest-depth-layers) {
+  position: relative;
+  z-index: 1;
+}
+
+.daily-forest-hero-copy {
+  align-self: end;
+  max-width: 780px;
+}
+
+.daily-forest-hero .eyebrow,
+.daily-forest-hero .action-label {
+  color: #7a4d23 !important;
+}
+
+.daily-forest-hero h1 {
+  color: #241d12 !important;
+  font-size: clamp(34px, 5.6vw, 68px) !important;
+  letter-spacing: 0 !important;
+  line-height: 0.96 !important;
+  margin: 8px 0 14px !important;
+  max-width: 780px;
+}
+
+.daily-forest-hero p {
+  color: #4d432f !important;
+  font-size: clamp(15px, 1.5vw, 18px) !important;
+  line-height: 1.72 !important;
+  max-width: 660px;
+}
+
+.daily-hero-stats {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 20px;
+  max-width: 760px;
+}
+
+.daily-hero-stats span,
+.daily-forest-taxonomy span,
+.daily-branch-materials span {
+  background: rgba(255, 250, 230, 0.78);
+  border: 1px solid rgba(113, 75, 37, 0.22);
+  border-radius: 8px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  min-width: 0;
+}
+
+.daily-hero-stats span {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+}
+
+.daily-hero-stats strong {
+  color: #2e2516;
+  font-size: clamp(18px, 2.3vw, 26px);
+  line-height: 1;
+}
+
+.daily-hero-stats em {
+  color: #6f6348;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 760;
+}
+
+.daily-forest-hero-controls {
+  align-content: end;
+  align-self: end;
+  display: grid !important;
+  gap: 10px;
+  justify-items: end;
+}
+
+.daily-forest-hero-controls .date-jump {
+  background: rgba(255, 249, 226, 0.76);
+  border: 1px solid rgba(113, 75, 37, 0.2);
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.daily-forest-layout {
+  align-items: start;
+}
+
+.daily-forest-layout .page-main {
+  display: grid;
+  gap: 18px;
+}
+
+.daily-date-grove.daily-forest-timeline {
+  margin-bottom: 18px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system {
+  border-radius: 18px !important;
+  padding: clamp(14px, 2vw, 22px) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-forest-head {
+  align-items: end;
+  display: grid !important;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-forest-head strong {
+  font-size: clamp(24px, 3.2vw, 38px) !important;
+  line-height: 1.05 !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-forest-head p {
+  max-width: 720px;
+}
+
+.daily-forest-taxonomy {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 12px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.daily-forest-taxonomy span {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+}
+
+.daily-forest-taxonomy strong {
+  color: #2d2518;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.daily-forest-taxonomy em {
+  color: #6c5c42;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 780;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-forest-legend {
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  margin: 12px 0 16px !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node {
+  border-radius: 8px !important;
+  gap: 8px !important;
+  grid-template-columns: 8px 48px minmax(0, 1fr) !important;
+  min-height: 68px !important;
+  padding: 7px 9px 7px 7px !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node strong {
+  align-self: end;
+  font-size: 13px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node em {
+  align-self: start;
+  background: transparent !important;
+  border: 0 !important;
+  color: #7a6447 !important;
+  display: block;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 760;
+  grid-column: 3 !important;
+  line-height: 1.2;
+  overflow: hidden;
+  padding: 0 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-map-thumb {
+  height: 48px;
+  width: 48px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-map-thumb::before {
+  border-radius: 8px !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-tree-icon {
+  height: 42px;
+  width: 42px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage {
+  display: grid !important;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  position: relative;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage .paper-plot-inspector {
+  align-self: start;
+  position: sticky !important;
+  right: auto;
+  top: 86px;
+  width: auto;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-density-controls {
+  border-radius: 8px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-density-controls button {
+  border-radius: 6px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .unified-paper-orchard {
+  min-height: clamp(500px, 54vw, 700px) !important;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-inspector-meta {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-inspector-meta span {
+  border-radius: 8px;
+}
+
+.daily-paper-forest.fantasy-forest-system.forest-material-system .paper-plot-inspector-meta span[data-inspector-land] {
+  grid-column: 1 / -1;
+}
+
+.daily-branch-materials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.daily-branch-materials span {
+  color: #5f5036;
+  font-size: 12px;
+  font-weight: 760;
+  padding: 6px 9px;
+}
+
+.daily-forest-empty.forest-material-system {
+  align-items: center;
+  background:
+    linear-gradient(180deg, rgba(255, 247, 220, 0.9), rgba(219, 197, 145, 0.72)),
+    var(--material-ai-board) center / cover no-repeat !important;
+  border: 1px solid rgba(125, 86, 42, 0.26);
+  border-radius: 18px;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  min-height: 180px;
+  padding: 22px;
+}
+
+.daily-forest-empty strong {
+  color: #2e2516;
+  display: block;
+  font-size: 24px;
+  line-height: 1.15;
+  margin: 6px 0;
+}
+
+.daily-forest-empty p {
+  color: #5b5038;
+  margin: 0;
+  max-width: 620px;
+}
+
+.daily-command-dock.digest-dock {
+  margin-top: 0 !important;
+}
+
+.daily-report-panel.summary-card {
+  border-radius: 12px;
+}
+
+@media (max-width: 1080px) {
+  .daily-forest-hero.forest-material-system,
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-forest-head,
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .daily-forest-hero-controls {
+    justify-items: start;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-layout.forest-system-stage .paper-plot-inspector {
+    position: static !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .daily-forest-hero.forest-material-system {
+    border-radius: 14px !important;
+    min-height: 0;
+    padding: 18px !important;
+  }
+
+  .daily-forest-hero h1 {
+    font-size: clamp(32px, 12vw, 48px) !important;
+  }
+
+  .daily-hero-stats,
+  .daily-forest-taxonomy {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-forest-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node {
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    min-height: 76px !important;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node > .daily-branch-color-dot {
+    display: none;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-map-thumb {
+    grid-column: 1 !important;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node strong,
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .daily-branch-node em {
+    grid-column: 2 !important;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .paper-field-head {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .daily-paper-forest.fantasy-forest-system.forest-material-system .paper-density-controls {
+    justify-self: stretch;
+  }
+
+  .daily-forest-empty.forest-material-system {
+    align-items: stretch;
+    display: grid;
+  }
+}

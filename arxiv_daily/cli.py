@@ -7,7 +7,7 @@ import typer
 from sqlmodel import Session
 
 from .app_settings import resolve_runtime_settings
-from .arxiv import fetch_papers_for_date
+from .arxiv import FetchQuotaExceeded, fetch_papers_for_date
 from .config import get_settings
 from .database import build_engine, create_db_and_tables
 from .dates import parse_day
@@ -36,7 +36,13 @@ def serve(host: str = "127.0.0.1", port: int = 8000, reload: bool = False) -> No
     """Start the local FastAPI web app."""
     import uvicorn
 
-    uvicorn.run("arxiv_daily.app:create_app", factory=True, host=host, port=port, reload=reload)
+    if reload:
+        uvicorn.run("arxiv_daily.app:create_app", factory=True, host=host, port=port, reload=True)
+        return
+
+    from .app import create_app
+
+    uvicorn.run(create_app, factory=True, host=host, port=port)
 
 
 @main.command("init-db")
@@ -48,17 +54,24 @@ def init_db() -> None:
 
 
 @main.command()
-def fetch(day: Optional[str] = typer.Option(None, "--date", "-d", help="Date in YYYY-MM-DD, default today.")) -> None:
+def fetch(
+    day: Optional[str] = typer.Option(None, "--date", "-d", help="Date in YYYY-MM-DD, default today."),
+    force_refresh: bool = typer.Option(False, "--force-refresh", help="Ignore cached arXiv pages and call arXiv again."),
+) -> None:
     """Fetch arXiv papers for one local day."""
     session, settings = _session()
     target_day = parse_day(day, settings.timezone)
     try:
-        result = fetch_papers_for_date(session, target_day, settings)
+        result = fetch_papers_for_date(session, target_day, settings, force_refresh=force_refresh)
+    except FetchQuotaExceeded as exc:
+        typer.echo(str(exc), err=True)
+        raise typer.Exit(1) from exc
     finally:
         session.close()
     typer.echo(
         f"{target_day}: fetched={result.fetched}, saved={result.saved}, "
-        f"skipped_no_keyword={result.skipped_no_keyword}, skipped_excluded={result.skipped_excluded}"
+        f"skipped_no_keyword={result.skipped_no_keyword}, skipped_excluded={result.skipped_excluded}, "
+        f"network_requests={result.network_requests}, cached_pages={result.cached_pages}"
     )
 
 

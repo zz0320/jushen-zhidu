@@ -3,8 +3,8 @@
 {% block content %}
   <section class="page-head workspace-head">
     <div>
-      <div class="eyebrow">Research console</div>
-      <h1>{{ day }} 论文雷达</h1>
+      <div class="eyebrow">Overview</div>
+      <h1>{{ day }} 总览</h1>
       <p>{{ papers|length }} 篇命中当前检索规则{% if report %}，日报已就绪{% else %}，等待生成日报{% endif %}。</p>
     </div>
     <div class="hero-controls">
@@ -16,102 +16,75 @@
       <div class="date-jump" aria-label="日期快捷跳转">
         <a class="button secondary compact-button" href="/?day={{ previous_day }}">前一天</a>
         <a class="button secondary compact-button" href="/?day={{ next_day }}">后一天</a>
-        {% if latest_day and latest_day != day %}
-          <a class="button ghost compact-button" href="/?day={{ latest_day }}">最近有结果</a>
-        {% endif %}
       </div>
     </div>
   </section>
 
   <div class="page-layout">
     <nav class="anchor-nav workflow-nav" aria-label="论文工作流">
-      <span class="nav-label">今日流程</span>
-      <div class="nav-kpi">
-        <strong>{{ papers|length }}</strong>
-        <span>命中论文</span>
-      </div>
-      <div class="nav-kpi">
-        <strong>{{ "Ready" if report else "Pending" }}</strong>
-        <span>日报状态</span>
-      </div>
-      <a href="#day-actions">1. 抓取与生成</a>
-      <a href="#fetch-progress" data-progress-nav="fetch-progress" hidden>抓取进度</a>
-      <a href="#summary-progress" data-progress-nav="summary-progress" hidden>生成进度</a>
-      <a href="#day-overview">2. 今日概览</a>
-      <a href="#paper-list">3. 扫描论文</a>
-      <span class="nav-label nav-label-secondary">相关页面</span>
-      <a class="nav-external" href="/daily/{{ day }}">打开日报</a>
+      <span class="nav-label">总览</span>
+      <a href="#day-actions">采集与日报</a>
+      <a href="#day-overview">今日概览</a>
+      <a href="#paper-list">论文列表</a>
     </nav>
 
     <div class="page-main">
       <section class="actions action-dock anchor-target" id="day-actions">
         <div class="action-card primary-action">
           <div>
-            <span class="action-label">Step 1</span>
+            <span class="action-label">采集</span>
             <strong>同步 arXiv</strong>
-            <p>按当前分类、关键词和排除词抓取这一天的论文。</p>
+            <p>默认优先使用本地缓存重算关键词；只有需要补齐新论文时才访问 arXiv。</p>
           </div>
-          <form method="post" action="/fetch" id="fetch-form" data-progress-fetch="true">
+          <form method="post" action="/fetch" id="fetch-form" data-progress-fetch="true" {% if active_fetch_job %}data-active-fetch-job-id="{{ active_fetch_job['id'] }}" data-active-fetch-day="{{ day }}"{% endif %}>
             <input type="hidden" name="day" value="{{ day }}">
+            <label class="inline-check fetch-refresh-option">
+              <input type="checkbox" name="force_refresh" value="true" {% if fetch_quota.exhausted %}disabled{% endif %}>
+              <span>跳过缓存</span>
+            </label>
+            <div class="quota-note">
+              {% if fetch_quota.unlimited %}
+                有效拉取不设每日上限
+              {% else %}
+                今日有效拉取 {{ fetch_quota.used }}/{{ fetch_quota.limit }}{% if fetch_quota.exhausted %}，请使用缓存{% else %}，剩余 {{ fetch_quota.remaining }} 次{% endif %}
+              {% endif %}
+            </div>
+            <div class="api-policy-note">
+              <span>{{ "官方 API" if arxiv_policy.uses_official_api else "自定义接口" }}</span>
+              <span>{{ arxiv_policy.base_url }}</span>
+              <span>单连接 · ≥{{ arxiv_policy.request_delay_seconds }} 秒/次 · 新增论文才计额度</span>
+            </div>
             <button type="submit" id="fetch-button">抓取论文</button>
           </form>
         </div>
-        <div class="action-card">
+        <div class="action-card danger-action">
           <div>
-            <span class="action-label">Step 2</span>
-            <strong>生成日报</strong>
-            <p>把候选论文压缩成趋势、重点论文和建议深读列表。</p>
+            <span class="action-label">清理</span>
+            <strong>清理缓存</strong>
+            <p>移除当日论文、日报、智能结果和 arXiv 页面缓存，有效拉取记录保留。</p>
           </div>
-          <form method="post" action="/daily/{{ day }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/daily/{{ day }}" data-running-label="生成中...">
+          <form method="post" action="/daily-cache/{{ day }}/clear" onsubmit="return confirm('确认清理 {{ day }} 的论文缓存数据？该操作会移除当日论文、日报和智能结果。')">
+            <button class="danger" type="submit">清理当日</button>
+          </form>
+        </div>
+        <div class="action-card {{ 'daily-ready-action' if report else 'daily-empty-action' }}">
+          <div>
+            <span class="action-label">日报</span>
+            <strong>{{ "刷新日报" if report else "生成日报" }}</strong>
+            <p>{{ "日报已生成，可按当前论文与模型配置重新整理。" if report else "把候选论文压缩成趋势、重点论文和建议深读列表。" }}</p>
+          </div>
+          <form method="post" action="/daily/{{ day }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/daily/{{ day }}" data-running-label="{{ '刷新中' if report else '生成中' }}" data-completed-label="{{ '已刷新' if report else '已生成' }}">
             <input type="hidden" name="force" value="true">
-            <button type="submit">生成日报</button>
+            <button class="{{ 'secondary' if report else '' }}" type="submit">{{ "刷新日报" if report else "生成日报" }}</button>
           </form>
         </div>
         <div class="action-card quiet-action">
           <div>
-            <span class="action-label">Step 3</span>
+            <span class="action-label">阅读</span>
             <strong>阅读结果</strong>
             <p>进入日报页查看正文，也可以导出 Markdown。</p>
           </div>
           <a class="button secondary" href="/daily/{{ day }}">打开日报</a>
-        </div>
-      </section>
-
-      <section class="progress-panel anchor-target" id="fetch-progress" hidden>
-        <div class="progress-head">
-          <div>
-            <div class="progress-title">正在抓取 arXiv 论文</div>
-            <div class="progress-message" id="fetch-progress-message">正在准备检索条件。</div>
-          </div>
-          <div class="progress-percent" id="fetch-progress-percent">0%</div>
-        </div>
-        <div class="progress-track" aria-label="抓取进度">
-          <div class="progress-fill" id="fetch-progress-fill" style="width: 0%"></div>
-        </div>
-        <div class="progress-meta">
-          <span><strong id="fetch-progress-stage">准备中</strong></span>
-          <span>读取 <strong id="fetch-progress-fetched">0</strong></span>
-          <span>保存 <strong id="fetch-progress-saved">0</strong></span>
-          <span>排除 <strong id="fetch-progress-skipped">0</strong></span>
-        </div>
-      </section>
-
-      <section class="progress-panel summary-progress anchor-target" id="summary-progress" hidden>
-        <div class="progress-head">
-          <div>
-            <div class="progress-title" id="summary-progress-title" data-progress-title>正在执行智能任务</div>
-            <div class="progress-message" id="summary-progress-message" data-progress-message>正在准备上下文。</div>
-          </div>
-          <div class="progress-percent" id="summary-progress-percent" data-progress-percent>0%</div>
-        </div>
-        <div class="progress-track" aria-label="日报生成进度">
-          <div class="progress-fill" id="summary-progress-fill" data-progress-fill style="width: 0%"></div>
-        </div>
-        <div class="progress-meta">
-          <span><strong id="summary-progress-stage" data-progress-stage>准备中</strong></span>
-          <span>任务 <strong id="summary-progress-kind" data-progress-kind>智能生成</strong></span>
-          <span>当前列表 <strong>{{ papers|length }}</strong> 篇</span>
-          <span>模型 <strong id="summary-progress-model" data-progress-model>智能模型</strong></span>
         </div>
       </section>
 
@@ -152,6 +125,7 @@
           {% set translation = translations_by_paper.get(paper.arxiv_id) %}
           {% set paper_summary = summaries_by_paper.get(paper.arxiv_id) %}
           {% set paper_full_text_summary = full_text_summaries_by_paper.get(paper.arxiv_id) %}
+          {% set all_insights_ready = translation and paper_summary and paper_full_text_summary %}
           <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ (paper.affiliations|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
             <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
@@ -181,29 +155,52 @@
                 {% endfor %}
               </div>
               {% if paper_summary or paper_full_text_summary %}
-                <section class="paper-card-insights" aria-label="智能总结预览">
+                <section class="paper-card-insights paper-card-insights-expanded" aria-label="智能总结">
                   <div class="paper-card-insights-head">
-                    <span>智能速览</span>
+                    <div>
+                      <span>智能速览</span>
+                      <strong>摘要总结与全文总结</strong>
+                    </div>
                     <a href="/papers/{{ paper.arxiv_id }}{% if paper_summary %}#abstract-summary{% else %}#full-text-summary{% endif %}">进入详情</a>
                   </div>
                   <div class="paper-card-insight-stack">
                     {% if paper_summary %}
-                      <article class="paper-insight-row">
-                        <div class="paper-insight-row-head">
-                          <span>摘要总结</span>
-                          <a href="/papers/{{ paper.arxiv_id }}#abstract-summary">细看</a>
+                      <details class="paper-insight-row paper-insight-disclosure">
+                        <summary class="paper-insight-row-head">
+                          <span class="paper-insight-title">摘要总结</span>
+                          <span class="paper-insight-summary-note">{{ paper_summary.content|summary_excerpt(360) }}</span>
+                          <span class="paper-insight-toggle" aria-hidden="true">
+                            <span class="toggle-closed">展开查看更多</span>
+                            <span class="toggle-open">收起</span>
+                          </span>
+                        </summary>
+                        <div class="paper-insight-body">
+                          <div class="paper-insight-body-head">
+                            <span>完整摘要总结</span>
+                            <a href="/papers/{{ paper.arxiv_id }}#abstract-summary">进入详情</a>
+                          </div>
+                          <div class="paper-insight-content">{{ paper_summary.content|summary_html }}</div>
                         </div>
-                        <p>{{ paper_summary.content|summary_excerpt(440) }}</p>
-                      </article>
+                      </details>
                     {% endif %}
                     {% if paper_full_text_summary %}
-                      <article class="paper-insight-row full-text">
-                        <div class="paper-insight-row-head">
-                          <span>全文总结</span>
-                          <a href="/papers/{{ paper.arxiv_id }}#full-text-summary">细看</a>
+                      <details class="paper-insight-row paper-insight-disclosure full-text">
+                        <summary class="paper-insight-row-head">
+                          <span class="paper-insight-title">全文总结</span>
+                          <span class="paper-insight-summary-note">{{ paper_full_text_summary.content|summary_excerpt(460) }}</span>
+                          <span class="paper-insight-toggle" aria-hidden="true">
+                            <span class="toggle-closed">展开查看更多</span>
+                            <span class="toggle-open">收起</span>
+                          </span>
+                        </summary>
+                        <div class="paper-insight-body">
+                          <div class="paper-insight-body-head">
+                            <span>完整全文总结</span>
+                            <a href="/papers/{{ paper.arxiv_id }}#full-text-summary">进入详情</a>
+                          </div>
+                          <div class="paper-insight-content">{{ paper_full_text_summary.content|summary_html }}</div>
                         </div>
-                        <p>{{ paper_full_text_summary.content|summary_excerpt(520) }}</p>
-                      </article>
+                      </details>
                     {% endif %}
                   </div>
                 </section>
@@ -235,27 +232,17 @@
                 <span>智能</span>
                 {% if translation %}
                   <a class="ai-chip done" href="/papers/{{ paper.arxiv_id }}#abstract-translation">译文</a>
-                {% else %}
-                  <form method="post" action="/paper-abstract/translate" data-progress-summary="true" data-progress-panel="summary-progress" data-summary-job-url="/summary-jobs/paper-abstract-translation" data-running-label="翻译中...">
-                    <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
-                    <button class="ai-chip" type="submit">翻译</button>
-                  </form>
                 {% endif %}
                 {% if paper_summary %}
                   <a class="ai-chip done" href="/papers/{{ paper.arxiv_id }}#abstract-summary">摘要</a>
-                {% else %}
-                  <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize" data-progress-summary="true" data-progress-panel="summary-progress" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}" data-running-label="生成中...">
-                    <button class="ai-chip" type="submit">摘要</button>
-                  </form>
                 {% endif %}
                 {% if paper_full_text_summary %}
                   <a class="ai-chip done" href="/papers/{{ paper.arxiv_id }}#full-text-summary">全文</a>
-                {% else %}
-                  <form method="post" action="/paper-full-text/summarize" data-progress-summary="true" data-progress-panel="summary-progress" data-summary-job-url="/summary-jobs/paper-full-text" data-running-label="提取中...">
-                    <input type="hidden" name="arxiv_id" value="{{ paper.arxiv_id }}">
-                    <button class="ai-chip" type="submit">全文</button>
-                  </form>
                 {% endif %}
+                <form method="post" action="/papers/{{ paper.arxiv_id }}/summarize-all" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ paper.arxiv_id }}/all" data-running-label="{{ '刷新中' if all_insights_ready else '生成中' }}" data-completed-label="{{ '已刷新' if all_insights_ready else '已生成' }}">
+                  <input type="hidden" name="force" value="{{ 'true' if all_insights_ready else 'false' }}">
+                  <button class="ai-chip" type="submit">{{ "刷新三项" if all_insights_ready else "生成三项" }}</button>
+                </form>
               </div>
             </div>
           </article>
@@ -263,9 +250,6 @@
           <div class="empty-state paper-empty">
             <strong>当前日期还没有论文</strong>
             <span>先点击“抓取论文”，或切换到已有结果的日期。</span>
-            {% if latest_day and latest_day != day %}
-              <a class="button secondary empty-action" href="/?day={{ latest_day }}">查看最近有结果日期 {{ latest_day }}</a>
-            {% endif %}
           </div>
         {% endfor %}
       </section>

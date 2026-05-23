@@ -192,14 +192,26 @@ def summary_to_html(value: str) -> Markup:
     """Render a small, safe subset of markdown-like model output for summaries."""
     lines = (value or "").splitlines()
     html_parts = []
-    in_list = False
+    list_tag = ""
+    list_class = ""
     seen_section = False
 
     def close_list() -> None:
-        nonlocal in_list
-        if in_list:
-            html_parts.append("</ul>")
-            in_list = False
+        nonlocal list_tag, list_class
+        if list_tag:
+            html_parts.append(f"</{list_tag}>")
+            list_tag = ""
+            list_class = ""
+
+    def ensure_list(tag: str, class_name: str = "") -> None:
+        nonlocal list_tag, list_class
+        if list_tag == tag and list_class == class_name:
+            return
+        close_list()
+        class_attr = f' class="{class_name}"' if class_name else ""
+        html_parts.append(f"<{tag}{class_attr}>")
+        list_tag = tag
+        list_class = class_name
 
     i = 0
     while i < len(lines):
@@ -247,6 +259,10 @@ def summary_to_html(value: str) -> Markup:
             close_list()
             html_parts.append(f"<h3>{_inline_markup(heading_text)}</h3>")
             seen_section = True
+        elif numbered_heading and _is_ranked_ordered_item(numbered_heading.group(2)):
+            item_text = _ranked_ordered_item_body(numbered_heading.group(2))
+            ensure_list("ol", "summary-ranked-list")
+            html_parts.append(f"<li>{_inline_markup(item_text)}</li>")
         elif numbered_heading:
             close_list()
             index, text = numbered_heading.groups()
@@ -255,9 +271,7 @@ def summary_to_html(value: str) -> Markup:
             )
             seen_section = True
         elif bullet:
-            if not in_list:
-                html_parts.append("<ul>")
-                in_list = True
+            ensure_list("ul")
             html_parts.append(f"<li>{_inline_markup(bullet.group(1))}</li>")
         else:
             close_list()
@@ -270,19 +284,59 @@ def summary_to_html(value: str) -> Markup:
     return Markup("\n".join(html_parts))
 
 
+def daily_report_to_html(value: str) -> Markup:
+    """Render daily reports as grouped reading cards instead of one long markdown stream."""
+    text = strip_first_markdown_heading(value)
+    sections = _split_daily_sections(text)
+    if not sections:
+        return summary_to_html(text)
+
+    parts = ['<div class="daily-report-structured">']
+    for section in sections:
+        title = section["title"]
+        body = section["body"].strip()
+        if not title:
+            if body:
+                parts.append(f'<section class="daily-report-lede">{summary_to_html(body)}</section>')
+            continue
+        section_type = _daily_section_type(title)
+        parts.append(f'<section class="daily-report-section daily-report-section-{section_type}">')
+        parts.append('<div class="daily-report-section-head">')
+        parts.append(f'<span>{escape(section["index"] or "•")}</span>')
+        parts.append(f"<h3>{_inline_markup(title)}</h3>")
+        parts.append("</div>")
+        if body:
+            parts.append(f'<div class="daily-report-section-body">{summary_to_html(body)}</div>')
+        parts.append("</section>")
+    parts.append("</div>")
+    return Markup("\n".join(str(part) for part in parts))
+
+
 def markdown_to_html(value: str) -> Markup:
     """Render exported daily markdown into a readable, safe preview."""
     lines = (value or "").splitlines()
     html_parts = []
-    in_list = False
+    list_tag = ""
+    list_class = ""
     in_code = False
     code_lines = []
 
     def close_list() -> None:
-        nonlocal in_list
-        if in_list:
-            html_parts.append("</ul>")
-            in_list = False
+        nonlocal list_tag, list_class
+        if list_tag:
+            html_parts.append(f"</{list_tag}>")
+            list_tag = ""
+            list_class = ""
+
+    def ensure_list(tag: str, class_name: str = "") -> None:
+        nonlocal list_tag, list_class
+        if list_tag == tag and list_class == class_name:
+            return
+        close_list()
+        class_attr = f' class="{class_name}"' if class_name else ""
+        html_parts.append(f"<{tag}{class_attr}>")
+        list_tag = tag
+        list_class = class_name
 
     def close_code() -> None:
         nonlocal in_code, code_lines
@@ -354,13 +408,15 @@ def markdown_to_html(value: str) -> Markup:
             level = min(len(heading_match.group(1)), 3)
             html_parts.append(f"<h{level}>{_inline_markup(heading_match.group(2))}</h{level}>")
         elif bullet:
-            if not in_list:
-                html_parts.append("<ul>")
-                in_list = True
+            ensure_list("ul")
             html_parts.append(f"<li>{_inline_markup(bullet.group(1))}</li>")
         elif numbered:
-            close_list()
-            html_parts.append(f"<p class=\"numbered-line\">{_inline_markup(stripped)}</p>")
+            item_text = numbered.group(1)
+            ranked = _is_ranked_ordered_item(item_text)
+            ensure_list("ol", "summary-ranked-list" if ranked else "")
+            if ranked:
+                item_text = _ranked_ordered_item_body(item_text)
+            html_parts.append(f"<li>{_inline_markup(item_text)}</li>")
         else:
             close_list()
             html_parts.append(f"<p>{_inline_markup(stripped)}</p>")
@@ -369,6 +425,55 @@ def markdown_to_html(value: str) -> Markup:
     close_list()
     close_code()
     return Markup("\n".join(html_parts))
+
+
+def _split_daily_sections(value: str) -> list[dict[str, str]]:
+    sections: list[dict[str, str]] = []
+    current = {"index": "", "title": "", "body_lines": []}
+
+    def push_current() -> None:
+        if current["title"] or any(line.strip() for line in current["body_lines"]):
+            sections.append(
+                {
+                    "index": current["index"],
+                    "title": current["title"],
+                    "body": "\n".join(current["body_lines"]).strip(),
+                }
+            )
+
+    for raw_line in (value or "").splitlines():
+        line = raw_line.strip()
+        heading = re.match(r"^#{2,4}\s+(.+)$", line)
+        if heading:
+            title = heading.group(1).strip()
+            index_match = re.match(r"^(\d+)[.、]\s*(.+)$", title)
+            push_current()
+            current = {
+                "index": index_match.group(1) if index_match else "",
+                "title": index_match.group(2).strip() if index_match else title,
+                "body_lines": [],
+            }
+        else:
+            current["body_lines"].append(raw_line)
+    push_current()
+    return sections
+
+
+def _daily_section_type(title: str) -> str:
+    lowered = (title or "").lower()
+    if any(token in lowered for token in ("主题", "趋势", "总览", "结论")):
+        return "overview"
+    if any(token in lowered for token in ("分类", "关键点", "方向")):
+        return "taxonomy"
+    if any(token in lowered for token in ("重点", "论文")):
+        return "papers"
+    if any(token in lowered for token in ("数据", "benchmark", "bench")):
+        return "data"
+    if any(token in lowered for token in ("vla", "world model", "本体", "亮点", "交叉", "信号")):
+        return "signals"
+    if any(token in lowered for token in ("深读", "建议", "推荐", "略读", "暂缓")):
+        return "reading"
+    return "default"
 
 
 def strip_first_markdown_heading(value: str) -> str:
@@ -415,6 +520,7 @@ def _inline_markup(value: str) -> Markup:
     safe = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", safe)
     safe = re.sub(r"(?<!\*)\*([^*\n]+)\*(?!\*)", r"<em>\1</em>", safe)
     safe = re.sub(r"`([^`]+)`", r"<code>\1</code>", safe)
+    safe = safe.replace("**", "").replace("__", "")
     safe = _link_arxiv_ids_html(safe)
     return Markup(safe)
 
@@ -478,6 +584,23 @@ def _summary_paragraph_class(line: str, seen_section: bool) -> str:
     if line.startswith(("（", "(")):
         return "summary-note"
     return ""
+
+
+def _is_ranked_ordered_item(value: str) -> bool:
+    return _ranked_ordered_item_body(value) != (value or "").strip()
+
+
+def _ranked_ordered_item_body(value: str) -> str:
+    text = (value or "").strip()
+    patterns = (
+        r"^\*\*\s*#\d+\s*\*\*\s*(?:[—–-]+|[:：])?\s*(.+)$",
+        r"^#\d+\s*(?:[—–-]+|[:：])\s*(.+)$",
+    )
+    for pattern in patterns:
+        match = re.match(pattern, text)
+        if match:
+            return match.group(1).strip()
+    return text
 
 
 def _is_horizontal_rule(line: str) -> bool:

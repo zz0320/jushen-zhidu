@@ -26,7 +26,9 @@
         </dd>
         <dt>Key 来源</dt><dd>{{ settings_view.api_key_source }}</dd>
         <dt>Base URL</dt><dd>{{ settings_view.effective.qwen_base_url }}</dd>
-        <dt>模型</dt><dd>{{ settings_view.effective.qwen_model|model_label }}</dd>
+        <dt>文本模型</dt><dd>{{ settings_view.effective.qwen_model }}</dd>
+        <dt>全文多模态模型</dt><dd>{{ settings_view.effective.qwen_vision_model }}</dd>
+        <dt>PDF 文档模型</dt><dd>{{ settings_view.effective.qwen_pdf_model }}</dd>
         <dt>Temperature</dt><dd>{{ settings_view.effective.qwen_temperature }}</dd>
         <dt>摘要输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_single }} tokens</dd>
         <dt>全文输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_full_text }} tokens</dd>
@@ -34,6 +36,8 @@
         <dt>日报论文数</dt><dd>{{ settings_view.effective.daily_top_n }} 篇</dd>
         <dt>每篇摘要上限</dt><dd>{{ settings_view.effective.daily_abstract_chars }} 字符</dd>
         <dt>PDF 输入上限</dt><dd>{{ settings_view.effective.full_text_max_chars }} 字符</dd>
+        <dt>全文图片上限</dt><dd>{{ settings_view.effective.full_text_figure_limit }} 张</dd>
+        <dt>PDF 原文上传</dt><dd>{{ "启用" if settings_view.effective.full_text_pdf_upload_enabled else "关闭" }}</dd>
       </dl>
     </article>
 
@@ -47,7 +51,7 @@
       <form class="stack-form settings-form" method="post" action="/settings/qwen">
         <label>
           API Key
-          <input type="password" name="api_key" placeholder="留空则保留当前已保存的 key 或使用环境变量">
+          <input type="password" name="api_key" placeholder="留空保留已保存 key">
         </label>
         <label class="check-row">
           <input type="checkbox" name="clear_api_key" value="true">
@@ -58,9 +62,24 @@
           <input name="base_url" value="{{ settings_view.effective.qwen_base_url }}" required>
         </label>
         <label>
-          模型 ID（可选）
-          <input name="model" value="" placeholder="留空保留当前模型；需要更换时输入模型 ID">
+          文本模型 ID（可选）
+          <input name="model" value="" placeholder="留空保留当前模型">
           <small>论文很多或全文很长时，建议使用支持长上下文的模型；`max_tokens` 只控制输出长度，不等于输入上下文长度。</small>
+        </label>
+        <label>
+          全文多模态模型 ID（可选）
+          <input name="vision_model" value="" placeholder="{{ settings_view.effective.qwen_vision_model }}">
+          <small>关闭 PDF 原文上传时，全文总结会使用该模型接收正文 + 图片；留空保留当前视觉模型。</small>
+        </label>
+        <label>
+          PDF 文档模型 ID（可选）
+          <input name="qwen_pdf_model" value="" placeholder="{{ settings_view.effective.qwen_pdf_model }}">
+          <small>启用 PDF 原文上传时，系统会把整份 PDF 上传给该模型，用 fileid:// 让模型直接读 PDF。推荐 qwen-doc-turbo。</small>
+        </label>
+        <label class="check-row">
+          <input type="hidden" name="full_text_pdf_upload_enabled" value="false">
+          <input type="checkbox" name="full_text_pdf_upload_enabled" value="true" {% if settings_view.effective.full_text_pdf_upload_enabled %}checked{% endif %}>
+          <span>全文总结优先上传 PDF 原文给文档模型</span>
         </label>
         <section class="preset-panel" aria-label="推荐参数预设">
           <div>
@@ -68,15 +87,15 @@
             <strong>按使用场景一键填充参数</strong>
           </div>
           <div class="preset-grid">
-            <button class="preset-card" type="button" data-settings-preset data-single="1600" data-full-text="4096" data-daily="4096" data-top-n="30" data-abstract-chars="1000" data-full-text-chars="70000">
+            <button class="preset-card" type="button" data-settings-preset data-single="1600" data-full-text="4096" data-daily="4096" data-top-n="30" data-abstract-chars="1000" data-full-text-chars="70000" data-figure-limit="4">
               <strong>日常快读</strong>
               <span>速度优先，适合每天扫论文。</span>
             </button>
-            <button class="preset-card" type="button" data-settings-preset data-single="1800" data-full-text="8192" data-daily="6144" data-top-n="40" data-abstract-chars="1200" data-full-text-chars="120000">
+            <button class="preset-card" type="button" data-settings-preset data-single="1800" data-full-text="8192" data-daily="6144" data-top-n="40" data-abstract-chars="1200" data-full-text-chars="120000" data-figure-limit="6">
               <strong>均衡推荐</strong>
               <span>覆盖更多候选，输出更完整。</span>
             </button>
-            <button class="preset-card" type="button" data-settings-preset data-single="2400" data-full-text="12000" data-daily="8192" data-top-n="60" data-abstract-chars="1500" data-full-text-chars="180000">
+            <button class="preset-card" type="button" data-settings-preset data-single="2400" data-full-text="12000" data-daily="8192" data-top-n="60" data-abstract-chars="1500" data-full-text-chars="180000" data-figure-limit="10">
               <strong>深度研究</strong>
               <span>论文多、全文长时使用。</span>
             </button>
@@ -111,10 +130,14 @@
             全文 PDF 输入字符
             <input name="full_text_max_chars" type="number" min="10000" max="300000" step="5000" value="{{ settings_view.effective.full_text_max_chars }}">
           </label>
+          <label>
+            全文图片输入张数
+            <input name="full_text_figure_limit" type="number" min="0" max="12" step="1" value="{{ settings_view.effective.full_text_figure_limit }}">
+          </label>
         </div>
         <div class="config-hint">
           <strong>推荐长论文配置</strong>
-          <span>摘要输出 1800、全文输出 4096-8192、日报输出 4096-8192、日报论文数 30-50、每篇摘要 1000-1500 字符、PDF 输入 90000-150000 字符。</span>
+          <span>默认启用 PDF 原文上传；模型直接读整份 PDF，图文线索由文档模型提取。关闭该选项后才回到正文文本 + 多张图片的 Qwen-VL 模式。</span>
         </div>
         <button type="submit">保存设置</button>
       </form>

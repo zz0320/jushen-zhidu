@@ -45,6 +45,22 @@ def _migrate_sqlite_schema(engine: Engine) -> None:
             if "affiliations_json" not in column_names:
                 connection.execute(text("ALTER TABLE paper ADD COLUMN affiliations_json TEXT NOT NULL DEFAULT '[]'"))
 
+        fetch_run_columns = connection.execute(text("PRAGMA table_info(arxivfetchrun)")).mappings().all()
+        if fetch_run_columns:
+            column_names = {str(column["name"]) for column in fetch_run_columns}
+            if "saved_papers" not in column_names:
+                connection.execute(text("ALTER TABLE arxivfetchrun ADD COLUMN saved_papers INTEGER NOT NULL DEFAULT 0"))
+
+        full_text_summary_columns = connection.execute(
+            text("PRAGMA table_info(paperfulltextsummary)")
+        ).mappings().all()
+        if full_text_summary_columns:
+            column_names = {str(column["name"]) for column in full_text_summary_columns}
+            if "figures_json" not in column_names:
+                connection.execute(
+                    text("ALTER TABLE paperfulltextsummary ADD COLUMN figures_json TEXT NOT NULL DEFAULT '[]'")
+                )
+
 
 def session_for(engine: Engine) -> Session:
     return Session(engine)

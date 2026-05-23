@@ -9,6 +9,7 @@
 - SQLite 持久化论文、命中关键词、相关性分数、单篇总结和日报。
 - 智能模型通过兼容 Chat Completions 的接口调用，支持在 Web 的“智能设置”页面配置 Base URL、模型 ID、temperature、输出 token 和长文本输入上限。
 - Web 页面支持手动抓取、查看论文、生成单篇总结、生成日报和导出 Markdown。
+- 抓取结果会按 arXiv 查询页缓存；重复抓取同一天会优先使用本地缓存重算关键词，减少触发 arXiv 限流。
 - CLI 支持 `serve`、`fetch`、`summarize-day`、`export-day`，便于接入 cron。
 
 ## 安装
@@ -33,6 +34,11 @@ export DASHSCOPE_API_KEY="sk-..."
 export ARXIV_DAILY_DB="data/arxiv_daily.sqlite3"
 export ARXIV_DAILY_REPORT_DIR="reports"
 export ARXIV_DAILY_TIMEZONE="Asia/Shanghai"
+export ARXIV_REQUEST_DELAY_SECONDS="5.0"
+export ARXIV_USER_AGENT="jushen-zhidu/0.1 (arXiv API client)"
+export ARXIV_RETRY_BASE_DELAY_SECONDS="30"
+export ARXIV_DAILY_NETWORK_FETCH_LIMIT="5"
+export ARXIV_CACHE_ENABLED="true"
 ```
 
 ## 使用
@@ -54,6 +60,21 @@ arxiv-daily fetch --date 2026-05-15
 arxiv-daily summarize-day --date 2026-05-15
 arxiv-daily export-day --date 2026-05-15
 ```
+
+如果确实需要绕过本地 arXiv 响应缓存重新请求，可以在 Web 抓取区勾选“跳过缓存”，或使用：
+
+```bash
+arxiv-daily fetch --date 2026-05-15 --force-refresh
+```
+
+`ARXIV_DAILY_NETWORK_FETCH_LIMIT` 用于限制同一目标日期每天“有效拉取”的次数；默认 `5`。只有成功完成且保存到新论文的官方 API 抓取才计数，429、503、超时、连接失败、缓存命中和 0 篇新增都不计数。普通抓取会优先使用本地缓存重算关键词。设置为 `0` 表示不限制。
+
+## arXiv 官方接口使用
+
+- 日常检索使用 arXiv 官方 API：`https://export.arxiv.org/api/query`，返回 Atom XML 元数据。
+- 请求节奏遵守 arXiv API Terms：单连接、至少 3 秒一次请求。本项目默认 5 秒一次；如果环境变量设置得更低，运行时也会强制按不少于 3 秒执行。
+- 大规模元数据同步应使用 arXiv OAI-PMH：`https://oaipmh.arxiv.org/oai`；本项目当前日常雷达仍走搜索 API，因为需要按提交日期、分类和关键词筛选。
+- PDF/全文只在用户主动生成全文总结时按单篇下载，不缓存或对外分发 PDF；界面保留 arXiv 摘要页链接作为主要阅读入口。
 
 ## 测试
 

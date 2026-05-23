@@ -1,4 +1,6 @@
 .venv/
+.DS_Store
+.playwright-cli/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -7,6 +9,11 @@ __pycache__/
 htmlcov/
 data/*.sqlite3
 data/*.sqlite3-*
+data/.arxiv-api-rate-limit
 reports/*.md
 .env
-
+arxiv_daily/static/generated/*
+!arxiv_daily/static/generated/forest-materials/
+!arxiv_daily/static/generated/forest-materials/**
+arxiv_daily/static/generated/forest-materials/*-chroma.png
+arxiv_daily/static/generated/forest-materials/ai-sources/

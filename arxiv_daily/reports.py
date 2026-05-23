@@ -7,6 +7,7 @@ from typing import Optional
 from sqlmodel import Session, select
 
 from .config import Settings, get_settings
+from .daily_view import build_daily_keypoint_groups
 from .models import DailyReport, Paper
 from .text import clean_latex_text, link_arxiv_ids_markdown, strip_first_markdown_heading
 
@@ -21,9 +22,32 @@ def render_daily_markdown(session: Session, report_date: date) -> str:
     ).all()
 
     lines = [f"# {report_date_text} arXiv 具身智能论文日报", ""]
+    keypoint_groups = build_daily_keypoint_groups(papers)
+    if keypoint_groups:
+        lines.extend(["## 模型 / 数据 / 本体分类", ""])
+        for dimension in keypoint_groups:
+            lines.extend([f"### {dimension['title']}（{dimension['count']} 篇命中）", ""])
+            lines.append(dimension["description"])
+            lines.append("")
+            for branch in dimension["branches"]:
+                if not branch["papers"]:
+                    continue
+                lines.append(f"#### {branch['title']}（{branch['count']} 篇）")
+                lines.append("")
+                lines.append(branch["description"])
+                lines.append("")
+                for item in branch["papers"]:
+                    paper = item["paper"]
+                    lines.append(
+                        f"- **{clean_latex_text(paper.title)}**（arXiv: {paper.arxiv_id}）"
+                        f" - {item['reason']}"
+                    )
+                lines.append("")
+            lines.append("")
+
     if report:
         report_body = link_arxiv_ids_markdown(strip_first_markdown_heading(report.content).strip())
-        lines.extend([report_body, ""])
+        lines.extend(["## 智能日报正文", "", report_body, ""])
     else:
         lines.extend(["尚未生成智能日报。", ""])
 

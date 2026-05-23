@@ -50,6 +50,29 @@ class AppSetting(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=utc_now)
 
 
+class ArxivPageCache(SQLModel, table=True):
+    cache_key: str = Field(primary_key=True)
+    query: str = Field(index=True)
+    start: int = Field(index=True)
+    page_size: int
+    response_text: str = Field(sa_column=Column(Text))
+    fetched_at: datetime = Field(default_factory=utc_now)
+
+
+class ArxivFetchRun(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    target_date: str = Field(index=True)
+    run_date: str = Field(index=True)
+    status: str = Field(default="running", index=True)
+    force_refresh: bool = False
+    network_requests: int = 0
+    cached_pages: int = 0
+    saved_papers: int = 0
+    message: str = Field(default="", sa_column=Column(Text))
+    created_at: datetime = Field(default_factory=utc_now)
+    finished_at: Optional[datetime] = None
+
+
 class Paper(SQLModel, table=True):
     arxiv_id: str = Field(primary_key=True)
     title: str
@@ -125,7 +148,12 @@ class PaperFullTextSummary(SQLModel, table=True):
     source_chars: int = 0
     used_chars: int = 0
     truncated: bool = False
+    figures_json: str = Field(default="[]", sa_column=Column(Text))
     generated_at: datetime = Field(default_factory=utc_now)
+
+    @property
+    def figures(self) -> List[Dict[str, Any]]:
+        return [item for item in _loads_list(self.figures_json) if isinstance(item, dict)]
 
 
 class DailyReport(SQLModel, table=True):

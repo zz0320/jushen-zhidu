@@ -55,6 +55,20 @@ def test_summary_to_html_renders_numbered_sections_safely():
     assert "<li>bullet</li>" in html
 
 
+def test_summary_to_html_renders_ranked_recommendations_as_list():
+    content = """### 5. 建议深读列表（优先级排序）
+1. **#1** —— 若你研究 **egocentric manipulation**；值得深读。
+2. **#2** —— 若你构建 **embodied LLM agent**；可作为评估参考。
+"""
+
+    html = str(summary_to_html(content))
+
+    assert '<ol class="summary-ranked-list">' in html
+    assert "<li>若你研究 <strong>egocentric manipulation</strong>；值得深读。</li>" in html
+    assert "<li>若你构建 <strong>embodied LLM agent</strong>；可作为评估参考。</li>" in html
+    assert '<span class="summary-index">1</span> <strong>#1</strong>' not in html
+
+
 def test_summary_to_html_cleans_inline_latex_math():
     html = str(summary_to_html(r"历史观测 $o_{\leq t}$、动作历史 $a_{<t}$ 和状态 $s_z$。"))
 
@@ -63,6 +77,13 @@ def test_summary_to_html_cleans_inline_latex_math():
     assert "o≤t" in html
     assert "a&lt;t" in html
     assert "s_z" in html
+
+
+def test_summary_to_html_removes_unbalanced_bold_markers():
+    html = str(summary_to_html("**重点趋势**机器人方向**仍稀缺。"))
+
+    assert "<strong>重点趋势</strong>机器人方向仍稀缺。" in html
+    assert "**" not in html
 
 
 def test_summary_to_html_renders_daily_markdown_blocks():
@@ -119,10 +140,12 @@ def test_format_datetime_removes_microseconds():
 
 
 def test_markdown_to_html_renders_headings_lists_and_links():
-    html = str(markdown_to_html("# Title\n\n- [arXiv](https://arxiv.org/abs/1)\n\nText arXiv:2605.15157v1"))
+    html = str(markdown_to_html("# Title\n\n- [arXiv](https://arxiv.org/abs/1)\n\n1. **#1** —— Read first\n\nText arXiv:2605.15157v1"))
 
     assert "<h1>Title</h1>" in html
     assert '<a href="https://arxiv.org/abs/1"' in html
+    assert '<ol class="summary-ranked-list">' in html
+    assert "<li>Read first</li>" in html
     assert 'href="https://arxiv.org/abs/2605.15157v1"' in html
     assert "<p>Text " in html
 
