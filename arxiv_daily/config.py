@@ -13,7 +13,6 @@ def _path_from_env(name: str, default: str) -> Path:
 @dataclass(frozen=True)
 class Settings:
     database_path: Path
-    report_dir: Path
     timezone: str = "Asia/Shanghai"
     arxiv_base_url: str = "https://export.arxiv.org/api/query"
     arxiv_page_size: int = 100
@@ -34,9 +33,6 @@ class Settings:
     qwen_temperature: float = 0.2
     qwen_max_tokens_single: int = 1800
     qwen_max_tokens_full_text: int = 4096
-    qwen_max_tokens_daily: int = 4096
-    daily_top_n: int = 40
-    daily_abstract_chars: int = 1200
     full_text_max_chars: int = 90_000
     full_text_figure_limit: int = 6
     full_text_pdf_upload_enabled: bool = True
@@ -66,7 +62,6 @@ def _bool_from_env(name: str, default: bool) -> bool:
 def get_settings() -> Settings:
     return Settings(
         database_path=_path_from_env("ARXIV_DAILY_DB", "data/arxiv_daily.sqlite3"),
-        report_dir=_path_from_env("ARXIV_DAILY_REPORT_DIR", "reports"),
         timezone=os.getenv("ARXIV_DAILY_TIMEZONE", "Asia/Shanghai"),
         arxiv_base_url=os.getenv("ARXIV_BASE_URL", "https://export.arxiv.org/api/query"),
         arxiv_page_size=int(os.getenv("ARXIV_PAGE_SIZE", "100")),
@@ -91,9 +86,6 @@ def get_settings() -> Settings:
         qwen_temperature=float(os.getenv("QWEN_TEMPERATURE", "0.2")),
         qwen_max_tokens_single=int(os.getenv("QWEN_MAX_TOKENS_SINGLE", "1800")),
         qwen_max_tokens_full_text=int(os.getenv("QWEN_MAX_TOKENS_FULL_TEXT", "4096")),
-        qwen_max_tokens_daily=int(os.getenv("QWEN_MAX_TOKENS_DAILY", "4096")),
-        daily_top_n=int(os.getenv("DAILY_TOP_N", "40")),
-        daily_abstract_chars=int(os.getenv("DAILY_ABSTRACT_CHARS", "1200")),
         full_text_max_chars=int(os.getenv("FULL_TEXT_MAX_CHARS", "90000")),
         full_text_figure_limit=int(os.getenv("FULL_TEXT_FIGURE_LIMIT", "6")),
         full_text_pdf_upload_enabled=_bool_from_env("FULL_TEXT_PDF_UPLOAD_ENABLED", True),

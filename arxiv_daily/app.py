@@ -4,7 +4,6 @@ import threading
 import time
 import urllib.parse
 import uuid
-from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, Generator, Optional
@@ -22,12 +21,10 @@ from .app_settings import qwen_settings_view, resolve_runtime_settings, save_qwe
 from .config import Settings, get_settings
 from .database import build_engine, create_db_and_tables
 from .dates import arxiv_date_range, arxiv_date_ranges, parse_day
-from .daily_view import build_daily_keypoint_groups, build_daily_paper_forest
 from .defaults import init_default_config
 from .models import (
     ArxivFetchRun,
     Category,
-    DailyReport,
     Keyword,
     KeywordGroup,
     Paper,
@@ -38,10 +35,8 @@ from .models import (
     utc_now,
 )
 from .pdf_text import download_paper_pdf, extract_paper_pdf_text
-from .reports import export_daily_markdown, render_daily_markdown
 from .summaries import (
     generate_abstract_translation,
-    generate_daily_report,
     generate_paper_full_text_summary,
     generate_paper_summary,
 )
@@ -49,11 +44,8 @@ from .text import (
     clean_latex_text,
     clean_translation_title,
     clean_translation_text,
-    daily_report_to_html,
     format_datetime,
-    markdown_to_html,
     summary_excerpt,
-    strip_first_markdown_heading,
     summary_to_html,
 )
 
@@ -63,11 +55,8 @@ templates.env.filters["clean_latex"] = clean_latex_text
 templates.env.filters["translation_title"] = clean_translation_title
 templates.env.filters["translation_text"] = clean_translation_text
 templates.env.filters["summary_html"] = summary_to_html
-templates.env.filters["daily_report_html"] = daily_report_to_html
 templates.env.filters["summary_excerpt"] = summary_excerpt
-templates.env.filters["markdown_html"] = markdown_to_html
 templates.env.filters["format_dt"] = format_datetime
-templates.env.filters["strip_first_heading"] = strip_first_markdown_heading
 
 
 def _model_display_name(value: object) -> str:
@@ -93,48 +82,6 @@ def _day_nav_context(target_day: date, session: Session) -> Dict[str, str]:
         "next_day": (target_day + timedelta(days=1)).isoformat(),
         "latest_day": _latest_day_with_papers(session),
     }
-
-
-def _daily_date_grove(target_day: date, session: Session, radius: int = 4) -> list[Dict[str, object]]:
-    paper_days = [str(day) for day in session.exec(select(Paper.fetched_for_date)).all() if day]
-    paper_counts = Counter(paper_days)
-    report_days = {str(day) for day in session.exec(select(DailyReport.report_date)).all() if day}
-    max_count = max(paper_counts.values(), default=0)
-    weekdays = "一二三四五六日"
-    days: list[Dict[str, object]] = []
-    for offset in range(-radius, radius + 1):
-        current_day = target_day + timedelta(days=offset)
-        day_text = current_day.isoformat()
-        paper_count = paper_counts.get(day_text, 0)
-        growth = 20 if max_count == 0 else 22 + int(58 * (paper_count / max_count))
-        trunk_height = 20 + int(growth * 0.44)
-        crown_size = 24 + int(growth * 0.24)
-        crown_bottom = 18 + int(growth * 0.35)
-        asset_height = 48 + int(growth * 0.38)
-        field_density = 0 if max_count == 0 else paper_count / max_count
-        field_width = 56 + int(22 * field_density)
-        field_height = 38 + int(14 * field_density)
-        mini_tree_count = 0 if paper_count == 0 else max(2, min(6, 1 + int(field_density * 5)))
-        days.append(
-            {
-                "day": day_text,
-                "display": current_day.strftime("%m-%d"),
-                "weekday": f"周{weekdays[current_day.weekday()]}",
-                "paper_count": paper_count,
-                "has_report": day_text in report_days,
-                "is_active": day_text == target_day.isoformat(),
-                "growth": growth,
-                "trunk_height": trunk_height,
-                "crown_size": crown_size,
-                "crown_bottom": crown_bottom,
-                "asset_height": asset_height,
-                "field_density": f"{field_density:.3f}",
-                "field_width": field_width,
-                "field_height": field_height,
-                "mini_tree_count": mini_tree_count,
-            }
-        )
-    return days
 
 
 def _redirect(path: str, **query: object) -> RedirectResponse:
@@ -168,11 +115,11 @@ def _message_from_fetch(result: FetchResult) -> str:
     )
 
 
-def _message_from_clear_daily_cache(day_text: str, counts: Dict[str, int]) -> str:
+def _message_from_clear_day_cache(day_text: str, counts: Dict[str, int]) -> str:
     smart_count = counts["translations"] + counts["paper_summaries"] + counts["full_text_summaries"]
     return (
         f"已清理 {day_text}：论文 {counts['papers']} 篇，智能结果 {smart_count} 条，"
-        f"日报 {counts['daily_reports']} 份，arXiv 页面缓存 {counts['arxiv_pages']} 页。限流记录已保留。"
+        f"arXiv 页面缓存 {counts['arxiv_pages']} 页。限流记录已保留。"
     )
 
 
@@ -195,7 +142,7 @@ def _delete_rows(session: Session, rows: list[object]) -> int:
     return len(rows)
 
 
-def _clear_daily_paper_cache(session: Session, target_day: date, settings: Settings) -> Dict[str, int]:
+def _clear_day_paper_cache(session: Session, target_day: date, settings: Settings) -> Dict[str, int]:
     day_text = target_day.isoformat()
     paper_ids = session.exec(select(Paper.arxiv_id).where(Paper.fetched_for_date == day_text)).all()
     counts = {
@@ -203,7 +150,6 @@ def _clear_daily_paper_cache(session: Session, target_day: date, settings: Setti
         "translations": 0,
         "paper_summaries": 0,
         "full_text_summaries": 0,
-        "daily_reports": 0,
         "arxiv_pages": 0,
     }
 
@@ -221,10 +167,6 @@ def _clear_daily_paper_cache(session: Session, target_day: date, settings: Setti
             session.exec(select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id.in_(paper_ids))).all(),
         )
 
-    counts["daily_reports"] = _delete_rows(
-        session,
-        session.exec(select(DailyReport).where(DailyReport.report_date == day_text)).all(),
-    )
     cache_markers = {f"submittedDate:{arxiv_date_range(target_day, settings.timezone)}"}
     cache_markers.update(f"submittedDate:{date_range}" for date_range in arxiv_date_ranges(target_day, settings.timezone))
     cache_rows_by_key = {}
@@ -412,7 +354,6 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             else []
         )
         full_text_summaries_by_paper = {summary.arxiv_id: summary for summary in full_text_summaries}
-        report = session.exec(select(DailyReport).where(DailyReport.report_date == target_day.isoformat())).first()
         return templates.TemplateResponse(
             "index.html",
             {
@@ -422,7 +363,6 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "translations_by_paper": translations_by_paper,
                 "summaries_by_paper": summaries_by_paper,
                 "full_text_summaries_by_paper": full_text_summaries_by_paper,
-                "report": report,
                 "fetch_quota": _fetch_quota_view(target_day, session, settings),
                 "arxiv_policy": _arxiv_policy_view(settings),
                 "active_fetch_job": active_fetch_job_for_day(target_day.isoformat()),
@@ -446,12 +386,12 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             return _redirect("/", day=day, error=_fetch_error_message(exc))
         return _redirect("/", day=day, message=_message_from_fetch(result))
 
-    @app.post("/daily-cache/{day}/clear")
-    def clear_daily_cache(day: str, session: Session = Depends(get_session)) -> RedirectResponse:
+    @app.post("/day-cache/{day}/clear")
+    def clear_day_cache(day: str, session: Session = Depends(get_session)) -> RedirectResponse:
         target_day = date.fromisoformat(day)
         with arxiv_fetch_lock:
-            counts = _clear_daily_paper_cache(session, target_day, settings)
-        return _redirect("/", day=day, message=_message_from_clear_daily_cache(day, counts))
+            counts = _clear_day_paper_cache(session, target_day, settings)
+        return _redirect("/", day=day, message=_message_from_clear_day_cache(day, counts))
 
     @app.post("/fetch-jobs")
     def start_fetch_job(day: str = Form(...), force_refresh: bool = Form(False)) -> Dict[str, object]:
@@ -1010,76 +950,6 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         threading.Thread(target=worker, name=f"summary-paper-full-text-{job_id}", daemon=True).start()
         return {"job_id": job_id}
 
-    @app.post("/summary-jobs/daily/{day}")
-    def start_daily_summary_job(day: str, force: bool = Form(False)) -> Dict[str, object]:
-        target_day = date.fromisoformat(day)
-        redirect_url = f"/daily/{day}"
-        job_id = create_summary_job("daily", "当日日报", redirect_url)
-
-        def worker() -> None:
-            with Session(engine) as worker_session:
-                try:
-                    update_summary_job(
-                        job_id,
-                        status="running",
-                        stage="preparing",
-                        stage_label=_summary_stage_label("preparing"),
-                        percent=10,
-                        message="正在读取当天论文并组装日报上下文。",
-                    )
-                    runtime_settings = resolve_runtime_settings(worker_session, settings)
-                    paper_count = len(
-                        worker_session.exec(select(Paper).where(Paper.fetched_for_date == day)).all()
-                    )
-                    if paper_count:
-                        progress_stage = "calling_model"
-                        progress_message = "正在调用智能模型生成当日日报。"
-                        progress_model = _model_display_name(runtime_settings.qwen_model)
-                    else:
-                        progress_stage = "saving"
-                        progress_message = "当天没有候选论文，正在生成空日报。"
-                        progress_model = "local"
-                    update_summary_job(
-                        job_id,
-                        stage=progress_stage,
-                        stage_label=_summary_stage_label(progress_stage),
-                        percent=36,
-                        message=progress_message,
-                        model=progress_model,
-                    )
-                    report = generate_daily_report(worker_session, target_day, runtime_settings, force=force)
-                    update_summary_job(
-                        job_id,
-                        stage="saving",
-                        stage_label=_summary_stage_label("saving"),
-                        percent=88,
-                        message="正在保存日报内容。",
-                    )
-                except Exception as exc:  # pragma: no cover - runtime model path
-                    error_message = _summary_error_message(exc)
-                    update_summary_job(
-                        job_id,
-                        status="failed",
-                        stage="failed",
-                        stage_label=_summary_stage_label("failed"),
-                        percent=100,
-                        error=error_message,
-                        message=error_message,
-                    )
-                    return
-                update_summary_job(
-                    job_id,
-                    status="completed",
-                    stage="complete",
-                    stage_label=_summary_stage_label("complete"),
-                    percent=100,
-                    model=_model_display_name(report.model),
-                    message="日报已生成，可手动查看结果。",
-                )
-
-        threading.Thread(target=worker, name=f"summary-daily-{job_id}", daemon=True).start()
-        return {"job_id": job_id}
-
     @app.get("/summary-jobs/{job_id}")
     def summary_job_status(job_id: str) -> Dict[str, object]:
         with summary_jobs_lock:
@@ -1155,9 +1025,6 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         temperature: float = Form(...),
         max_tokens_single: int = Form(...),
         max_tokens_full_text: int = Form(...),
-        max_tokens_daily: int = Form(...),
-        daily_top_n: int = Form(...),
-        daily_abstract_chars: int = Form(...),
         full_text_max_chars: int = Form(...),
         full_text_figure_limit: int = Form(6),
         full_text_pdf_upload_enabled: bool = Form(True),
@@ -1176,9 +1043,6 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             temperature=temperature,
             max_tokens_single=max_tokens_single,
             max_tokens_full_text=max_tokens_full_text,
-            max_tokens_daily=max_tokens_daily,
-            daily_top_n=daily_top_n,
-            daily_abstract_chars=daily_abstract_chars,
             full_text_max_chars=full_text_max_chars,
             full_text_figure_limit=full_text_figure_limit,
             full_text_pdf_upload_enabled=full_text_pdf_upload_enabled,
@@ -1441,66 +1305,6 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         except Exception as exc:  # pragma: no cover - model/PDF runtime path
             return _redirect(f"/papers/{arxiv_id}", error=_summary_error_message(exc))
         return _redirect(f"/papers/{arxiv_id}", message="Full-text paper summary generated.")
-
-    @app.get("/daily")
-    @app.get("/daily/")
-    def daily_index(session: Session = Depends(get_session)) -> RedirectResponse:
-        latest_day = _latest_day_with_papers(session)
-        target_day = latest_day or parse_day(None, settings.timezone).isoformat()
-        return _redirect(f"/daily/{target_day}")
-
-    @app.get("/daily/{day}")
-    def daily_report_page(
-        request: Request,
-        day: str,
-        message: str = "",
-        error: str = "",
-        session: Session = Depends(get_session),
-    ) -> Response:
-        target_day = date.fromisoformat(day)
-        report = session.exec(select(DailyReport).where(DailyReport.report_date == day)).first()
-        papers = session.exec(
-            select(Paper)
-            .where(Paper.fetched_for_date == day)
-            .order_by(Paper.relevance_score.desc(), Paper.published_at.desc())
-        ).all()
-        markdown_preview = render_daily_markdown(session, target_day)
-        daily_keypoint_groups = build_daily_keypoint_groups(papers)
-        daily_paper_forest = build_daily_paper_forest(papers)
-        return templates.TemplateResponse(
-            "daily.html",
-            {
-                "request": request,
-                "day": day,
-                "report": report,
-                "papers": papers,
-                "daily_keypoint_groups": daily_keypoint_groups,
-                "daily_paper_forest": daily_paper_forest,
-                "daily_date_grove": _daily_date_grove(target_day, session),
-                "markdown_preview": markdown_preview,
-                "message": message,
-                "error": error,
-                **_day_nav_context(target_day, session),
-            },
-        )
-
-    @app.post("/daily/{day}/summarize")
-    def summarize_day(
-        day: str,
-        force: bool = Form(False),
-        session: Session = Depends(get_session),
-    ) -> RedirectResponse:
-        target_day = date.fromisoformat(day)
-        try:
-            generate_daily_report(session, target_day, resolve_runtime_settings(session, settings), force=force)
-        except Exception as exc:  # pragma: no cover - model runtime path
-            return _redirect(f"/daily/{day}", error=_summary_error_message(exc))
-        return _redirect(f"/daily/{day}", message="Daily report generated.")
-
-    @app.post("/daily/{day}/export")
-    def export_day(day: str, session: Session = Depends(get_session)) -> RedirectResponse:
-        path = export_daily_markdown(session, date.fromisoformat(day), settings)
-        return _redirect(f"/daily/{day}", message=f"Exported to {path}")
 
     return app
 

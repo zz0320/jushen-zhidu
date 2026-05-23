@@ -1,7 +1,7 @@
 [project]
 name = "embodied-arxiv-daily"
 version = "0.1.0"
-description = "Local arXiv daily digest app for embodied intelligence and robotics papers."
+description = "Local arXiv paper workspace for embodied intelligence and robotics papers."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -46,6 +46,4 @@ arxiv_daily = [
   "static/*.js",
   "static/*.svg",
   "static/fonts/*",
-  "static/generated/forest-materials/*.png",
-  "static/generated/forest-materials/*.svg",
 ]

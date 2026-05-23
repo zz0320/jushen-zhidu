@@ -11,7 +11,7 @@ import httpx
 from .models import Paper
 
 MAX_FULL_TEXT_CHARS = 70_000
-PDF_USER_AGENT = "embodied-arxiv-daily/0.1 (+https://arxiv.org)"
+PDF_USER_AGENT = "jushen-zhidu/0.1 (+https://arxiv.org)"
 PACKAGE_DIR = Path(__file__).resolve().parent
 DEFAULT_FIGURE_OUTPUT_DIR = PACKAGE_DIR / "static" / "generated" / "figures"
 DEFAULT_FIGURE_LIMIT = 6

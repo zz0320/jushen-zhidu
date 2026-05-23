@@ -103,7 +103,7 @@ def test_fetch_papers_reports_progress():
 def test_fetch_papers_uses_cached_page_on_repeated_query(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     with Session(engine) as session:
         init_default_config(session)
         calls = []
@@ -132,7 +132,7 @@ def test_fetch_papers_uses_cached_page_on_repeated_query(tmp_path):
 def test_fetch_papers_force_refresh_ignores_cached_page(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path, arxiv_daily_network_fetch_limit=2)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", arxiv_daily_network_fetch_limit=2)
     with Session(engine) as session:
         init_default_config(session)
         calls = []
@@ -160,7 +160,7 @@ def test_fetch_papers_force_refresh_ignores_cached_page(tmp_path):
 def test_fetch_papers_blocks_realtime_refresh_after_daily_limit(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path, arxiv_daily_network_fetch_limit=1)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", arxiv_daily_network_fetch_limit=1)
     with Session(engine) as session:
         init_default_config(session)
         calls = []
@@ -194,7 +194,7 @@ def test_fetch_papers_blocks_realtime_refresh_after_daily_limit(tmp_path):
 def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path, arxiv_daily_network_fetch_limit=5)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", arxiv_daily_network_fetch_limit=5)
     run_date = datetime.now(ZoneInfo(settings.timezone)).date().isoformat()
     with Session(engine) as session:
         session.add(
@@ -254,7 +254,6 @@ def test_fetch_papers_retries_429_with_wait(tmp_path):
     SQLModel.metadata.create_all(engine)
     settings = Settings(
         database_path=tmp_path / "test.sqlite3",
-        report_dir=tmp_path,
         arxiv_retry_count=2,
         arxiv_request_delay_seconds=3.2,
     )

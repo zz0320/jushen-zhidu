@@ -6,10 +6,9 @@
     <title>{% block title %}具身智读{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/logo.svg') }}?v=20260520-resume-summary-jobs">
     <link rel="shortcut icon" href="{{ url_for('static', path='/logo.svg') }}?v=20260520-resume-summary-jobs">
-    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260523-ai-forest-assets">
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest-mosaic.css') }}?v=20260523-ai-forest-assets">
+    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260523-paper-workspace">
     <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
-    <script src="{{ url_for('static', path='/app.js') }}?v=20260523-ai-forest-assets" defer></script>
+    <script src="{{ url_for('static', path='/app.js') }}?v=20260523-paper-workspace" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -21,7 +20,6 @@
       {% set current_path = request.url.path %}
       <nav class="main-nav app-main-nav" aria-label="主导航">
         <a class="{{ 'is-active' if current_path == '/' else '' }}" href="/">总览</a>
-        <a class="{{ 'is-active' if current_path.startswith('/daily') else '' }}" href="/daily">日报系统</a>
         <a class="{{ 'is-active' if current_path.startswith('/papers') else '' }}" href="/papers">单篇论文</a>
         <a class="{{ 'is-active' if current_path.startswith('/keywords') else '' }}" href="/keywords">扫描规则</a>
         <a class="{{ 'is-active' if current_path.startswith('/settings') else '' }}" href="/settings">智能设置</a>

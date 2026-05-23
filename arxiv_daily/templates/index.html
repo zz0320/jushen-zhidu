@@ -5,7 +5,7 @@
     <div>
       <div class="eyebrow">Overview</div>
       <h1>{{ day }} 总览</h1>
-      <p>{{ papers|length }} 篇命中当前检索规则{% if report %}，日报已就绪{% else %}，等待生成日报{% endif %}。</p>
+      <p>{{ papers|length }} 篇命中当前检索规则，可进入单篇论文工作区继续阅读和生成总结。</p>
     </div>
     <div class="hero-controls">
       <form class="toolbar" method="get" action="/">
@@ -23,7 +23,7 @@
   <div class="page-layout">
     <nav class="anchor-nav workflow-nav" aria-label="论文工作流">
       <span class="nav-label">总览</span>
-      <a href="#day-actions">采集与日报</a>
+      <a href="#day-actions">采集与清理</a>
       <a href="#day-overview">今日概览</a>
       <a href="#paper-list">论文列表</a>
     </nav>
@@ -61,30 +61,19 @@
           <div>
             <span class="action-label">清理</span>
             <strong>清理缓存</strong>
-            <p>移除当日论文、日报、智能结果和 arXiv 页面缓存，有效拉取记录保留。</p>
+            <p>移除当日论文、智能结果和 arXiv 页面缓存，有效拉取记录保留。</p>
           </div>
-          <form method="post" action="/daily-cache/{{ day }}/clear" onsubmit="return confirm('确认清理 {{ day }} 的论文缓存数据？该操作会移除当日论文、日报和智能结果。')">
+          <form method="post" action="/day-cache/{{ day }}/clear" onsubmit="return confirm('确认清理 {{ day }} 的论文缓存数据？该操作会移除当日论文和智能结果。')">
             <button class="danger" type="submit">清理当日</button>
-          </form>
-        </div>
-        <div class="action-card {{ 'daily-ready-action' if report else 'daily-empty-action' }}">
-          <div>
-            <span class="action-label">日报</span>
-            <strong>{{ "刷新日报" if report else "生成日报" }}</strong>
-            <p>{{ "日报已生成，可按当前论文与模型配置重新整理。" if report else "把候选论文压缩成趋势、重点论文和建议深读列表。" }}</p>
-          </div>
-          <form method="post" action="/daily/{{ day }}/summarize" data-progress-summary="true" data-summary-job-url="/summary-jobs/daily/{{ day }}" data-running-label="{{ '刷新中' if report else '生成中' }}" data-completed-label="{{ '已刷新' if report else '已生成' }}">
-            <input type="hidden" name="force" value="true">
-            <button class="{{ 'secondary' if report else '' }}" type="submit">{{ "刷新日报" if report else "生成日报" }}</button>
           </form>
         </div>
         <div class="action-card quiet-action">
           <div>
             <span class="action-label">阅读</span>
-            <strong>阅读结果</strong>
-            <p>进入日报页查看正文，也可以导出 Markdown。</p>
+            <strong>单篇工作区</strong>
+            <p>集中查看当日论文，并继续生成摘要、译文或全文总结。</p>
           </div>
-          <a class="button secondary" href="/daily/{{ day }}">打开日报</a>
+          <a class="button secondary" href="/papers?day={{ day }}">打开单篇论文</a>
         </div>
       </section>
 
@@ -94,8 +83,8 @@
           <span>命中论文</span>
         </div>
         <div class="metric-card">
-          <strong>{{ "Ready" if report else "Pending" }}</strong>
-          <span>日报状态</span>
+          <strong>{{ summaries_by_paper|length }}</strong>
+          <span>摘要总结</span>
         </div>
         <div class="metric-card">
           <strong>{{ day }}</strong>

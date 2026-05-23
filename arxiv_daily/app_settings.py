@@ -17,9 +17,6 @@ QWEN_SETTING_KEYS = {
     "qwen_temperature",
     "qwen_max_tokens_single",
     "qwen_max_tokens_full_text",
-    "qwen_max_tokens_daily",
-    "daily_top_n",
-    "daily_abstract_chars",
     "full_text_max_chars",
     "full_text_figure_limit",
     "full_text_pdf_upload_enabled",
@@ -64,9 +61,6 @@ def resolve_runtime_settings(session: Session, base_settings: Settings) -> Setti
         qwen_max_tokens_full_text=_int_setting(
             saved.get("qwen_max_tokens_full_text"), base_settings.qwen_max_tokens_full_text
         ),
-        qwen_max_tokens_daily=_int_setting(saved.get("qwen_max_tokens_daily"), base_settings.qwen_max_tokens_daily),
-        daily_top_n=_int_setting(saved.get("daily_top_n"), base_settings.daily_top_n),
-        daily_abstract_chars=_int_setting(saved.get("daily_abstract_chars"), base_settings.daily_abstract_chars),
         full_text_max_chars=_int_setting(saved.get("full_text_max_chars"), base_settings.full_text_max_chars),
         full_text_figure_limit=_int_setting(
             saved.get("full_text_figure_limit"), base_settings.full_text_figure_limit
@@ -105,9 +99,6 @@ def save_qwen_form(
     temperature: float,
     max_tokens_single: int,
     max_tokens_full_text: int,
-    max_tokens_daily: int,
-    daily_top_n: int,
-    daily_abstract_chars: int,
     full_text_max_chars: int,
     full_text_figure_limit: int,
     clear_api_key: bool = False,
@@ -130,9 +121,6 @@ def save_qwen_form(
     set_app_setting(session, "qwen_temperature", str(max(0.0, min(2.0, temperature))))
     set_app_setting(session, "qwen_max_tokens_single", str(max(256, max_tokens_single)))
     set_app_setting(session, "qwen_max_tokens_full_text", str(max(512, max_tokens_full_text)))
-    set_app_setting(session, "qwen_max_tokens_daily", str(max(512, max_tokens_daily)))
-    set_app_setting(session, "daily_top_n", str(max(1, daily_top_n)))
-    set_app_setting(session, "daily_abstract_chars", str(max(200, daily_abstract_chars)))
     set_app_setting(session, "full_text_max_chars", str(max(10_000, full_text_max_chars)))
     set_app_setting(session, "full_text_figure_limit", str(max(0, min(12, full_text_figure_limit))))
     set_app_setting(session, "full_text_pdf_upload_enabled", "true" if full_text_pdf_upload_enabled else "false")

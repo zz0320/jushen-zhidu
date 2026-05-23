@@ -1,5 +1,3 @@
-from datetime import date
-
 from sqlmodel import Session, SQLModel, create_engine
 
 from arxiv_daily.config import Settings
@@ -11,7 +9,6 @@ from arxiv_daily.summaries import (
     build_full_text_pdf_messages,
     build_full_text_paper_messages,
     generate_abstract_translation,
-    generate_daily_report,
     generate_paper_full_text_summary,
     generate_paper_summary,
     parse_full_text_pdf_result,
@@ -22,7 +19,7 @@ from arxiv_daily.summaries import (
 def test_generate_paper_summary_uses_injected_completion(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
 
     with Session(engine) as session:
         session.add(
@@ -56,7 +53,7 @@ def test_generate_paper_summary_uses_injected_completion(tmp_path):
 def test_generate_paper_full_text_summary_uses_extracted_pdf_text(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
 
     with Session(engine) as session:
         session.add(
@@ -197,7 +194,6 @@ def test_pdf_full_text_summary_uses_model_selected_figures(tmp_path, monkeypatch
     SQLModel.metadata.create_all(engine)
     settings = Settings(
         database_path=tmp_path / "test.sqlite3",
-        report_dir=tmp_path,
         qwen_api_key="test-key",
         full_text_pdf_upload_enabled=True,
         full_text_figure_limit=3,
@@ -281,7 +277,7 @@ def test_pdf_full_text_summary_uses_model_selected_figures(tmp_path, monkeypatch
 def test_existing_full_text_summary_backfills_figures_without_model(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
 
     with Session(engine) as session:
         session.add(
@@ -336,7 +332,7 @@ def test_existing_full_text_summary_backfills_figures_without_model(tmp_path):
 def test_generate_abstract_translation_saves_title_and_abstract(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
 
     with Session(engine) as session:
         session.add(
@@ -370,15 +366,3 @@ def test_generate_abstract_translation_saves_title_and_abstract(tmp_path):
         assert translation.title_content == "具身机器人翻译"
         assert translation.content == "一个灵巧机器人使用 π0.5 和 π0。"
         assert translation.model == "fake-qwen"
-
-
-def test_generate_daily_report_without_papers_is_local(tmp_path):
-    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
-    SQLModel.metadata.create_all(engine)
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
-
-    with Session(engine) as session:
-        report = generate_daily_report(session, date(2026, 5, 15), settings=settings)
-
-    assert report.model == "local"
-    assert "没有匹配" in report.content

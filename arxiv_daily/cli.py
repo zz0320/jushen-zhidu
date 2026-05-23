@@ -6,16 +6,15 @@ from typing import Optional
 import typer
 from sqlmodel import Session
 
-from .app_settings import resolve_runtime_settings
 from .arxiv import FetchQuotaExceeded, fetch_papers_for_date
 from .config import get_settings
 from .database import build_engine, create_db_and_tables
 from .dates import parse_day
 from .defaults import init_default_config
-from .reports import export_daily_markdown
-from .summaries import generate_daily_report, generate_paper_full_text_summary, generate_paper_summary
+from .app_settings import resolve_runtime_settings
+from .summaries import generate_paper_full_text_summary, generate_paper_summary
 
-main = typer.Typer(help="arXiv embodied intelligence daily digest.")
+main = typer.Typer(help="arXiv embodied intelligence paper workspace.")
 
 
 def _display_model_name(value: str) -> str:
@@ -75,24 +74,6 @@ def fetch(
     )
 
 
-@main.command("summarize-day")
-def summarize_day(
-    day: Optional[str] = typer.Option(None, "--date", "-d", help="Date in YYYY-MM-DD, default today."),
-    force: bool = typer.Option(False, "--force", help="Regenerate even if a report exists."),
-) -> None:
-    """Generate the intelligent daily report for one local day."""
-    session, settings = _session()
-    target_day = parse_day(day, settings.timezone)
-    try:
-        report = generate_daily_report(session, target_day, resolve_runtime_settings(session, settings), force=force)
-    finally:
-        session.close()
-    typer.echo(
-        f"{target_day}: generated report id={report.id}, "
-        f"model={_display_model_name(report.model)}, papers={report.paper_count}"
-    )
-
-
 @main.command("summarize-paper")
 def summarize_paper(
     arxiv_id: str = typer.Argument(..., help="arXiv id, for example 2605.15157v1."),
@@ -117,18 +98,6 @@ def summarize_paper(
             )
     finally:
         session.close()
-
-
-@main.command("export-day")
-def export_day(day: Optional[str] = typer.Option(None, "--date", "-d", help="Date in YYYY-MM-DD, default today.")) -> None:
-    """Export a day's report and paper list to Markdown."""
-    session, settings = _session()
-    target_day = parse_day(day, settings.timezone)
-    try:
-        path = export_daily_markdown(session, target_day, settings)
-    finally:
-        session.close()
-    typer.echo(str(path))
 
 
 if __name__ == "__main__":

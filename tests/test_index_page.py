@@ -10,7 +10,6 @@ from arxiv_daily.dates import arxiv_date_range, arxiv_submitted_date_query
 from arxiv_daily.models import (
     ArxivFetchRun,
     ArxivPageCache,
-    DailyReport,
     Paper,
     PaperAbstractTranslation,
     PaperFullTextSummary,
@@ -24,7 +23,7 @@ def test_index_paper_card_exposes_ai_actions(tmp_path):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
     with Session(engine) as session:
         session.add(
@@ -62,7 +61,7 @@ def test_index_paper_card_shows_summary_previews(tmp_path):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
     with Session(engine) as session:
         session.add(
@@ -108,7 +107,7 @@ def test_index_paper_card_renders_full_insight_blocks(tmp_path):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
     long_body = "\n".join(
         [
@@ -147,104 +146,13 @@ def test_index_paper_card_renders_full_insight_blocks(tmp_path):
     assert "最终完整展示标记" in html
 
 
-def test_daily_report_actions_reflect_existing_report(tmp_path):
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
-    app = create_app(settings=settings, engine=engine)
-    with Session(engine) as session:
-        session.add(DailyReport(report_date="2026-05-19", content="日报已生成。", model="fake-qwen", paper_count=0))
-        session.commit()
-
-    client = TestClient(app)
-    index_html = client.get("/?day=2026-05-19").text
-    daily_html = client.get("/daily/2026-05-19").text
-
-    assert "daily-ready-action" in index_html
-    assert "刷新日报" in index_html
-    assert 'data-completed-label="已刷新"' in index_html
-    assert "daily-ready-action" in daily_html
-    assert "刷新日报" in daily_html
-    assert 'data-completed-label="已刷新"' in daily_html
-
-
-def test_daily_report_renders_dynamic_paper_forest(tmp_path):
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
-    app = create_app(settings=settings, engine=engine)
-    with Session(engine) as session:
-        session.add(
-            Paper(
-                arxiv_id="2605.18729v1",
-                title="Forest VLA Paper",
-                abstract="A vision-language-action robot policy.",
-                primary_category="cs.RO",
-                fetched_for_date="2026-05-22",
-                relevance_score=20.0,
-                matched_keywords_json='[{"keyword":"vla","group":"VLA and Robot Foundation Models"}]',
-            )
-        )
-        session.add(
-            Paper(
-                arxiv_id="2605.18730v1",
-                title="Forest Benchmark Paper",
-                abstract="A dataset benchmark for embodied evaluation.",
-                primary_category="cs.RO",
-                fetched_for_date="2026-05-21",
-                relevance_score=10.0,
-                matched_keywords_json='[{"keyword":"benchmark","group":"Datasets and Benchmarks"}]',
-            )
-        )
-        session.add(DailyReport(report_date="2026-05-22", content="日报已生成。", model="fake-qwen", paper_count=1))
-        session.commit()
-
-    html = TestClient(app).get("/daily/2026-05-22").text
-
-    assert "按天穿行灵境树林" in html
-    assert "所有论文生长在同一片灵境森林" in html
-    assert "fantasy-forest-system" in html
-    assert "forest-material-system" in html
-    assert "forest-mosaic.css" in html
-    assert "forest-depth-layers" in html
-    assert "/generated/forest-materials/ai-tree-radiant-maple.png" in html
-    assert "20260523-ai-forest-assets" in html
-    assert "Forest VLA Paper" in html
-    assert "paper-unified-field" in html
-    assert "paper-plot-inspector" in html
-    assert "Auto 9x9" in html
-    assert "data-field-size-control=\"9\"" in html
-    assert "data-paper-title=\"Forest VLA Paper\"" in html
-    assert "--tree-tilt:" in html
-    assert "--tree-scale:" in html
-    assert "--tile-tilt:" in html
-    assert "paper-tile-surface" in html
-    assert "data-paper-shape=\"radiant-maple\"" in html
-    assert "data-paper-land=" in html
-    assert "paper-tree-shape-radiant-maple" in html
-    assert "paper-tree-model paper-tree-vla" in html
-    assert "paper-tree-grass" in html
-    assert "date-tree" in html
-    assert "date-tree-asset" in html
-    assert "date-field-block" in html
-    assert "daily-branch-map-thumb" in html
-    assert "daily-branch-tree-icon" in html
-    assert "daily-branch-node-vla" in html
-
-
 def test_paper_detail_uses_combined_insight_action(tmp_path):
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
     with Session(engine) as session:
         session.add(
@@ -306,7 +214,7 @@ def test_papers_workspace_lists_day_papers(tmp_path):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
     with Session(engine) as session:
         session.add(
@@ -331,13 +239,13 @@ def test_papers_workspace_lists_day_papers(tmp_path):
     assert "Paper not found" not in html
 
 
-def test_clear_daily_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
+def test_clear_day_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
     day = "2026-05-19"
     other_day = "2026-05-20"
@@ -370,8 +278,6 @@ def test_clear_daily_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
         session.add(PaperSummary(arxiv_id="2605.18726v1", content="摘要", model="fake"))
         session.add(PaperFullTextSummary(arxiv_id="2605.18726v1", content="全文", model="fake"))
         session.add(PaperSummary(arxiv_id="2605.18727v1", content="其他日摘要", model="fake"))
-        session.add(DailyReport(report_date=day, content="日报", model="fake", paper_count=1))
-        session.add(DailyReport(report_date=other_day, content="其他日报", model="fake", paper_count=1))
         session.add(
             ArxivPageCache(
                 cache_key="target-cache",
@@ -402,7 +308,7 @@ def test_clear_daily_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
         session.add(ArxivFetchRun(target_date=day, run_date=day, status="completed", network_requests=1))
         session.commit()
 
-    response = TestClient(app).post(f"/daily-cache/{day}/clear", follow_redirects=False)
+    response = TestClient(app).post(f"/day-cache/{day}/clear", follow_redirects=False)
 
     assert response.status_code == 303
     assert response.headers["location"].startswith(f"/?day={day}&message=")
@@ -412,7 +318,6 @@ def test_clear_daily_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
         assert session.exec(select(PaperSummary).where(PaperSummary.arxiv_id == "2605.18726v1")).first() is None
         assert session.exec(select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id == "2605.18726v1")).first() is None
         assert session.exec(select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id == "2605.18726v1")).first() is None
-        assert session.exec(select(DailyReport).where(DailyReport.report_date == day)).first() is None
         assert session.get(ArxivPageCache, "target-cache") is None
         assert session.get(ArxivPageCache, "target-cache-split") is None
         assert session.get(ArxivPageCache, "other-cache") is not None
@@ -425,7 +330,7 @@ def test_app_startup_marks_stale_fetch_runs_failed(tmp_path):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "test.sqlite3", report_dir=tmp_path)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
     with Session(engine) as session:
         SQLModel.metadata.create_all(engine)
         session.add(ArxivFetchRun(target_date="2026-05-19", run_date="2026-05-19", status="running"))

@@ -5,7 +5,7 @@
     <div>
       <div class="eyebrow">Intelligence settings</div>
       <h1>智能模型设置</h1>
-      <p>在界面里配置智能模型调用参数，用于生成单篇论文总结、全文总结和当日日报。</p>
+      <p>在界面里配置智能模型调用参数，用于生成单篇论文总结、摘要翻译和全文总结。</p>
     </div>
   </section>
 
@@ -32,9 +32,6 @@
         <dt>Temperature</dt><dd>{{ settings_view.effective.qwen_temperature }}</dd>
         <dt>摘要输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_single }} tokens</dd>
         <dt>全文输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_full_text }} tokens</dd>
-        <dt>日报输出</dt><dd>{{ settings_view.effective.qwen_max_tokens_daily }} tokens</dd>
-        <dt>日报论文数</dt><dd>{{ settings_view.effective.daily_top_n }} 篇</dd>
-        <dt>每篇摘要上限</dt><dd>{{ settings_view.effective.daily_abstract_chars }} 字符</dd>
         <dt>PDF 输入上限</dt><dd>{{ settings_view.effective.full_text_max_chars }} 字符</dd>
         <dt>全文图片上限</dt><dd>{{ settings_view.effective.full_text_figure_limit }} 张</dd>
         <dt>PDF 原文上传</dt><dd>{{ "启用" if settings_view.effective.full_text_pdf_upload_enabled else "关闭" }}</dd>
@@ -87,15 +84,15 @@
             <strong>按使用场景一键填充参数</strong>
           </div>
           <div class="preset-grid">
-            <button class="preset-card" type="button" data-settings-preset data-single="1600" data-full-text="4096" data-daily="4096" data-top-n="30" data-abstract-chars="1000" data-full-text-chars="70000" data-figure-limit="4">
+            <button class="preset-card" type="button" data-settings-preset data-single="1600" data-full-text="4096" data-full-text-chars="70000" data-figure-limit="4">
               <strong>日常快读</strong>
               <span>速度优先，适合每天扫论文。</span>
             </button>
-            <button class="preset-card" type="button" data-settings-preset data-single="1800" data-full-text="8192" data-daily="6144" data-top-n="40" data-abstract-chars="1200" data-full-text-chars="120000" data-figure-limit="6">
+            <button class="preset-card" type="button" data-settings-preset data-single="1800" data-full-text="8192" data-full-text-chars="120000" data-figure-limit="6">
               <strong>均衡推荐</strong>
               <span>覆盖更多候选，输出更完整。</span>
             </button>
-            <button class="preset-card" type="button" data-settings-preset data-single="2400" data-full-text="12000" data-daily="8192" data-top-n="60" data-abstract-chars="1500" data-full-text-chars="180000" data-figure-limit="10">
+            <button class="preset-card" type="button" data-settings-preset data-single="2400" data-full-text="12000" data-full-text-chars="180000" data-figure-limit="10">
               <strong>深度研究</strong>
               <span>论文多、全文长时使用。</span>
             </button>
@@ -113,18 +110,6 @@
           <label>
             全文总结输出 token
             <input name="max_tokens_full_text" type="number" min="1024" max="32768" step="256" value="{{ settings_view.effective.qwen_max_tokens_full_text }}">
-          </label>
-          <label>
-            日报输出 token
-            <input name="max_tokens_daily" type="number" min="1024" max="32768" step="256" value="{{ settings_view.effective.qwen_max_tokens_daily }}">
-          </label>
-          <label>
-            日报论文数
-            <input name="daily_top_n" type="number" min="1" max="100" value="{{ settings_view.effective.daily_top_n }}">
-          </label>
-          <label>
-            日报每篇摘要字符
-            <input name="daily_abstract_chars" type="number" min="200" max="5000" step="100" value="{{ settings_view.effective.daily_abstract_chars }}">
           </label>
           <label>
             全文 PDF 输入字符

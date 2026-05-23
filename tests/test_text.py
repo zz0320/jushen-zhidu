@@ -86,8 +86,8 @@ def test_summary_to_html_removes_unbalanced_bold_markers():
     assert "**" not in html
 
 
-def test_summary_to_html_renders_daily_markdown_blocks():
-    content = """**arXiv 具身智能论文日报 · 2026-05-15**
+def test_summary_to_html_renders_markdown_blocks():
+    content = """**arXiv 具身智能论文总结 · 2026-05-15**
 *面向具身智能研究者*
 （严格基于 arXiv 元数据和摘要）
 
@@ -165,7 +165,7 @@ def test_markdown_to_html_renders_tables_and_callouts():
     assert 'class="summary-table"' in html
 
 
-def test_strip_first_markdown_heading_removes_duplicate_daily_title():
+def test_strip_first_markdown_heading_removes_duplicate_title():
     assert strip_first_markdown_heading("# 2026 title\n\nbody") == "body"
     assert strip_first_markdown_heading("body") == "body"
 

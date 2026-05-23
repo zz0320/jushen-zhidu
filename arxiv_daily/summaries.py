@@ -6,7 +6,6 @@ import mimetypes
 import re
 import tempfile
 from dataclasses import asdict, dataclass, field
-from datetime import date
 from io import BytesIO
 from pathlib import Path
 from typing import Callable, List, Optional
@@ -14,7 +13,7 @@ from typing import Callable, List, Optional
 from sqlmodel import Session, select
 
 from .config import Settings, get_settings
-from .models import DailyReport, Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary, utc_now
+from .models import Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary, utc_now
 from .pdf_text import (
     FullTextExtraction,
     download_paper_pdf,
@@ -698,143 +697,3 @@ def _combined_full_text_model(text_model: str, visual_result: Optional[Completio
     if not visual_result.model or visual_result.model == text_model:
         return text_model
     return f"{text_model} + {visual_result.model}"
-
-
-def _truncate_text(value: str, max_chars: int) -> str:
-    value = (value or "").strip()
-    if len(value) <= max_chars:
-        return value
-    return value[:max_chars].rstrip() + "..."
-
-
-def _daily_context(papers: List[Paper], abstract_chars: int) -> str:
-    blocks = []
-    for index, paper in enumerate(papers, start=1):
-        authors = ", ".join(paper.authors[:5])
-        if len(paper.authors) > 5:
-            authors += " et al."
-        affiliations = "; ".join(paper.affiliations[:4])
-        if len(paper.affiliations) > 4:
-            affiliations += " 等"
-        abstract = _truncate_text(paper.abstract, abstract_chars)
-        lines = [
-            f"{index}. {clean_latex_text(paper.title)}",
-            f"   arXiv: {paper.arxiv_id}",
-            f"   Authors: {authors}",
-        ]
-        if affiliations:
-            lines.append(f"   Affiliations: {affiliations}")
-        lines.extend(
-            [
-                f"   Category: {paper.primary_category}",
-                f"   Score: {paper.relevance_score}",
-                f"   Keywords: {paper.matched_terms}",
-                f"   Keyword groups: {_paper_keyword_groups(paper)}",
-                f"   Abstract: {abstract}",
-            ]
-        )
-        blocks.append("\n".join(lines))
-    return "\n\n".join(blocks)
-
-
-def build_daily_messages(report_date: date, papers: List[Paper], abstract_chars: int = 1200) -> List[dict]:
-    return [
-        {
-            "role": "system",
-            "content": (
-                "你是具身智能、机器人学习、VLA、world model 和机器人数据集方向的研究助理。"
-                "请只基于用户提供的 arXiv 元数据和摘要总结，不要编造。"
-                "中文输出，保留关键英文术语，面向需要快速判断是否深读的研究者。"
-                "不要输出 Markdown 表格，不要使用 emoji；用短段落和项目符号保证页面可读。"
-            ),
-        },
-        {
-            "role": "user",
-            "content": (
-                f"请生成 {report_date.isoformat()} 的 arXiv 具身智能论文日报。"
-                "请按照“模型 - 数据 - 本体”三维框架做总结和分类，结构必须严格包含：\n\n"
-                "## 1. 今日总览\n"
-                "- 用 3 条以内总结今天最值得注意的研究主线。\n"
-                "- 每条都要说明为什么对具身智能/VLA/机器人学习有意义。\n\n"
-                "## 2. 模型 / 数据 / 本体三维分类\n"
-                "按以下三个维度归类；每个维度只列当天确实命中的细分分支，不要硬凑：\n"
-                "- 模型：VLA/多模态策略、World Model/预测规划、Policy/控制架构、空间推理/导航模型。\n"
-                "- 数据：Benchmark/评测套件、合成数据/sim-to-real、人类示教/UMI/第一人称、数据闭环/自动构建。\n"
-                "- 本体：机器人形态/硬件、传感器/接触、任务对象/场景、安全/部署约束。\n"
-                "每个细分分支列 1-4 篇代表论文，格式为：**论文名**（arXiv: xxxx） - 关键贡献；适合谁读。\n\n"
-                "## 3. 三维交叉信号\n"
-                "指出 2-5 个跨维度信号，例如“模型创新依赖新 benchmark”、“数据闭环服务真实本体约束”。"
-                "每条都要点名相关论文。\n\n"
-                "## 4. 建议深读列表\n"
-                "给出 5-8 篇，按优先级排序。每篇一行，格式为："
-                "1. **论文名**（arXiv: xxxx） - **为什么读**：...；**适合**：...\n\n"
-                "## 5. 可以略读或暂缓\n"
-                "列出和当前具身智能主线关系较弱、或只是泛命中的论文，并说明原因。\n\n"
-                "每篇重点论文都要给出一句为什么值得关注。"
-                "注明：基于 arXiv 元数据和摘要。\n\n"
-                f"候选论文如下：\n\n{_daily_context(papers, abstract_chars)}"
-            ),
-        },
-    ]
-
-
-def generate_daily_report(
-    session: Session,
-    report_date: date,
-    settings: Optional[Settings] = None,
-    force: bool = False,
-    completion_fn: Optional[CompletionFn] = None,
-) -> DailyReport:
-    settings = settings or get_settings()
-    report_date_text = report_date.isoformat()
-    existing = session.exec(select(DailyReport).where(DailyReport.report_date == report_date_text)).first()
-    if existing is not None and not force:
-        return existing
-
-    papers = session.exec(
-        select(Paper)
-        .where(Paper.fetched_for_date == report_date_text)
-        .order_by(Paper.relevance_score.desc(), Paper.published_at.desc())
-    ).all()
-    top_papers = list(papers[: settings.daily_top_n])
-    if not top_papers:
-        content = "当天没有匹配当前关键词配置的论文。"
-        model = "local"
-    else:
-        complete = completion_fn or (lambda messages, max_tokens: qwen_completion(settings, messages, max_tokens))
-        result = complete(
-            build_daily_messages(report_date, top_papers, settings.daily_abstract_chars),
-            settings.qwen_max_tokens_daily,
-        )
-        content = result.content
-        model = result.model
-
-    if existing is None:
-        report = DailyReport(
-            report_date=report_date_text,
-            content=content,
-            model=model,
-            paper_count=len(top_papers),
-        )
-    else:
-        report = existing
-        report.content = content
-        report.model = model
-        report.paper_count = len(top_papers)
-        report.generated_at = utc_now()
-
-    session.add(report)
-    session.commit()
-    session.refresh(report)
-    return report
-
-
-def _paper_keyword_groups(paper: Paper) -> str:
-    groups = []
-    seen = set()
-    for item in paper.matched_keywords:
-        group = str(item.get("group", "")).strip()
-        if group and group not in seen:
-            seen.add(group)
-            groups.append(group)
-    return ", ".join(groups) or "-"

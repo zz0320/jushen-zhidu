@@ -12,7 +12,7 @@ from arxiv_daily.config import Settings
 def test_resolve_runtime_settings_prefers_saved_qwen_values(tmp_path: Path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    base = Settings(database_path=tmp_path / "db.sqlite3", report_dir=tmp_path, qwen_api_key="env-key")
+    base = Settings(database_path=tmp_path / "db.sqlite3", qwen_api_key="env-key")
 
     with Session(engine) as session:
         save_qwen_form(
@@ -26,9 +26,6 @@ def test_resolve_runtime_settings_prefers_saved_qwen_values(tmp_path: Path):
             temperature=0.4,
             max_tokens_single=900,
             max_tokens_full_text=4096,
-            max_tokens_daily=1800,
-            daily_top_n=12,
-            daily_abstract_chars=900,
             full_text_max_chars=80000,
             full_text_figure_limit=9,
         )
@@ -44,9 +41,6 @@ def test_resolve_runtime_settings_prefers_saved_qwen_values(tmp_path: Path):
     assert resolved.qwen_temperature == 0.4
     assert resolved.qwen_max_tokens_single == 900
     assert resolved.qwen_max_tokens_full_text == 4096
-    assert resolved.qwen_max_tokens_daily == 1800
-    assert resolved.daily_top_n == 12
-    assert resolved.daily_abstract_chars == 900
     assert resolved.full_text_max_chars == 80000
     assert resolved.full_text_figure_limit == 9
 
@@ -54,7 +48,7 @@ def test_resolve_runtime_settings_prefers_saved_qwen_values(tmp_path: Path):
 def test_blank_model_keeps_existing_runtime_model(tmp_path: Path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
-    base = Settings(database_path=tmp_path / "db.sqlite3", report_dir=tmp_path, qwen_model="base-model")
+    base = Settings(database_path=tmp_path / "db.sqlite3", qwen_model="base-model")
 
     with Session(engine) as session:
         save_qwen_form(
@@ -65,9 +59,6 @@ def test_blank_model_keeps_existing_runtime_model(tmp_path: Path):
             temperature=0.2,
             max_tokens_single=1800,
             max_tokens_full_text=4096,
-            max_tokens_daily=4096,
-            daily_top_n=40,
-            daily_abstract_chars=1200,
             full_text_max_chars=90000,
             full_text_figure_limit=20,
             full_text_pdf_upload_enabled=True,
@@ -85,7 +76,7 @@ def test_settings_form_allows_missing_optional_model(tmp_path: Path):
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    settings = Settings(database_path=tmp_path / "db.sqlite3", report_dir=tmp_path, qwen_model="base-model")
+    settings = Settings(database_path=tmp_path / "db.sqlite3", qwen_model="base-model")
     app = create_app(settings=settings, engine=engine)
 
     response = TestClient(app, follow_redirects=False).post(
@@ -95,9 +86,6 @@ def test_settings_form_allows_missing_optional_model(tmp_path: Path):
             "temperature": "0.2",
             "max_tokens_single": "1800",
             "max_tokens_full_text": "4096",
-            "max_tokens_daily": "4096",
-            "daily_top_n": "40",
-            "daily_abstract_chars": "1200",
             "full_text_max_chars": "90000",
             "full_text_figure_limit": "6",
         },

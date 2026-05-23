@@ -154,12 +154,3 @@ class PaperFullTextSummary(SQLModel, table=True):
     @property
     def figures(self) -> List[Dict[str, Any]]:
         return [item for item in _loads_list(self.figures_json) if isinstance(item, dict)]
-
-
-class DailyReport(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    report_date: str = Field(index=True, unique=True)
-    content: str = Field(sa_column=Column(Text))
-    model: str
-    paper_count: int = 0
-    generated_at: datetime = Field(default_factory=utc_now)

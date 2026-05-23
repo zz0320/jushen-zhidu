@@ -284,36 +284,8 @@ def summary_to_html(value: str) -> Markup:
     return Markup("\n".join(html_parts))
 
 
-def daily_report_to_html(value: str) -> Markup:
-    """Render daily reports as grouped reading cards instead of one long markdown stream."""
-    text = strip_first_markdown_heading(value)
-    sections = _split_daily_sections(text)
-    if not sections:
-        return summary_to_html(text)
-
-    parts = ['<div class="daily-report-structured">']
-    for section in sections:
-        title = section["title"]
-        body = section["body"].strip()
-        if not title:
-            if body:
-                parts.append(f'<section class="daily-report-lede">{summary_to_html(body)}</section>')
-            continue
-        section_type = _daily_section_type(title)
-        parts.append(f'<section class="daily-report-section daily-report-section-{section_type}">')
-        parts.append('<div class="daily-report-section-head">')
-        parts.append(f'<span>{escape(section["index"] or "•")}</span>')
-        parts.append(f"<h3>{_inline_markup(title)}</h3>")
-        parts.append("</div>")
-        if body:
-            parts.append(f'<div class="daily-report-section-body">{summary_to_html(body)}</div>')
-        parts.append("</section>")
-    parts.append("</div>")
-    return Markup("\n".join(str(part) for part in parts))
-
-
 def markdown_to_html(value: str) -> Markup:
-    """Render exported daily markdown into a readable, safe preview."""
+    """Render Markdown into a readable, safe preview."""
     lines = (value or "").splitlines()
     html_parts = []
     list_tag = ""
@@ -425,55 +397,6 @@ def markdown_to_html(value: str) -> Markup:
     close_list()
     close_code()
     return Markup("\n".join(html_parts))
-
-
-def _split_daily_sections(value: str) -> list[dict[str, str]]:
-    sections: list[dict[str, str]] = []
-    current = {"index": "", "title": "", "body_lines": []}
-
-    def push_current() -> None:
-        if current["title"] or any(line.strip() for line in current["body_lines"]):
-            sections.append(
-                {
-                    "index": current["index"],
-                    "title": current["title"],
-                    "body": "\n".join(current["body_lines"]).strip(),
-                }
-            )
-
-    for raw_line in (value or "").splitlines():
-        line = raw_line.strip()
-        heading = re.match(r"^#{2,4}\s+(.+)$", line)
-        if heading:
-            title = heading.group(1).strip()
-            index_match = re.match(r"^(\d+)[.、]\s*(.+)$", title)
-            push_current()
-            current = {
-                "index": index_match.group(1) if index_match else "",
-                "title": index_match.group(2).strip() if index_match else title,
-                "body_lines": [],
-            }
-        else:
-            current["body_lines"].append(raw_line)
-    push_current()
-    return sections
-
-
-def _daily_section_type(title: str) -> str:
-    lowered = (title or "").lower()
-    if any(token in lowered for token in ("主题", "趋势", "总览", "结论")):
-        return "overview"
-    if any(token in lowered for token in ("分类", "关键点", "方向")):
-        return "taxonomy"
-    if any(token in lowered for token in ("重点", "论文")):
-        return "papers"
-    if any(token in lowered for token in ("数据", "benchmark", "bench")):
-        return "data"
-    if any(token in lowered for token in ("vla", "world model", "本体", "亮点", "交叉", "信号")):
-        return "signals"
-    if any(token in lowered for token in ("深读", "建议", "推荐", "略读", "暂缓")):
-        return "reading"
-    return "default"
 
 
 def strip_first_markdown_heading(value: str) -> str:
