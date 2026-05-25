@@ -30,6 +30,8 @@ from .forest import (
     forest_filters,
     forest_groves,
     forest_scene_context,
+    forest_status_filters,
+    forest_topic_filters,
 )
 from .models import (
     ArxivFetchRun,
@@ -326,7 +328,9 @@ def _forest_data(session: Session, target_day: date) -> Dict[str, object]:
         "tiles": tiles,
         "client_tiles": forest_client_tiles(tiles),
         "counts": forest_counts(tiles),
-        "filters": forest_filters(),
+        "filters": forest_filters(tiles),
+        "topic_filters": forest_topic_filters(tiles),
+        "status_filters": forest_status_filters(tiles),
         "groves": forest_groves(tiles),
         "scene": forest_scene_context(target_day),
     }

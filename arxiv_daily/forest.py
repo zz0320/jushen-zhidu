@@ -42,15 +42,17 @@ FOREST_KINDS: Dict[str, ForestKind] = {
     "other": ForestKind("other", "Other", "普通树", "other"),
 }
 
+DATASET_NEEDLES = ["dataset", "benchmark", "benchmarks", "evaluation suite"]
+
 KIND_RULES = [
     ("vla", ["vision-language-action", "vision language action", "vla"]),
     ("world_model", ["world model", "world models"]),
-    ("dataset", ["dataset", "benchmark", "benchmarks", "evaluation suite"]),
-    ("robotics", ["robotics", "robotic", "robot", "robots"]),
-    ("embodied_ai", ["embodied ai", "embodied intelligence", "embodied agent", "embodiment"]),
     ("manipulation", ["manipulation", "manipulate", "manipulator", "dexterous", "grasping"]),
     ("navigation", ["navigation", "navigate", "nav", "vln", "path planning"]),
     ("simulation", ["simulation", "sim-to-real", "simulator", "synthetic data", "digital twin"]),
+    ("embodied_ai", ["embodied ai", "embodied intelligence", "embodied agent", "embodiment"]),
+    ("robotics", ["robotics", "robotic", "robot", "robots"]),
+    ("dataset", DATASET_NEEDLES),
 ]
 
 FOREST_RARITIES: Dict[str, ForestRarity] = {
@@ -105,11 +107,24 @@ def _paper_text(paper: Paper) -> str:
     return f"{paper.title} {paper.abstract} {terms} {paper.primary_category} {categories}".lower()
 
 
+def _paper_signal_text(paper: Paper) -> str:
+    terms = " ".join(str(match.get("keyword", "")) for match in paper.matched_keywords)
+    categories = " ".join(paper.categories)
+    return f"{paper.title} {terms} {paper.primary_category} {categories}".lower()
+
+
 def classify_forest_kind(paper: Paper) -> ForestKind:
     text = _paper_text(paper)
+    signal_text = _paper_signal_text(paper)
+    if any(_matches_topic(signal_text, needle) for needle in DATASET_NEEDLES):
+        return FOREST_KINDS["dataset"]
     for key, needles in KIND_RULES:
+        if key == "dataset":
+            continue
         if any(_matches_topic(text, needle) for needle in needles):
             return FOREST_KINDS[key]
+    if any(_matches_topic(text, needle) for needle in DATASET_NEEDLES):
+        return FOREST_KINDS["dataset"]
     return FOREST_KINDS["other"]
 
 
@@ -315,22 +330,45 @@ def forest_groves(tiles: Sequence[Dict[str, object]]) -> List[Dict[str, object]]
     return groves
 
 
-def forest_filters() -> List[Dict[str, str]]:
+def _filter_count(tiles: Optional[Sequence[Dict[str, object]]], key: str) -> Optional[int]:
+    if tiles is None:
+        return None
+    return sum(1 for tile in tiles if filter_tile(tile, key))
+
+
+def forest_topic_filters(tiles: Optional[Sequence[Dict[str, object]]] = None) -> List[Dict[str, object]]:
+    items = [{"key": "all", "label": "全部主题"}]
+    items.extend({"key": kind.filter_key, "label": kind.label} for kind in FOREST_KINDS.values())
     return [
-        {"key": "all", "label": "全部"},
-        {"key": "vla", "label": "VLA"},
-        {"key": "world_model", "label": "World Model"},
-        {"key": "dataset", "label": "Dataset / Benchmark"},
-        {"key": "robotics", "label": "Robotics"},
-        {"key": "embodied_ai", "label": "Embodied AI"},
-        {"key": "manipulation", "label": "Manipulation"},
-        {"key": "navigation", "label": "Navigation"},
-        {"key": "simulation", "label": "Simulation"},
-        {"key": "other", "label": "Other"},
+        {
+            **item,
+            "group": "topic",
+            "count": len(tiles) if tiles is not None and item["key"] == "all" else _filter_count(tiles, str(item["key"])),
+        }
+        for item in items
+    ]
+
+
+def forest_status_filters(tiles: Optional[Sequence[Dict[str, object]]] = None) -> List[Dict[str, object]]:
+    items = [
+        {"key": "all", "label": "全部状态"},
         {"key": "summarized", "label": "已成长"},
         {"key": "unsummarized", "label": "树苗"},
+        {"key": "full_text", "label": "全文古树"},
         {"key": "high_relevance", "label": "高相关"},
     ]
+    return [
+        {
+            **item,
+            "group": "status",
+            "count": len(tiles) if tiles is not None and item["key"] == "all" else _filter_count(tiles, str(item["key"])),
+        }
+        for item in items
+    ]
+
+
+def forest_filters(tiles: Optional[Sequence[Dict[str, object]]] = None) -> List[Dict[str, object]]:
+    return [*forest_topic_filters(tiles), *forest_status_filters(tiles)[1:]]
 
 
 def filter_tile(tile: Dict[str, object], filter_key: Optional[str]) -> bool:
@@ -341,6 +379,8 @@ def filter_tile(tile: Dict[str, object], filter_key: Optional[str]) -> bool:
         return bool(tile["summarized"])
     if key == "unsummarized":
         return not bool(tile["summarized"])
+    if key == "full_text":
+        return tile["growth"] == "full_text"
     if key == "high_relevance":
         return bool(tile["high_relevance"])
     return tile["filter_key"] == key

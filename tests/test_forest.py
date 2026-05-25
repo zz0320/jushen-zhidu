@@ -48,6 +48,13 @@ def test_forest_kind_classification_rules():
     ).tree_label == "机械松树"
     assert classify_forest_kind(
         _paper(
+            title="Robot Planning with Online Evaluation",
+            abstract="We report a benchmark after deployment, but the method is a robot planner.",
+            matched_keywords_json='[{"keyword":"robotics"}]',
+        )
+    ).tree_label == "机械松树"
+    assert classify_forest_kind(
+        _paper(
             title="Vision-Language Navigation with Self Awareness",
             abstract="An agent follows routes in indoor scenes.",
             matched_keywords_json='[{"keyword":"navigation"},{"keyword":"data engine","group":"World Models and Data Loop"}]',
@@ -161,6 +168,7 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
     assert payload["date"] == "2026-05-23"
     assert payload["scene"]["season_key"] == "spring"
     assert payload["counts"]["total"] == 2
+    assert payload["filters"][0]["count"] == 2
     assert payload["tiles"][0]["tree_label"] == "果树"
     assert payload["tiles"][0]["growth_label"] == "大树"
     assert len(vla_payload["tiles"]) == 1
@@ -183,6 +191,13 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
 
     assert response.status_code == 200
     assert "论文森林" in response.text
+    assert "forest-shell-v2" in response.text
+    assert "forest-command-v2" in response.text
+    assert "forest-board-v2" in response.text
+    assert "forest-sidebar-v2" in response.text
+    assert "forest-map-v2" in response.text
+    assert "forest-grid-v2" in response.text
+    assert "forest-detail-v2" in response.text
     assert "data-forest-grove" in response.text
     assert "data-forest-tile" in response.text
     assert "forest-mote" in response.text
@@ -194,14 +209,17 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "forest-growth-status-badge" in response.text
     assert "data-forest-growth-fill" in response.text
     assert "data-forest-grown-visible" in response.text
-    assert "分类树林" in response.text
+    assert 'data-filter-group="topic"' in response.text
+    assert 'data-filter-group="status"' in response.text
+    assert "data-forest-active-topic" in response.text
+    assert "data-forest-focus-clear" in response.text
+    assert "forest-inspector-close" in response.text
     assert "--scatter-x" not in response.text
     assert "--scatter-y" not in response.text
-    assert "水晶树" not in response.text
-    assert "果树" not in response.text
-    assert "机械松树" not in response.text
-    assert "路标树" not in response.text
-    assert "普通树" not in response.text
+    assert "forest-head" not in response.text
+    assert "forest-summary" not in response.text
+    assert "forest-control-dock" not in response.text
+    assert 'class="forest-experience' not in response.text
     assert "forest-focus-plot" not in response.text
     assert "data-forest-focus-start" not in response.text
     assert "forest-focus-harvest-badge" not in response.text
@@ -218,9 +236,32 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "Navigation" in response.text
     assert "Simulation" in response.text
     assert "Other" in response.text
-    assert "未做 AI 总结" in response.text
-    assert "已有单篇/全文总结" in response.text
     assert "古树" in response.text
+
+
+def test_forest_page_aggregates_large_groves_with_focus_action(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        for index in range(26):
+            session.add(
+                _paper(
+                    arxiv_id=f"2605.10{index:03d}v1",
+                    title=f"Dataset Benchmark Suite {index}",
+                    abstract="A dataset and evaluation suite for embodied robots.",
+                    matched_keywords_json='[{"keyword":"dataset"}]',
+                )
+            )
+        session.commit()
+
+    response = TestClient(app).get("/forest?date=2026-05-23")
+
+    assert response.status_code == 200
+    assert 'data-grove-overflow="true"' in response.text
+    assert 'data-forest-focus-grove="dataset"' in response.text
+    assert "forest-grove-more" in response.text
+    assert "+8" in response.text
 
 
 def test_forest_page_marks_saplings_and_grown_trees(tmp_path):
