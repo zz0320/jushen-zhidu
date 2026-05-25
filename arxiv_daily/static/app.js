@@ -1071,7 +1071,7 @@
       button.addEventListener("click", () => {
         const group = buttonGroup(button);
         activeFilters[group] = button.dataset.forestFilter || "all";
-        if (group === "topic" && focusedGrove && activeFilters.topic !== "all" && activeFilters.topic !== focusedGrove) {
+        if (group === "topic" && focusedGrove && (activeFilters.topic === "all" || activeFilters.topic !== focusedGrove)) {
           setFocusedGrove("");
         }
         applyFilterState();
