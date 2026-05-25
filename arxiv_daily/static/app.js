@@ -166,10 +166,11 @@
       });
       if (job.status !== "failed") {
         const saved = numberText(job.saved);
+        const matched = numberText(job.matched);
         const fetched = numberText(job.fetched);
         const network = numberText(job.network_requests);
         const cached = numberText(job.cached_pages);
-        renderInlineStatus(statusNode, `${job.stage_label || "正在抓取"} · 读取 ${fetched} · 保存 ${saved} · API ${network} · 缓存 ${cached}`, job);
+        renderInlineStatus(statusNode, `${job.stage_label || "正在抓取"} · 读取 ${fetched} · 命中 ${matched} · 新增 ${saved} · API ${network} · 缓存 ${cached}`, job);
       }
     };
 
@@ -684,9 +685,288 @@
     });
   };
 
+  const setupForest = () => {
+    const dataNode = document.getElementById("forest-data");
+    const grid = document.querySelector("[data-forest-grid]");
+    if (!dataNode || !grid) {
+      return;
+    }
+    const stage = document.querySelector("[data-forest-stage]");
+    const experience = document.querySelector("[data-forest-experience]");
+    const visibleCountNode = document.querySelector("[data-forest-visible-count]");
+
+    let tiles = [];
+    try {
+      tiles = JSON.parse(dataNode.textContent || "[]");
+    } catch (_error) {
+      tiles = [];
+    }
+    const tileById = new Map(tiles.map((tile) => [tile.arxiv_id, tile]));
+    const buttons = Array.from(document.querySelectorAll("[data-forest-tile]"));
+    const filters = Array.from(document.querySelectorAll("[data-forest-filter]"));
+    const groves = Array.from(document.querySelectorAll("[data-forest-grove]"));
+    const empty = document.querySelector("[data-forest-empty]");
+
+    const nodes = {
+      kind: document.querySelector("[data-forest-detail-kind]"),
+      title: document.querySelector("[data-forest-detail-title]"),
+      paper: document.querySelector("[data-forest-detail-paper]"),
+      score: document.querySelector("[data-forest-detail-score]"),
+      rarity: document.querySelector("[data-forest-detail-rarity]"),
+      growth: document.querySelector("[data-forest-detail-growth]"),
+      category: document.querySelector("[data-forest-detail-category]"),
+      authors: document.querySelector("[data-forest-detail-authors]"),
+      arxiv: document.querySelector("[data-forest-detail-arxiv]"),
+      keywords: document.querySelector("[data-forest-detail-keywords]"),
+      categories: document.querySelector("[data-forest-detail-categories]"),
+      status: document.querySelector("[data-forest-detail-status]"),
+      abstract: document.querySelector("[data-forest-detail-abstract]"),
+      plant: document.querySelector("[data-forest-detail-plant]"),
+      sprite: document.querySelector("[data-forest-detail-sprite]"),
+      growthDiary: document.querySelector("[data-forest-growth-diary]"),
+      growthSteps: Array.from(document.querySelectorAll("[data-growth-step]")),
+      growthStatusBadge: document.querySelector("[data-forest-growth-status]"),
+      growthStatusFill: document.querySelector("[data-forest-growth-fill]"),
+      grownVisible: document.querySelector("[data-forest-grown-visible]"),
+      growthVisible: document.querySelector("[data-forest-growth-visible]"),
+    };
+
+    const text = (value, fallback = "") => {
+      const normalized = Array.isArray(value) ? value.join(", ") : String(value || "");
+      return normalized || fallback;
+    };
+
+    const updateGrowthStatusSummary = () => {
+      const visibleButtons = buttons.filter((button) => !button.hidden);
+      const grown = visibleButtons.filter((button) => button.dataset.summarized === "true").length;
+      const growthPercent = visibleButtons.length ? Math.round((grown / visibleButtons.length) * 100) : 0;
+      if (nodes.grownVisible) {
+        nodes.grownVisible.textContent = String(grown);
+      }
+      if (nodes.growthVisible) {
+        nodes.growthVisible.textContent = String(visibleButtons.length);
+      }
+      if (nodes.growthStatusBadge) {
+        nodes.growthStatusBadge.classList.toggle("has-growth", grown > 0);
+        nodes.growthStatusBadge.dataset.growthRatio = visibleButtons.length ? `${grown}/${visibleButtons.length}` : "0/0";
+        nodes.growthStatusBadge.style.setProperty("--forest-grown-progress", `${growthPercent}%`);
+      }
+      if (nodes.growthStatusFill) {
+        const badgeWidth = nodes.growthStatusBadge ? Math.max(nodes.growthStatusBadge.clientWidth - 10, 0) : 0;
+        const fillWidth = growthPercent > 0 ? Math.max(3, Math.round((badgeWidth * growthPercent) / 100)) : 0;
+        nodes.growthStatusFill.style.width = `${fillWidth}px`;
+      }
+    };
+
+    const setSelected = (button, animate = true) => {
+      buttons.forEach((item) => {
+        const selected = item === button;
+        item.classList.toggle("is-selected", selected);
+        item.setAttribute("aria-pressed", selected ? "true" : "false");
+      });
+      groves.forEach((grove) => {
+        grove.classList.toggle("is-focused-grove", grove.contains(button));
+      });
+      if (!animate) {
+        return;
+      }
+      if (stage) {
+        const stageRect = stage.getBoundingClientRect();
+        const buttonRect = button.getBoundingClientRect();
+        const selectionX = ((buttonRect.left + buttonRect.width / 2 - stageRect.left) / stageRect.width) * 100;
+        const selectionY = ((buttonRect.top + buttonRect.height / 2 - stageRect.top) / stageRect.height) * 100;
+        stage.style.setProperty("--forest-selection-x", `${Math.max(0, Math.min(100, selectionX))}%`);
+        stage.style.setProperty("--forest-selection-y", `${Math.max(0, Math.min(100, selectionY))}%`);
+        stage.dataset.selectionKind = button.dataset.filterKey || "all";
+        stage.classList.remove("is-selection-pulse");
+        void stage.offsetWidth;
+        stage.classList.add("is-selection-pulse");
+        window.setTimeout(() => stage.classList.remove("is-selection-pulse"), 760);
+      }
+      button.classList.remove("is-planting");
+      void button.offsetWidth;
+      button.classList.add("is-planting");
+      window.setTimeout(() => button.classList.remove("is-planting"), 720);
+    };
+
+    const spritePath = (tile) => {
+      const prefix = tile.plant_stage === "sapling" ? "sapling-" : "tree-";
+      return `/static/forest/generated/${prefix}${tile.asset}.png`;
+    };
+
+    const renderDetails = (tile) => {
+      if (!tile) {
+        return;
+      }
+      const inspector = nodes.title ? nodes.title.closest(".forest-inspector") : null;
+      if (inspector) {
+        inspector.classList.remove("is-updating", "is-tree-stage", "is-sapling-stage");
+        inspector.classList.add(tile.has_ai_summary ? "is-tree-stage" : "is-sapling-stage");
+        void inspector.offsetWidth;
+        inspector.classList.add("is-updating");
+        window.setTimeout(() => inspector.classList.remove("is-updating"), 380);
+      }
+      if (nodes.kind) nodes.kind.textContent = tile.kind_label || tile.primary_category || "";
+      if (nodes.title) nodes.title.textContent = tile.title || "";
+      if (nodes.paper) nodes.paper.href = tile.detail_url || "#";
+      if (nodes.score) nodes.score.textContent = `相关性 ${tile.score_display || tile.score || 0}`;
+      if (nodes.rarity) nodes.rarity.textContent = tile.rarity_label || "";
+      if (nodes.growth) nodes.growth.textContent = tile.growth_label || "";
+      if (nodes.category) nodes.category.textContent = tile.primary_category || "";
+      if (nodes.authors) nodes.authors.textContent = text(tile.authors_display || tile.authors, "作者未记录");
+      if (nodes.arxiv) {
+        nodes.arxiv.href = tile.abs_url || "#";
+        nodes.arxiv.textContent = tile.arxiv_id || "arXiv";
+      }
+      if (nodes.keywords) nodes.keywords.textContent = text(tile.matched_terms_display || tile.matched_keywords, "暂无关键词");
+      if (nodes.categories) nodes.categories.textContent = text(tile.categories_display || tile.categories, tile.primary_category || "-");
+      if (nodes.status) nodes.status.textContent = tile.summary_status || "只有元数据";
+      if (nodes.abstract) nodes.abstract.textContent = tile.abstract || "";
+      const growthRank = Number(tile.growth_rank || 0);
+      const clampedGrowthRank = Number.isFinite(growthRank) ? Math.max(0, Math.min(3, growthRank)) : 0;
+      if (nodes.growthDiary) {
+        nodes.growthDiary.dataset.currentGrowth = tile.growth || "metadata";
+        nodes.growthDiary.style.setProperty("--forest-growth-progress", `${(clampedGrowthRank / 3) * 100}%`);
+        nodes.growthDiary.setAttribute("aria-label", `论文成长进度：${tile.growth_label || "树苗"}`);
+      }
+      if (nodes.growthSteps.length) {
+        nodes.growthSteps.forEach((step) => {
+          const stepRank = Number(step.dataset.growthRank || 0);
+          step.classList.toggle("is-complete", stepRank <= clampedGrowthRank);
+          step.classList.toggle("is-current", step.dataset.growthStep === (tile.growth || "metadata"));
+        });
+      }
+      if (nodes.sprite && tile.asset) {
+        nodes.sprite.src = spritePath(tile);
+      }
+      if (nodes.plant) {
+        const plantClasses = [
+          "forest-inspector-plant",
+          `tree-${tile.kind || "other"}`,
+          `is-${tile.plant_stage || "sapling"}-plant`,
+        ];
+        if (tile.high_relevance) {
+          plantClasses.push("is-high-relevance-plant");
+        }
+        if (tile.growth === "full_text") {
+          plantClasses.push("is-full-text-plant");
+        }
+        nodes.plant.className = plantClasses.join(" ");
+        nodes.plant.dataset.growth = tile.growth || "";
+      }
+    };
+
+    const matchesFilter = (button, filter) => {
+      if (filter === "all") return true;
+      if (filter === "summarized") return button.dataset.summarized === "true";
+      if (filter === "unsummarized") return button.dataset.summarized !== "true";
+      if (filter === "high_relevance") return button.dataset.highRelevance === "true";
+      return button.dataset.filterKey === filter;
+    };
+
+    const densityForCount = (count) => {
+      if (count >= 28) return "canopy";
+      if (count >= 16) return "dense";
+      return "open";
+    };
+
+    const groveSizeForCount = (count) => {
+      if (count >= 48) return "canopy";
+      if (count >= 18) return "large";
+      if (count >= 7) return "medium";
+      return "small";
+    };
+
+    const applyDensity = (count) => {
+      const density = densityForCount(count);
+      [grid, stage, experience].forEach((node) => {
+        if (!node) return;
+        node.classList.remove("forest-density-open", "forest-density-dense", "forest-density-canopy");
+        node.classList.add(`forest-density-${density}`);
+        node.dataset.density = density;
+      });
+      if (visibleCountNode) {
+        visibleCountNode.textContent = String(count);
+      }
+      updateGrowthStatusSummary();
+    };
+
+    const applyGroveLayout = () => {
+      groves.forEach((grove) => {
+        const visibleButtons = Array.from(grove.querySelectorAll("[data-forest-tile]")).filter((button) => !button.hidden);
+        const visible = visibleButtons.length;
+        const summarized = visibleButtons.filter((button) => button.dataset.summarized === "true").length;
+        const saplings = Math.max(visible - summarized, 0);
+        const size = groveSizeForCount(visible);
+        const countLabel = grove.querySelector("[data-grove-count-label]");
+        const growthLabel = grove.querySelector("[data-grove-growth-label]");
+
+        grove.hidden = visible === 0;
+        grove.classList.remove("is-canopy-grove", "is-large-grove", "is-medium-grove", "is-small-grove", "is-major", "is-minor");
+        grove.classList.add(`is-${size}-grove`, visible >= 48 ? "is-major" : "is-minor");
+        if (countLabel) {
+          countLabel.textContent = String(visible);
+        }
+        if (growthLabel) {
+          growthLabel.textContent = `${summarized} 成长 / ${saplings} 树苗`;
+        }
+      });
+    };
+
+    const applyFilter = (filter) => {
+      let visible = 0;
+      let firstVisible = null;
+      buttons.forEach((button) => {
+        const matched = matchesFilter(button, filter);
+        button.hidden = !matched;
+        if (matched) {
+          visible += 1;
+          firstVisible = firstVisible || button;
+        }
+      });
+      filters.forEach((button) => button.classList.toggle("is-active", button.dataset.forestFilter === filter));
+      if (stage) {
+        stage.dataset.activeFilter = filter;
+        stage.classList.remove("is-filtering");
+        void stage.offsetWidth;
+        stage.classList.add("is-filtering");
+        window.setTimeout(() => stage.classList.remove("is-filtering"), 520);
+      }
+      applyGroveLayout();
+      if (empty) {
+        empty.hidden = visible > 0;
+      }
+      applyDensity(visible);
+      if (firstVisible && !buttons.some((button) => !button.hidden && button.classList.contains("is-selected"))) {
+        firstVisible.click();
+      }
+    };
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setSelected(button);
+        renderDetails(tileById.get(button.dataset.arxivId));
+      });
+    });
+
+    filters.forEach((button) => {
+      button.addEventListener("click", () => {
+        applyFilter(button.dataset.forestFilter || "all");
+      });
+    });
+
+    const initialButton = buttons.find((button) => button.classList.contains("is-selected")) || buttons[0];
+    if (initialButton) {
+      setSelected(initialButton, false);
+      renderDetails(tileById.get(initialButton.dataset.arxivId));
+    }
+    applyFilter("all");
+  };
+
   setupFetchProgress();
   setupSummaryProgress();
   setupPaperFilter();
   setupSettingsPresets();
   setupFigureLightbox();
+  setupForest();
 })();

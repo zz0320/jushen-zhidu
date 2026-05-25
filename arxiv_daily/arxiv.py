@@ -6,8 +6,9 @@ import os
 import re
 import time
 import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from typing import Callable, Dict, Iterable, List, Optional
 from zoneinfo import ZoneInfo
 
@@ -21,6 +22,7 @@ from .scoring import KeywordRule, load_keyword_rules, score_text
 
 ATOM_NS = "{http://www.w3.org/2005/Atom}"
 ARXIV_NS = "{http://arxiv.org/schemas/atom}"
+OPENSEARCH_NS = "{http://a9.com/-/spec/opensearch/1.1/}"
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,14 @@ class ArxivEntry:
 
 
 @dataclass(frozen=True)
+class ArxivFeedPage:
+    entries: List[ArxivEntry]
+    total_results: Optional[int] = None
+    start_index: Optional[int] = None
+    items_per_page: Optional[int] = None
+
+
+@dataclass(frozen=True)
 class FetchResult:
     fetched: int
     saved: int
@@ -51,6 +61,8 @@ class FetchResult:
     cached_pages: int = 0
     daily_network_fetch_limit: int = 0
     daily_network_fetch_used: int = 0
+    matched: int = 0
+    updated: int = 0
 
 
 @dataclass(frozen=True)
@@ -106,6 +118,15 @@ def _parse_dt(value: str) -> Optional[datetime]:
         return None
 
 
+def _parse_int(value: str) -> Optional[int]:
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
 def _unique_strings(values: Iterable[str]) -> List[str]:
     unique: List[str] = []
     seen = set()
@@ -117,7 +138,7 @@ def _unique_strings(values: Iterable[str]) -> List[str]:
     return unique
 
 
-def parse_atom_feed(xml_text: str) -> List[ArxivEntry]:
+def parse_atom_page(xml_text: str) -> ArxivFeedPage:
     root = ET.fromstring(xml_text)
     entries: List[ArxivEntry] = []
     for entry in root.findall(f"{ATOM_NS}entry"):
@@ -172,7 +193,16 @@ def parse_atom_feed(xml_text: str) -> List[ArxivEntry]:
                 comment=_text(entry, f"{ARXIV_NS}comment"),
             )
         )
-    return entries
+    return ArxivFeedPage(
+        entries=entries,
+        total_results=_parse_int(_text(root, f"{OPENSEARCH_NS}totalResults")),
+        start_index=_parse_int(_text(root, f"{OPENSEARCH_NS}startIndex")),
+        items_per_page=_parse_int(_text(root, f"{OPENSEARCH_NS}itemsPerPage")),
+    )
+
+
+def parse_atom_feed(xml_text: str) -> List[ArxivEntry]:
+    return parse_atom_page(xml_text).entries
 
 
 def enabled_categories(session: Session) -> List[str]:
@@ -212,6 +242,7 @@ def _upsert_paper(
         "fetched_for_date": target_day.isoformat(),
         "relevance_score": score,
         "matched_keywords_json": json.dumps(matched_keywords, ensure_ascii=False),
+        "refreshed_at": utc_now(),
     }
     if existing is None:
         session.add(Paper(arxiv_id=entry.arxiv_id, **payload))
@@ -229,8 +260,25 @@ def _retry_after_seconds(response: httpx.Response, attempt: int, settings: Setti
         try:
             return max(settings.effective_arxiv_request_delay_seconds, float(raw_retry_after))
         except ValueError:
-            pass
+            try:
+                retry_after = parsedate_to_datetime(raw_retry_after)
+            except (TypeError, ValueError):
+                pass
+            else:
+                if retry_after.tzinfo is None:
+                    retry_after = retry_after.replace(tzinfo=timezone.utc)
+                delay = (retry_after - datetime.now(timezone.utc)).total_seconds()
+                return max(settings.effective_arxiv_request_delay_seconds, delay)
     return _retry_backoff_seconds(attempt, settings)
+
+
+def _has_reached_feed_end(start: int, entries_count: int, page_size: int, total_results: Optional[int], max_results: int) -> bool:
+    if entries_count < page_size:
+        return True
+    if total_results is None:
+        return False
+    result_limit = min(total_results, max_results)
+    return start + entries_count >= result_limit
 
 
 def _retry_backoff_seconds(attempt: int, settings: Settings) -> float:
@@ -325,11 +373,51 @@ def _page_cache_key(settings: Settings, query: str, start: int, page_size: int) 
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def _cached_page_text(session: Session, cache_key: str, force_refresh: bool) -> Optional[str]:
+def _age_seconds(value: datetime) -> float:
+    timestamp = value
+    if timestamp.tzinfo is None:
+        timestamp = timestamp.replace(tzinfo=timezone.utc)
+    return max(0.0, (datetime.now(timezone.utc) - timestamp).total_seconds())
+
+
+def _is_empty_feed(xml_text: str) -> bool:
+    try:
+        page = parse_atom_page(xml_text)
+    except ET.ParseError:
+        return False
+    if page.total_results == 0:
+        return True
+    return page.total_results is None and not page.entries
+
+
+def _empty_cache_ttl_seconds(target_day: date, settings: Settings) -> Optional[float]:
+    ttl = settings.arxiv_empty_cache_ttl_seconds
+    if ttl <= 0:
+        return None
+    current_day = date.fromisoformat(_current_run_date(settings))
+    if target_day >= current_day - timedelta(days=1):
+        return ttl
+    return None
+
+
+def _cached_page_text(
+    session: Session,
+    cache_key: str,
+    force_refresh: bool,
+    empty_cache_ttl_seconds: Optional[float] = None,
+) -> Optional[str]:
     if force_refresh:
         return None
     cached = session.get(ArxivPageCache, cache_key)
-    return cached.response_text if cached is not None else None
+    if cached is None:
+        return None
+    if (
+        empty_cache_ttl_seconds is not None
+        and _age_seconds(cached.fetched_at) > empty_cache_ttl_seconds
+        and _is_empty_feed(cached.response_text)
+    ):
+        return None
+    return cached.response_text
 
 
 def _store_page_cache(
@@ -421,6 +509,8 @@ def fetch_papers_for_date(
     query = build_search_query(categories, target_day, settings.timezone)
     fetched = 0
     saved = 0
+    matched = 0
+    updated = 0
     skipped_no_keyword = 0
     skipped_excluded = 0
     network_requests = 0
@@ -444,6 +534,8 @@ def fetch_papers_for_date(
             "total_pages": total_pages,
             "fetched": fetched,
             "saved": saved,
+            "matched": matched,
+            "updated": updated,
             "skipped_no_keyword": skipped_no_keyword,
             "skipped_excluded": skipped_excluded,
             "query": query,
@@ -468,7 +560,12 @@ def fetch_papers_for_date(
         nonlocal last_request_at, network_requests, cached_pages, network_fetch_run_id
         cache_key = _page_cache_key(settings, query, start, page_size)
         if settings.arxiv_cache_enabled:
-            cached_text = _cached_page_text(session, cache_key, force_refresh)
+            cached_text = _cached_page_text(
+                session,
+                cache_key,
+                force_refresh,
+                empty_cache_ttl_seconds=_empty_cache_ttl_seconds(target_day, settings),
+            )
             if cached_text is not None:
                 cached_pages += 1
                 report("cached", start=start, page=page, percent=percent, cached_pages=cached_pages)
@@ -573,7 +670,8 @@ def fetch_papers_for_date(
             request_percent = min(90, int(start / settings.arxiv_max_results * 80) + 8)
             report("requesting", start=start, page=page, percent=request_percent)
             response_text = request_page(start, page, page_size, request_percent)
-            entries = parse_atom_feed(response_text)
+            feed_page = parse_atom_page(response_text)
+            entries = feed_page.entries
             if not entries:
                 report("complete", start=start, page=page, percent=100)
                 break
@@ -588,6 +686,7 @@ def fetch_papers_for_date(
                 if not score.matched_keywords:
                     skipped_no_keyword += 1
                     continue
+                matched += 1
                 created = _upsert_paper(
                     session=session,
                     entry=entry,
@@ -597,10 +696,12 @@ def fetch_papers_for_date(
                 )
                 if created:
                     saved += 1
+                else:
+                    updated += 1
 
             session.commit()
             report("saving", start=start, page=page, percent=min(95, int((start + len(entries)) / settings.arxiv_max_results * 85) + 10))
-            if len(entries) < page_size:
+            if _has_reached_feed_end(start, len(entries), page_size, feed_page.total_results, settings.arxiv_max_results):
                 break
     except Exception as exc:
         _finish_network_fetch(
@@ -620,6 +721,8 @@ def fetch_papers_for_date(
     return FetchResult(
         fetched=fetched,
         saved=saved,
+        matched=matched,
+        updated=updated,
         skipped_no_keyword=skipped_no_keyword,
         skipped_excluded=skipped_excluded,
         query=query,

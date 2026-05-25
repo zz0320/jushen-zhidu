@@ -23,6 +23,7 @@ class Settings:
     arxiv_retry_base_delay_seconds: float = 30.0
     arxiv_daily_network_fetch_limit: int = 5
     arxiv_cache_enabled: bool = True
+    arxiv_empty_cache_ttl_seconds: float = 1800.0
     arxiv_rate_limit_path: Optional[Path] = None
     request_timeout_seconds: float = 30.0
     qwen_api_key: str = ""
@@ -72,6 +73,7 @@ def get_settings() -> Settings:
         arxiv_retry_base_delay_seconds=float(os.getenv("ARXIV_RETRY_BASE_DELAY_SECONDS", "30")),
         arxiv_daily_network_fetch_limit=int(os.getenv("ARXIV_DAILY_NETWORK_FETCH_LIMIT", "5")),
         arxiv_cache_enabled=_bool_from_env("ARXIV_CACHE_ENABLED", True),
+        arxiv_empty_cache_ttl_seconds=float(os.getenv("ARXIV_EMPTY_CACHE_TTL_SECONDS", "1800")),
         arxiv_rate_limit_path=(
             _path_from_env("ARXIV_RATE_LIMIT_FILE", "")
             if os.getenv("ARXIV_RATE_LIMIT_FILE")

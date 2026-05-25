@@ -68,7 +68,8 @@ def fetch(
     finally:
         session.close()
     typer.echo(
-        f"{target_day}: fetched={result.fetched}, saved={result.saved}, "
+        f"{target_day}: fetched={result.fetched}, matched={result.matched}, "
+        f"saved={result.saved}, updated={result.updated}, "
         f"skipped_no_keyword={result.skipped_no_keyword}, skipped_excluded={result.skipped_excluded}, "
         f"network_requests={result.network_requests}, cached_pages={result.cached_pages}"
     )

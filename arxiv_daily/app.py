@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, Generator, Optional
 
-from fastapi import Depends, FastAPI, Form, Request
+from fastapi import Depends, FastAPI, Form, Query, Request
 import httpx
 from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -22,6 +22,15 @@ from .config import Settings, get_settings
 from .database import build_engine, create_db_and_tables
 from .dates import arxiv_date_range, arxiv_date_ranges, parse_day
 from .defaults import init_default_config
+from .forest import (
+    build_forest_tiles,
+    filter_tile,
+    forest_client_tiles,
+    forest_counts,
+    forest_filters,
+    forest_groves,
+    forest_scene_context,
+)
 from .models import (
     ArxivFetchRun,
     Category,
@@ -84,6 +93,15 @@ def _day_nav_context(target_day: date, session: Session) -> Dict[str, str]:
     }
 
 
+def _parse_optional_day(value: Optional[str], settings: Settings) -> tuple[date, str]:
+    if not value:
+        return parse_day(None, settings.timezone), ""
+    try:
+        return parse_day(value, settings.timezone), ""
+    except ValueError:
+        return parse_day(None, settings.timezone), f"日期 {value} 无法识别，已展示今天的论文森林。"
+
+
 def _redirect(path: str, **query: object) -> RedirectResponse:
     filtered = {key: value for key, value in query.items() if value not in (None, "")}
     suffix = f"?{urllib.parse.urlencode(filtered)}" if filtered else ""
@@ -109,7 +127,8 @@ def _message_from_fetch(result: FetchResult) -> str:
     if result.daily_network_fetch_limit > 0:
         quota_note = f" 今日有效拉取额度 {result.daily_network_fetch_used}/{result.daily_network_fetch_limit}。"
     return (
-        f"读取 {result.fetched} 篇；保存 {result.saved} 篇；"
+        f"读取 {result.fetched} 篇；命中 {result.matched} 篇；"
+        f"新增 {result.saved} 篇；刷新已有 {result.updated} 篇；"
         f"无关键词跳过 {result.skipped_no_keyword} 篇；排除词跳过 {result.skipped_excluded} 篇。"
         f" {source_note}{quota_note}"
     )
@@ -204,6 +223,8 @@ def _fetch_stage_message(payload: Dict[str, object]) -> str:
     total_pages = int(payload.get("total_pages") or 0)
     fetched = int(payload.get("fetched") or 0)
     saved = int(payload.get("saved") or 0)
+    matched = int(payload.get("matched") or 0)
+    updated = int(payload.get("updated") or 0)
     if stage == "locked":
         seconds = int(payload.get("wait_seconds") or 0)
         return f"上一个抓取任务仍在运行，已等待 {seconds} 秒。"
@@ -229,7 +250,7 @@ def _fetch_stage_message(payload: Dict[str, object]) -> str:
     if stage == "processing":
         return f"正在解析论文并计算关键词相关性，已读取 {fetched} 篇。"
     if stage == "saving":
-        return f"已保存 {saved} 篇命中论文。"
+        return f"已命中 {matched} 篇，新增 {saved} 篇，刷新已有 {updated} 篇。"
     if stage == "complete":
         return "抓取完成，正在刷新列表。"
     return "正在准备检索条件。"
@@ -275,6 +296,40 @@ def _summary_error_message(exc: Exception) -> str:
     if isinstance(exc, httpx.RequestError):
         return "无法连接智能模型 API，请检查网络或 Base URL。"
     return message
+
+
+def _forest_data(session: Session, target_day: date) -> Dict[str, object]:
+    papers = session.exec(
+        select(Paper)
+        .where(Paper.fetched_for_date == target_day.isoformat())
+        .order_by(Paper.relevance_score.desc(), Paper.published_at.desc())
+    ).all()
+    paper_ids = [paper.arxiv_id for paper in papers]
+    translations = (
+        session.exec(select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id.in_(paper_ids))).all()
+        if paper_ids
+        else []
+    )
+    paper_summaries = (
+        session.exec(select(PaperSummary).where(PaperSummary.arxiv_id.in_(paper_ids))).all()
+        if paper_ids
+        else []
+    )
+    full_text_summaries = (
+        session.exec(select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id.in_(paper_ids))).all()
+        if paper_ids
+        else []
+    )
+    tiles = build_forest_tiles(papers, target_day, translations, paper_summaries, full_text_summaries)
+    return {
+        "papers": papers,
+        "tiles": tiles,
+        "client_tiles": forest_client_tiles(tiles),
+        "counts": forest_counts(tiles),
+        "filters": forest_filters(),
+        "groves": forest_groves(tiles),
+        "scene": forest_scene_context(target_day),
+    }
 
 
 def _mark_stale_fetch_runs_failed(session: Session) -> int:
@@ -411,6 +466,8 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "percent": 1,
                 "fetched": 0,
                 "saved": 0,
+                "matched": 0,
+                "updated": 0,
                 "skipped_no_keyword": 0,
                 "skipped_excluded": 0,
                 "network_requests": 0,
@@ -496,6 +553,8 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                     percent=100,
                     fetched=result.fetched,
                     saved=result.saved,
+                    matched=result.matched,
+                    updated=result.updated,
                     skipped_no_keyword=result.skipped_no_keyword,
                     skipped_excluded=result.skipped_excluded,
                     network_requests=result.network_requests,
@@ -1163,6 +1222,49 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             session.delete(keyword)
             session.commit()
         return _redirect("/keywords")
+
+    @app.get("/forest")
+    def forest_page(
+        request: Request,
+        forest_date: Optional[str] = Query(None, alias="date"),
+        message: str = "",
+        error: str = "",
+        session: Session = Depends(get_session),
+    ) -> Response:
+        target_day, date_error = _parse_optional_day(forest_date, settings)
+        data = _forest_data(session, target_day)
+        return templates.TemplateResponse(
+            "forest.html",
+            {
+                "request": request,
+                "day": target_day.isoformat(),
+                "message": message,
+                "error": error or date_error,
+                **data,
+                **_day_nav_context(target_day, session),
+            },
+        )
+
+    @app.get("/api/forest")
+    def forest_api(
+        forest_date: Optional[str] = Query(None, alias="date"),
+        filter_key: Optional[str] = Query(None, alias="filter"),
+        session: Session = Depends(get_session),
+    ) -> Dict[str, object]:
+        target_day, date_error = _parse_optional_day(forest_date, settings)
+        data = _forest_data(session, target_day)
+        tiles = data["tiles"]
+        if filter_key:
+            tiles = [tile for tile in tiles if filter_tile(tile, filter_key)]
+        return {
+            "date": target_day.isoformat(),
+            "error": date_error,
+            "filter": filter_key or "all",
+            "counts": data["counts"],
+            "filters": data["filters"],
+            "scene": data["scene"],
+            "tiles": tiles,
+        }
 
     @app.get("/papers")
     @app.get("/papers/")

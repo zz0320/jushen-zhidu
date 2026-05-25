@@ -1,0 +1,7169 @@
+/* Pixel forest asset system for the paper forest route. */
+
+.forest-head {
+  background:
+    linear-gradient(180deg, rgba(19, 42, 31, 0.18), transparent 48%),
+    linear-gradient(135deg, #163325 0%, #24523a 52%, #18382f 100%);
+  border: 2px solid #21432f;
+  box-shadow: 0 18px 42px rgba(28, 65, 43, 0.16);
+  color: #f8fff1;
+  overflow: hidden;
+  position: relative;
+  transform: none;
+}
+
+.forest-head::before {
+  background:
+    linear-gradient(90deg, transparent 0 18px, rgba(240, 204, 101, 0.82) 18px 26px, transparent 26px 42px),
+    linear-gradient(90deg, rgba(58, 126, 72, 0.85) 0 12px, rgba(37, 86, 55, 0.85) 12px 24px, rgba(120, 170, 82, 0.85) 24px 36px);
+  bottom: 0;
+  content: "";
+  height: 14px;
+  image-rendering: pixelated;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: auto;
+  transform: none;
+  width: auto;
+}
+
+.forest-head::after {
+  background:
+    linear-gradient(180deg, #8fcf6a 0 12px, transparent 12px),
+    linear-gradient(180deg, transparent 0 12px, #5f8a48 12px 28px, transparent 28px),
+    linear-gradient(90deg, transparent 0 10px, #6f4d2f 10px 16px, transparent 16px);
+  bottom: 14px;
+  content: "";
+  height: 42px;
+  image-rendering: pixelated;
+  opacity: 0.42;
+  position: absolute;
+  right: 28px;
+  width: 52px;
+}
+
+.forest-head > * {
+  position: relative;
+  z-index: 2;
+}
+
+.forest-head .eyebrow,
+.forest-head p {
+  color: #cfeecb;
+}
+
+.forest-head h1 {
+  color: #ffffff;
+  letter-spacing: 0;
+}
+
+.forest-tools,
+.forest-summary .metric-card,
+.forest-inspector {
+  border-radius: 8px;
+}
+
+.forest-filter {
+  border-radius: 6px;
+}
+
+.forest-filter:hover,
+.forest-filter.is-active {
+  background: #173526;
+  border-color: #173526;
+}
+
+.forest-experience {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 388px;
+}
+
+.forest-stage {
+  background:
+    radial-gradient(circle at 15% 18%, rgba(236, 244, 187, 0.44) 0 8%, transparent 9%),
+    radial-gradient(circle at 84% 9%, rgba(113, 168, 79, 0.46) 0 14%, transparent 15%),
+    linear-gradient(180deg, #d9ecae 0%, #a2cb76 48%, #6c9b57 100%);
+  border: 3px solid #24462f;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.16),
+    inset 0 -18px 0 rgba(39, 77, 41, 0.15),
+    0 18px 38px rgba(29, 68, 39, 0.17);
+  overflow: hidden;
+  padding: 16px;
+  position: relative;
+}
+
+.forest-scene-decor {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+.forest-decor {
+  display: block;
+  image-rendering: pixelated;
+  position: absolute;
+}
+
+.forest-decor.canopy {
+  background: #3d7c3f;
+  box-shadow:
+    18px 0 0 #4f914a,
+    36px 0 0 #315f35,
+    9px 12px 0 #5f9d4a,
+    27px 12px 0 #3f793c,
+    45px 12px 0 #2d5d36;
+  height: 12px;
+  opacity: 0.34;
+  width: 18px;
+}
+
+.canopy-a {
+  left: 22px;
+  top: 18px;
+}
+
+.canopy-b {
+  right: 58px;
+  top: 38px;
+  transform: scaleX(-1);
+}
+
+.forest-decor.path {
+  background:
+    linear-gradient(135deg, transparent 0 44%, rgba(145, 118, 67, 0.42) 44% 58%, transparent 58%);
+  height: 100%;
+  left: 42%;
+  top: 0;
+  transform: skewX(-11deg);
+  width: 108px;
+}
+
+.forest-decor.pond {
+  background:
+    linear-gradient(90deg, transparent 0 10px, rgba(255, 255, 255, 0.28) 10px 38px, transparent 38px),
+    #4f9e92;
+  border: 3px solid rgba(40, 100, 83, 0.55);
+  bottom: 16px;
+  box-shadow: inset -8px -8px 0 rgba(36, 93, 91, 0.32);
+  height: 42px;
+  opacity: 0.5;
+  right: 24px;
+  width: 78px;
+}
+
+.forest-grid {
+  background:
+    repeating-linear-gradient(90deg, rgba(34, 76, 36, 0.15) 0 1px, transparent 1px 78px),
+    repeating-linear-gradient(180deg, rgba(34, 76, 36, 0.12) 0 1px, transparent 1px 78px),
+    radial-gradient(circle at 18% 26%, rgba(236, 244, 187, 0.2) 0 7%, transparent 8%),
+    linear-gradient(180deg, #8ec262, #6fa94f);
+  border: 4px solid rgba(30, 64, 36, 0.74);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 0 3px rgba(247, 255, 232, 0.18),
+    inset 0 -14px 0 rgba(35, 70, 38, 0.12);
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.forest-tile {
+  --tree-shift-x: 0px;
+  --tree-shift-y: 0px;
+  --tree-tilt: 0deg;
+  --growth-scale: 1;
+  aspect-ratio: 1 / 1;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: #173526;
+  min-height: 86px;
+  overflow: visible;
+  padding: 0;
+  position: relative;
+}
+
+.forest-tile:hover,
+.forest-tile:focus-visible,
+.forest-tile.is-selected {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  outline: none;
+  transform: none;
+  z-index: 4;
+}
+
+.forest-tile-ground {
+  background:
+    radial-gradient(circle at 22px 68px, rgba(38, 86, 38, 0.2) 0 4px, transparent 5px),
+    radial-gradient(circle at 68px 20px, rgba(255, 255, 255, 0.2) 0 3px, transparent 4px),
+    linear-gradient(180deg, var(--land-a) 0 58%, var(--land-b) 58% 100%);
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -7px 0 rgba(31, 75, 38, 0.18);
+  display: block;
+  height: 100%;
+  image-rendering: pixelated;
+  overflow: visible;
+  position: relative;
+  width: 100%;
+}
+
+.forest-tile.is-selected .forest-tile-ground {
+  box-shadow:
+    inset 0 -7px 0 rgba(31, 75, 38, 0.18),
+    inset 0 0 0 3px #f0cc65,
+    inset 0 0 0 5px rgba(57, 46, 12, 0.2);
+}
+
+.forest-tile:hover .forest-tile-ground,
+.forest-tile:focus-visible .forest-tile-ground {
+  box-shadow:
+    inset 0 -7px 0 rgba(31, 75, 38, 0.18),
+    inset 0 0 0 3px rgba(248, 255, 241, 0.42);
+}
+
+.land-moss .forest-tile-ground,
+.land-fern .forest-tile-ground,
+.land-sprout .forest-tile-ground {
+  background:
+    radial-gradient(circle at 19px 67px, rgba(34, 84, 41, 0.28) 0 4px, transparent 5px),
+    radial-gradient(circle at 67px 24px, rgba(236, 244, 187, 0.26) 0 4px, transparent 5px),
+    linear-gradient(180deg, #8ec563 0 58%, #6aa44e 58% 100%);
+}
+
+.land-stone .forest-tile-ground {
+  background:
+    linear-gradient(90deg, transparent 0 28px, rgba(93, 111, 85, 0.25) 28px 44px, transparent 44px),
+    radial-gradient(circle at 65px 68px, #75856a 0 4px, transparent 5px),
+    linear-gradient(180deg, #99aa79 0 58%, #748c61 58% 100%);
+}
+
+.land-water .forest-tile-ground {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.23) 0 2px, transparent 2px 13px),
+    linear-gradient(180deg, #75b9a7 0 60%, #569688 60% 100%);
+}
+
+.land-flower .forest-tile-ground {
+  background:
+    radial-gradient(circle at 18px 66px, #f0cc65 0 3px, transparent 4px),
+    radial-gradient(circle at 68px 24px, #e87664 0 3px, transparent 4px),
+    radial-gradient(circle at 58px 70px, #f7f2c0 0 2px, transparent 3px),
+    linear-gradient(180deg, #94c961 0 58%, #73ad52 58% 100%);
+}
+
+.land-clay .forest-tile-ground {
+  background:
+    linear-gradient(135deg, transparent 0 40%, rgba(91, 66, 38, 0.22) 40% 56%, transparent 56%),
+    linear-gradient(180deg, #bc9b61 0 58%, #96784a 58% 100%);
+}
+
+.land-shade .forest-tile-ground {
+  background:
+    linear-gradient(180deg, rgba(26, 68, 41, 0.24), transparent 45%),
+    linear-gradient(180deg, #739d5e 0 58%, #557d49 58% 100%);
+}
+
+.terrain-shadow,
+.tree-shadow,
+.terrain-sprite {
+  display: block;
+  image-rendering: pixelated;
+  position: absolute;
+}
+
+.terrain-shadow {
+  background: rgba(42, 83, 39, 0.22);
+  bottom: 11px;
+  height: 7px;
+  left: 18%;
+  width: 64%;
+  z-index: 1;
+}
+
+.tree-shadow {
+  background: rgba(31, 58, 28, 0.28);
+  bottom: 13px;
+  height: 8px;
+  left: 22%;
+  width: 56%;
+  z-index: 2;
+}
+
+.terrain-sprite {
+  background: #386f36;
+  box-shadow:
+    5px -4px 0 #5a9346,
+    10px 0 0 #2f6434;
+  height: 5px;
+  width: 5px;
+  z-index: 3;
+}
+
+.sprite-one {
+  bottom: 17px;
+  left: 10px;
+}
+
+.sprite-two {
+  bottom: 10px;
+  right: 13px;
+  transform: scaleX(-1);
+}
+
+.land-flower .terrain-sprite {
+  background: #f0cc65;
+  box-shadow:
+    5px -4px 0 #e87664,
+    10px 0 0 #2f7b38;
+}
+
+.land-stone .terrain-sprite {
+  background: #6c7868;
+  box-shadow:
+    7px -3px 0 #8b977d,
+    14px 0 0 #53634f;
+}
+
+.land-water .terrain-sprite {
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow:
+    8px 0 0 rgba(255, 255, 255, 0.28),
+    18px -5px 0 rgba(255, 255, 255, 0.24);
+}
+
+.land-clay .terrain-sprite {
+  background: #6b5738;
+  box-shadow:
+    6px -3px 0 #8a7148,
+    13px 0 0 #5b482f;
+}
+
+.forest-pixel-tree {
+  bottom: calc(9px + var(--tree-shift-y));
+  display: block;
+  height: 84px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(calc(-50% + var(--tree-shift-x))) rotate(var(--tree-tilt)) scale(var(--growth-scale));
+  transform-origin: center bottom;
+  width: 78px;
+  z-index: 5;
+}
+
+.is-flipped .forest-pixel-tree {
+  transform: translateX(calc(-50% + var(--tree-shift-x))) rotate(calc(var(--tree-tilt) * -1)) scaleX(-1) scale(var(--growth-scale));
+}
+
+.accent-0 {
+  --tree-shift-x: -3px;
+  --tree-tilt: -1deg;
+}
+
+.accent-1 {
+  --tree-shift-x: 4px;
+  --tree-shift-y: -1px;
+}
+
+.accent-2 {
+  --tree-shift-x: -5px;
+  --tree-tilt: 1deg;
+}
+
+.accent-3 {
+  --tree-shift-x: 2px;
+  --tree-shift-y: 1px;
+}
+
+.accent-4 {
+  --tree-shift-x: 5px;
+  --tree-tilt: -0.8deg;
+}
+
+.forest-tile:nth-child(2n) {
+  --tree-shift-y: -4px;
+}
+
+.forest-tile:nth-child(3n) {
+  --tree-shift-x: 6px;
+  --tree-shift-y: 2px;
+}
+
+.forest-tile:nth-child(4n) {
+  --tree-shift-y: 4px;
+}
+
+.forest-tile:nth-child(5n) {
+  --tree-shift-x: -7px;
+  --tree-shift-y: -5px;
+}
+
+.forest-tile:nth-child(7n) {
+  --tree-shift-x: 8px;
+  --tree-shift-y: -2px;
+}
+
+.growth-metadata {
+  --growth-scale: 0.93;
+}
+
+.growth-translation {
+  --growth-scale: 1.02;
+}
+
+.growth-summary {
+  --growth-scale: 1.12;
+}
+
+.growth-full_text {
+  --growth-scale: 1.22;
+}
+
+.tree-trunk,
+.tree-crown,
+.tree-detail {
+  display: block;
+  image-rendering: pixelated;
+  position: absolute;
+}
+
+.tree-trunk {
+  background: var(--trunk);
+  bottom: 0;
+  box-shadow:
+    inset -4px 0 rgba(0, 0, 0, 0.18),
+    0 -8px 0 rgba(102, 74, 43, 0.55);
+  height: 35px;
+  left: 33px;
+  width: 13px;
+  z-index: 2;
+}
+
+.tree-crown {
+  background: var(--leaf-a);
+  box-shadow:
+    inset -6px -6px 0 var(--leaf-b),
+    0 4px 0 rgba(36, 79, 37, 0.28);
+  outline: 1px solid rgba(18, 45, 27, 0.18);
+  z-index: 4;
+}
+
+.tree-crown::before,
+.tree-crown::after {
+  content: "";
+  display: block;
+  image-rendering: pixelated;
+  position: absolute;
+}
+
+.crown-one {
+  height: 25px;
+  left: 27px;
+  top: 2px;
+  width: 25px;
+}
+
+.crown-one::before {
+  background: rgba(255, 255, 255, 0.2);
+  height: 5px;
+  left: 5px;
+  top: 5px;
+  width: 8px;
+}
+
+.crown-two {
+  height: 31px;
+  left: 16px;
+  top: 21px;
+  width: 47px;
+}
+
+.crown-two::before {
+  background: var(--leaf-a);
+  box-shadow:
+    46px 8px 0 var(--leaf-b),
+    -12px 10px 0 var(--leaf-b);
+  height: 12px;
+  left: -7px;
+  top: 7px;
+  width: 12px;
+}
+
+.crown-three {
+  height: 26px;
+  left: 7px;
+  top: 45px;
+  width: 64px;
+}
+
+.crown-three::after {
+  background: rgba(31, 71, 33, 0.24);
+  bottom: -4px;
+  height: 4px;
+  left: 8px;
+  width: 46px;
+}
+
+.tree-detail {
+  background: var(--detail);
+  height: 7px;
+  width: 7px;
+  z-index: 6;
+}
+
+.detail-one {
+  left: 22px;
+  top: 28px;
+}
+
+.detail-two {
+  left: 46px;
+  top: 22px;
+}
+
+.detail-three {
+  left: 37px;
+  top: 45px;
+}
+
+.tree-vla {
+  --leaf-a: #54a64a;
+  --leaf-b: #2f783b;
+  --trunk: #6f4b30;
+  --detail: #ef6a5a;
+}
+
+.tree-vla .tree-detail {
+  border: 1px solid rgba(105, 39, 30, 0.2);
+}
+
+.tree-world_model {
+  --leaf-a: #8fd9e3;
+  --leaf-b: #3f93aa;
+  --trunk: #63738b;
+  --detail: #f4fbff;
+}
+
+.tree-world_model .tree-crown {
+  background: linear-gradient(135deg, #d2fbff 0 34%, #83d6e5 34% 58%, #3f93aa 58% 100%);
+  box-shadow: inset -5px -5px 0 #2d718f, 0 4px 0 rgba(40, 94, 111, 0.22);
+  clip-path: polygon(50% 0, 100% 47%, 50% 100%, 0 47%);
+}
+
+.tree-world_model .detail-one,
+.tree-world_model .detail-two,
+.tree-world_model .detail-three {
+  background: rgba(255, 255, 255, 0.75);
+  height: 5px;
+}
+
+.tree-dataset {
+  --leaf-a: #6fa95b;
+  --leaf-b: #497d43;
+  --trunk: #68513a;
+  --detail: #d9ded0;
+}
+
+.tree-dataset .tree-crown {
+  background: #6fa95b;
+  box-shadow: inset -7px -6px 0 #497d43, 0 4px 0 rgba(49, 86, 45, 0.24);
+  clip-path: none;
+}
+
+.tree-dataset .crown-one {
+  height: 25px;
+  left: 24px;
+  top: 3px;
+  width: 31px;
+}
+
+.tree-dataset .crown-two {
+  height: 32px;
+  left: 10px;
+  top: 21px;
+  width: 36px;
+}
+
+.tree-dataset .crown-three {
+  background: #5f964f;
+  height: 31px;
+  left: 35px;
+  top: 22px;
+  width: 34px;
+}
+
+.tree-dataset .tree-trunk {
+  background: #5f4a36;
+  height: 34px;
+}
+
+.tree-dataset .detail-one {
+  background: #909b98;
+  bottom: 2px;
+  box-shadow: inset -4px -3px 0 #67736f;
+  height: 14px;
+  left: 28px;
+  top: auto;
+  width: 23px;
+}
+
+.tree-dataset .detail-two {
+  background: #eef1df;
+  bottom: 8px;
+  height: 3px;
+  left: 33px;
+  top: auto;
+  width: 11px;
+}
+
+.tree-dataset .detail-three {
+  background: #eef1df;
+  bottom: 4px;
+  height: 2px;
+  left: 34px;
+  top: auto;
+  width: 9px;
+}
+
+.tree-robotics {
+  --leaf-a: #5f9888;
+  --leaf-b: #385f5b;
+  --trunk: #4f5963;
+  --detail: #d7dde1;
+}
+
+.tree-robotics .tree-crown {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.tree-robotics .crown-one {
+  height: 31px;
+  left: 26px;
+  top: 0;
+  width: 27px;
+}
+
+.tree-robotics .crown-two {
+  height: 33px;
+  left: 17px;
+  top: 22px;
+  width: 44px;
+}
+
+.tree-robotics .crown-three {
+  height: 31px;
+  left: 8px;
+  top: 47px;
+  width: 62px;
+}
+
+.tree-robotics .tree-detail {
+  background: #cfd7dc;
+  height: 5px;
+  width: 5px;
+}
+
+.tree-embodied_ai {
+  --leaf-a: #d8ba4f;
+  --leaf-b: #947b2e;
+  --trunk: #7a5733;
+  --detail: #fff2a8;
+}
+
+.tree-embodied_ai .tree-crown {
+  background: #d8ba4f;
+  box-shadow:
+    inset -7px -6px 0 #947b2e,
+    -8px 10px 0 #e2c963,
+    8px 8px 0 #cba541;
+}
+
+.tree-manipulation {
+  --leaf-a: #789a52;
+  --leaf-b: #526f3e;
+  --trunk: #755333;
+  --detail: #dc8f45;
+}
+
+.tree-manipulation .detail-one,
+.tree-manipulation .detail-two {
+  height: 5px;
+  width: 18px;
+}
+
+.tree-navigation {
+  --leaf-a: #4f9b78;
+  --leaf-b: #2f7158;
+  --trunk: #6f5032;
+  --detail: #f0cc65;
+}
+
+.tree-navigation .detail-one,
+.tree-navigation .detail-two {
+  background: #f0cc65;
+  box-shadow: inset -4px 0 #bf8d32;
+  height: 7px;
+  width: 28px;
+}
+
+.tree-navigation .detail-one {
+  left: 12px;
+  top: 21px;
+}
+
+.tree-navigation .detail-two {
+  left: 30px;
+  top: 38px;
+}
+
+.tree-simulation {
+  --leaf-a: #65a35a;
+  --leaf-b: #3f7044;
+  --trunk: #6a5631;
+  --detail: #f0cc65;
+}
+
+.tree-simulation .tree-crown {
+  border-radius: 0;
+}
+
+.tree-simulation .crown-one {
+  height: 54px;
+  left: 27px;
+  top: 5px;
+  width: 22px;
+}
+
+.tree-simulation .crown-two {
+  height: 18px;
+  left: 14px;
+  top: 30px;
+  width: 18px;
+}
+
+.tree-simulation .crown-three {
+  height: 18px;
+  left: 46px;
+  top: 38px;
+  width: 18px;
+}
+
+.tree-simulation .tree-detail {
+  background: #f0cc65;
+  height: 4px;
+  width: 4px;
+}
+
+.tree-other {
+  --leaf-a: #5f9e55;
+  --leaf-b: #3f773e;
+  --trunk: #704c31;
+  --detail: #f0cc65;
+}
+
+.rarity-uncommon .tree-crown {
+  outline-color: rgba(230, 244, 191, 0.32);
+}
+
+.rarity-rare .forest-tile-ground {
+  box-shadow:
+    inset 0 -7px 0 rgba(31, 75, 38, 0.18),
+    inset 0 0 0 2px rgba(142, 213, 230, 0.38);
+}
+
+.rarity-legendary .forest-tile-ground {
+  box-shadow:
+    inset 0 -7px 0 rgba(31, 75, 38, 0.18),
+    inset 0 0 0 3px rgba(240, 204, 101, 0.72),
+    0 0 18px rgba(240, 204, 101, 0.5);
+}
+
+.rarity-legendary .forest-pixel-tree::after {
+  background: #f0cc65;
+  box-shadow:
+    14px -9px 0 rgba(255, 255, 255, 0.9),
+    32px 2px 0 rgba(240, 204, 101, 0.86);
+  content: "";
+  height: 4px;
+  left: 6px;
+  position: absolute;
+  top: 2px;
+  width: 4px;
+}
+
+.forest-tile-mark,
+.forest-score-chip,
+.forest-tile-caption {
+  position: absolute;
+  z-index: 8;
+}
+
+.forest-tile-mark {
+  background: rgba(18, 45, 30, 0.78);
+  border: 1px solid rgba(248, 255, 241, 0.2);
+  border-radius: 2px;
+  color: #f8fff1;
+  font-size: 9px;
+  font-weight: 900;
+  left: 5px;
+  line-height: 1;
+  opacity: 0;
+  padding: 3px 4px;
+  top: 5px;
+  transition: opacity 0.12s ease;
+}
+
+.rarity-rare .forest-tile-mark,
+.rarity-legendary .forest-tile-mark,
+.forest-tile:hover .forest-tile-mark,
+.forest-tile:focus-visible .forest-tile-mark,
+.forest-tile.is-selected .forest-tile-mark {
+  opacity: 1;
+}
+
+.forest-score-chip {
+  background: rgba(255, 247, 196, 0.95);
+  border: 1px solid rgba(88, 76, 28, 0.2);
+  border-radius: 2px;
+  color: #604c12;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0;
+  padding: 3px 4px;
+  right: 5px;
+  top: 5px;
+  transition: opacity 0.12s ease;
+}
+
+.rarity-rare .forest-score-chip,
+.rarity-legendary .forest-score-chip,
+.forest-tile:hover .forest-score-chip,
+.forest-tile:focus-visible .forest-score-chip,
+.forest-tile.is-selected .forest-score-chip {
+  opacity: 1;
+}
+
+.forest-tile-caption {
+  background: rgba(18, 45, 30, 0.82);
+  border: 1px solid rgba(248, 255, 241, 0.2);
+  border-radius: 2px;
+  bottom: 5px;
+  color: #f8fff1;
+  display: block;
+  font-size: 10px;
+  font-weight: 900;
+  left: 7px;
+  line-height: 1;
+  max-width: calc(100% - 14px);
+  opacity: 0;
+  overflow: hidden;
+  padding: 4px 5px;
+  right: auto;
+  text-overflow: ellipsis;
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
+  width: auto;
+}
+
+.forest-tile:hover .forest-tile-caption,
+.forest-tile:focus-visible .forest-tile-caption,
+.forest-tile.is-selected .forest-tile-caption {
+  opacity: 1;
+}
+
+.forest-inspector {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 250, 241, 0.98)),
+    linear-gradient(90deg, rgba(69, 130, 76, 0.11), transparent 48%);
+  border: 2px solid #d5e4cf;
+  box-shadow: 0 16px 34px rgba(34, 72, 45, 0.12);
+  max-height: calc(100vh - 92px);
+  overflow: auto;
+  position: sticky;
+  top: 82px;
+}
+
+.forest-inspector-head h2 {
+  color: #183526;
+  font-size: 18px;
+  line-height: 1.34;
+}
+
+.forest-inspector-kicker,
+.forest-detail-label {
+  color: #3d6d4d;
+}
+
+.forest-inspector-meta span {
+  background: #edf7ec;
+  border-color: #c8dfc5;
+  color: #244a35;
+}
+
+.forest-detail-grid {
+  grid-template-columns: 1fr;
+}
+
+.forest-detail-grid section,
+.forest-abstract {
+  border-radius: 6px;
+}
+
+.forest-abstract p {
+  max-height: 180px;
+}
+
+/* Sprite-backed forest pass: real pixel assets on a continuous forest floor. */
+.forest-grid {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(231, 238, 172, 0.18) 0 7%, transparent 8%),
+    radial-gradient(circle at 84% 72%, rgba(63, 135, 82, 0.28) 0 9%, transparent 10%),
+    repeating-linear-gradient(90deg, rgba(31, 67, 35, 0.08) 0 1px, transparent 1px 74px),
+    repeating-linear-gradient(180deg, rgba(31, 67, 35, 0.07) 0 1px, transparent 1px 74px),
+    linear-gradient(180deg, #87bd5c 0%, #6da24d 58%, #5e8d45 100%);
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+}
+
+.forest-tile {
+  min-height: 104px;
+}
+
+.forest-tile-ground,
+.land-moss .forest-tile-ground,
+.land-fern .forest-tile-ground,
+.land-sprout .forest-tile-ground,
+.land-stone .forest-tile-ground,
+.land-water .forest-tile-ground,
+.land-flower .forest-tile-ground,
+.land-clay .forest-tile-ground,
+.land-shade .forest-tile-ground {
+  background: transparent;
+  box-shadow: none;
+}
+
+.land-moss .forest-tile-ground,
+.land-fern .forest-tile-ground,
+.land-sprout .forest-tile-ground {
+  background:
+    radial-gradient(circle at 20px 62px, rgba(41, 92, 43, 0.32) 0 5px, transparent 6px),
+    radial-gradient(circle at 58px 18px, rgba(225, 239, 175, 0.22) 0 4px, transparent 5px);
+}
+
+.land-stone .forest-tile-ground {
+  background:
+    radial-gradient(circle at 58px 60px, rgba(99, 113, 91, 0.52) 0 5px, transparent 6px),
+    radial-gradient(circle at 18px 22px, rgba(137, 151, 119, 0.36) 0 4px, transparent 5px);
+}
+
+.land-water .forest-tile-ground {
+  background:
+    linear-gradient(90deg, transparent 0 18px, rgba(108, 182, 170, 0.48) 18px 54px, transparent 54px),
+    linear-gradient(90deg, transparent 0 28px, rgba(255, 255, 255, 0.32) 28px 44px, transparent 44px);
+}
+
+.land-flower .forest-tile-ground {
+  background:
+    radial-gradient(circle at 18px 62px, #f0cc65 0 3px, transparent 4px),
+    radial-gradient(circle at 58px 24px, #e87664 0 3px, transparent 4px),
+    radial-gradient(circle at 46px 63px, #f7f2c0 0 2px, transparent 3px);
+}
+
+.land-clay .forest-tile-ground {
+  background:
+    linear-gradient(135deg, transparent 0 40%, rgba(108, 82, 48, 0.24) 40% 58%, transparent 58%);
+}
+
+.land-shade .forest-tile-ground {
+  background:
+    radial-gradient(circle at 36px 26px, rgba(28, 66, 37, 0.2) 0 24px, transparent 25px);
+}
+
+.forest-tile.is-selected .forest-tile-ground {
+  box-shadow:
+    inset 0 0 0 3px #f0cc65,
+    inset 0 0 0 5px rgba(57, 46, 12, 0.2);
+}
+
+.forest-tile:hover .forest-tile-ground,
+.forest-tile:focus-visible .forest-tile-ground {
+  box-shadow: inset 0 0 0 3px rgba(248, 255, 241, 0.4);
+}
+
+.forest-pixel-tree {
+  bottom: calc(2px + var(--tree-shift-y));
+  height: 118px;
+  width: 118px;
+}
+
+.tree-sprite {
+  bottom: 0;
+  display: block;
+  height: 118px;
+  image-rendering: pixelated;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 118px;
+}
+
+.forest-pixel-tree .tree-trunk,
+.forest-pixel-tree .tree-crown,
+.forest-pixel-tree .tree-detail {
+  display: none;
+}
+
+.growth-metadata {
+  --growth-scale: 0.98;
+}
+
+.growth-translation {
+  --growth-scale: 1.06;
+}
+
+.growth-summary {
+  --growth-scale: 1.15;
+}
+
+.growth-full_text {
+  --growth-scale: 1.24;
+}
+
+.accent-1 .tree-sprite {
+  filter: saturate(1.08);
+}
+
+.accent-2 .tree-sprite {
+  filter: brightness(0.96) saturate(1.12);
+}
+
+.accent-3 .tree-sprite {
+  filter: hue-rotate(-5deg) saturate(1.04);
+}
+
+.accent-4 .tree-sprite {
+  filter: brightness(1.03);
+}
+
+body .forest-head {
+  background-color: #173526;
+  background-image:
+    linear-gradient(180deg, rgba(19, 42, 31, 0.18), transparent 48%),
+    linear-gradient(135deg, #163325 0%, #24523a 52%, #18382f 100%) !important;
+}
+
+body .forest-head::before {
+  background-color: transparent;
+  background-image:
+    linear-gradient(90deg, transparent 0 18px, rgba(240, 204, 101, 0.82) 18px 26px, transparent 26px 42px),
+    linear-gradient(90deg, rgba(58, 126, 72, 0.85) 0 12px, rgba(37, 86, 55, 0.85) 12px 24px, rgba(120, 170, 82, 0.85) 24px 36px) !important;
+}
+
+body .forest-head::after {
+  background-color: transparent;
+  background-image:
+    linear-gradient(180deg, #8fcf6a 0 12px, transparent 12px),
+    linear-gradient(180deg, transparent 0 12px, #5f8a48 12px 28px, transparent 28px),
+    linear-gradient(90deg, transparent 0 10px, #6f4d2f 10px 16px, transparent 16px) !important;
+}
+
+body .forest-stage {
+  background-color: #8dbd62;
+  background-image:
+    radial-gradient(circle at 15% 18%, rgba(236, 244, 187, 0.44) 0 8%, transparent 9%),
+    radial-gradient(circle at 84% 9%, rgba(113, 168, 79, 0.46) 0 14%, transparent 15%),
+    linear-gradient(180deg, #d9ecae 0%, #a2cb76 48%, #6c9b57 100%) !important;
+}
+
+body .forest-grid {
+  background-color: #6da24d;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(231, 238, 172, 0.18) 0 7%, transparent 8%),
+    radial-gradient(circle at 84% 72%, rgba(63, 135, 82, 0.28) 0 9%, transparent 10%),
+    repeating-linear-gradient(90deg, rgba(31, 67, 35, 0.1) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(180deg, rgba(31, 67, 35, 0.09) 0 1px, transparent 1px 104px),
+    linear-gradient(180deg, #87bd5c 0%, #6da24d 58%, #5e8d45 100%) !important;
+}
+
+body .forest-tile-ground {
+  background-color: transparent;
+  background-image: none !important;
+}
+
+body .land-moss .forest-tile-ground,
+body .land-fern .forest-tile-ground,
+body .land-sprout .forest-tile-ground {
+  background-image:
+    radial-gradient(circle at 20px 62px, rgba(41, 92, 43, 0.32) 0 5px, transparent 6px),
+    radial-gradient(circle at 58px 18px, rgba(225, 239, 175, 0.22) 0 4px, transparent 5px) !important;
+}
+
+body .land-stone .forest-tile-ground {
+  background-image:
+    radial-gradient(circle at 58px 60px, rgba(99, 113, 91, 0.52) 0 5px, transparent 6px),
+    radial-gradient(circle at 18px 22px, rgba(137, 151, 119, 0.36) 0 4px, transparent 5px) !important;
+}
+
+body .land-water .forest-tile-ground {
+  background-image:
+    linear-gradient(90deg, transparent 0 18px, rgba(108, 182, 170, 0.48) 18px 54px, transparent 54px),
+    linear-gradient(90deg, transparent 0 28px, rgba(255, 255, 255, 0.32) 28px 44px, transparent 44px) !important;
+}
+
+body .land-flower .forest-tile-ground {
+  background-image:
+    radial-gradient(circle at 18px 62px, #f0cc65 0 3px, transparent 4px),
+    radial-gradient(circle at 58px 24px, #e87664 0 3px, transparent 4px),
+    radial-gradient(circle at 46px 63px, #f7f2c0 0 2px, transparent 3px) !important;
+}
+
+body .land-clay .forest-tile-ground {
+  background-image:
+    linear-gradient(135deg, transparent 0 40%, rgba(108, 82, 48, 0.24) 40% 58%, transparent 58%) !important;
+}
+
+body .land-shade .forest-tile-ground {
+  background-image:
+    radial-gradient(circle at 36px 26px, rgba(28, 66, 37, 0.2) 0 24px, transparent 25px) !important;
+}
+
+body .forest-inspector {
+  background-color: #f8fbf5;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(245, 250, 241, 0.98)),
+    linear-gradient(90deg, rgba(69, 130, 76, 0.11), transparent 48%) !important;
+}
+
+/* Cozy farm-map pass: each paper tile receives a distinct pixel-ground style. */
+body .forest-grid {
+  background-color: #6d9f4f;
+  border-color: #2e5230;
+  box-shadow:
+    inset 0 0 0 4px rgba(231, 245, 184, 0.25),
+    inset 0 -16px 0 rgba(44, 84, 42, 0.18),
+    0 16px 30px rgba(32, 74, 42, 0.16);
+}
+
+body .forest-tile-ground {
+  background-color: #7ab153;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+body .land-grass .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-grass.png") !important;
+}
+
+body .land-moss .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-moss.png") !important;
+}
+
+body .land-fern .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-fern.png") !important;
+}
+
+body .land-flower .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-flower.png") !important;
+}
+
+body .land-clay .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-clay.png") !important;
+}
+
+body .land-stone .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-stone.png") !important;
+}
+
+body .land-water .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-water.png") !important;
+}
+
+body .land-shade .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-shade.png") !important;
+}
+
+body .land-sprout .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-sprout.png") !important;
+}
+
+body .land-autumn .forest-tile-ground {
+  background-image: url("/static/forest/terrain/land-autumn.png") !important;
+}
+
+body .land-stone .tree-shadow,
+body .land-clay .tree-shadow {
+  background: rgba(39, 43, 34, 0.26);
+}
+
+body .land-water .tree-shadow {
+  background: rgba(20, 79, 78, 0.2);
+}
+
+body .tree-vla .tree-sprite {
+  filter: saturate(1.08);
+}
+
+body .tree-robotics .tree-sprite {
+  filter: saturate(1.05) contrast(1.02);
+}
+
+body .tree-embodied_ai .tree-sprite {
+  filter: saturate(1.05) brightness(1.05);
+}
+
+body .tree-world_model .tree-sprite {
+  filter: saturate(1.12) contrast(1.04);
+}
+
+/* Cohesion pass: keep the richer farm tiles from feeling like pasted patches. */
+body .forest-stage {
+  background-color: #8fb45f;
+  background-image:
+    radial-gradient(circle at 12% 16%, rgba(244, 235, 166, 0.32) 0 8%, transparent 9%),
+    radial-gradient(circle at 82% 74%, rgba(65, 122, 70, 0.26) 0 13%, transparent 14%),
+    linear-gradient(180deg, #d6e9a8 0%, #9fc371 42%, #6d9b55 100%) !important;
+  border-color: #25482d;
+  box-shadow:
+    inset 0 0 0 5px rgba(242, 250, 206, 0.24),
+    inset 0 -20px 0 rgba(50, 88, 45, 0.17),
+    0 18px 36px rgba(30, 68, 40, 0.14);
+}
+
+body .forest-grid {
+  background-color: #6f9f4e;
+  background-image:
+    linear-gradient(180deg, rgba(255, 244, 184, 0.12), rgba(40, 83, 43, 0.12)),
+    repeating-linear-gradient(90deg, rgba(37, 78, 38, 0.08) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(180deg, rgba(37, 78, 38, 0.08) 0 1px, transparent 1px 104px) !important;
+  border: 5px solid #315a34;
+  box-shadow:
+    inset 0 0 0 3px #7daf58,
+    inset 0 0 0 7px rgba(230, 243, 176, 0.3),
+    inset 0 -14px 0 rgba(47, 83, 44, 0.2);
+}
+
+body .forest-tile-ground {
+  isolation: isolate;
+}
+
+body .forest-tile-ground::before {
+  background-color: rgba(109, 151, 74, 0.1);
+  background-image:
+    linear-gradient(180deg, rgba(255, 248, 194, 0.1), rgba(30, 76, 37, 0.12)) !important;
+  box-shadow:
+    inset 1px 0 0 rgba(244, 252, 205, 0.09),
+    inset 0 1px 0 rgba(244, 252, 205, 0.09),
+    inset -1px 0 0 rgba(37, 75, 37, 0.08),
+    inset 0 -1px 0 rgba(37, 75, 37, 0.08);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+body .forest-tile-ground::after {
+  background-color: transparent;
+  background-image:
+    radial-gradient(circle at 22% 70%, rgba(43, 86, 42, 0.18) 0 6px, transparent 7px),
+    radial-gradient(circle at 72% 20%, rgba(238, 246, 182, 0.18) 0 5px, transparent 6px) !important;
+  content: "";
+  inset: 0;
+  opacity: 0.55;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+body .terrain-shadow,
+body .terrain-sprite,
+body .tree-shadow {
+  z-index: 3;
+}
+
+body .forest-pixel-tree {
+  z-index: 6;
+}
+
+body .forest-tools,
+body .forest-summary .metric-card,
+body .forest-inspector {
+  background-color: #fffaf0;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(246, 238, 212, 0.34)) !important;
+  border-color: #d7c99e;
+  box-shadow:
+    0 12px 26px rgba(83, 101, 58, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+body .forest-inspector {
+  border-color: #c8d9b6;
+}
+
+body .forest-detail-grid section,
+body .forest-abstract {
+  background: #fffdf5;
+  border-color: #decfa8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+body .forest-inspector-meta span {
+  background: #eef7df;
+  border-color: #bed6a8;
+  color: #315a34;
+}
+
+body .forest-filter {
+  background: #f9fff1;
+  border-color: #bed6a8;
+  color: #315a34;
+}
+
+body .forest-filter:hover,
+body .forest-filter.is-active {
+  background: #214a2c;
+  border-color: #214a2c;
+  color: #f8fff1;
+}
+
+body .forest-tile.is-selected .forest-tile-ground {
+  box-shadow:
+    inset 0 0 0 3px #f1d270,
+    inset 0 0 0 5px rgba(65, 52, 18, 0.22);
+}
+
+body .forest-tile:hover .forest-tile-ground,
+body .forest-tile:focus-visible .forest-tile-ground {
+  box-shadow: inset 0 0 0 3px rgba(255, 247, 190, 0.46);
+}
+
+@media (max-width: 1180px) {
+  .forest-experience {
+    grid-template-columns: 1fr;
+  }
+
+  .forest-inspector {
+    max-height: none;
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .forest-stage {
+    padding: 10px;
+  }
+
+  .forest-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  }
+
+  .forest-tile {
+    min-height: 84px;
+  }
+
+  .forest-pixel-tree {
+    height: 98px;
+    width: 98px;
+  }
+
+  .tree-sprite {
+    height: 98px;
+    width: 98px;
+  }
+
+  .forest-head h1 {
+    font-size: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forest-score-chip,
+  .forest-tile-caption {
+    transition: none;
+  }
+}
+
+/* Final cohesion pass: terrain becomes part of a continuous farm map, not full-cell stickers. */
+body .forest-grid {
+  background-color: #74a756;
+  background-image:
+    radial-gradient(circle at 16% 18%, rgba(232, 241, 171, 0.18) 0 8%, transparent 9%),
+    radial-gradient(circle at 82% 78%, rgba(54, 103, 55, 0.22) 0 13%, transparent 14%),
+    repeating-linear-gradient(90deg, rgba(42, 84, 40, 0.07) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(180deg, rgba(42, 84, 40, 0.07) 0 1px, transparent 1px 104px),
+    linear-gradient(180deg, #83b660 0%, #6ea151 60%, #5b8845 100%) !important;
+}
+
+body .forest-tile-ground,
+body .land-grass .forest-tile-ground,
+body .land-moss .forest-tile-ground,
+body .land-fern .forest-tile-ground,
+body .land-flower .forest-tile-ground,
+body .land-clay .forest-tile-ground,
+body .land-stone .forest-tile-ground,
+body .land-water .forest-tile-ground,
+body .land-shade .forest-tile-ground,
+body .land-sprout .forest-tile-ground,
+body .land-autumn .forest-tile-ground {
+  background-color: transparent;
+  background-image: none !important;
+}
+
+body .forest-tile-ground::before {
+  background-color: rgba(119, 166, 80, 0.42);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: 1px solid rgba(236, 248, 190, 0.1);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 1px 0 rgba(242, 252, 202, 0.08),
+    inset -1px -1px 0 rgba(39, 74, 37, 0.08);
+  content: "";
+  inset: 9px 10px 8px;
+  opacity: 0.68;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+body .land-grass .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-grass.png") !important;
+}
+
+body .land-moss .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-moss.png") !important;
+}
+
+body .land-fern .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-fern.png") !important;
+}
+
+body .land-flower .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-flower.png") !important;
+  opacity: 0.72;
+}
+
+body .land-clay .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-clay.png") !important;
+  opacity: 0.58;
+}
+
+body .land-stone .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-stone.png") !important;
+  opacity: 0.56;
+}
+
+body .land-water .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-water.png") !important;
+  opacity: 0.62;
+}
+
+body .land-shade .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-shade.png") !important;
+  opacity: 0.6;
+}
+
+body .land-sprout .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-sprout.png") !important;
+  opacity: 0.64;
+}
+
+body .land-autumn .forest-tile-ground::before {
+  background-image: url("/static/forest/terrain/land-autumn.png") !important;
+  opacity: 0.66;
+}
+
+body .forest-tile-ground::after {
+  background-image:
+    radial-gradient(circle at 22% 72%, rgba(44, 88, 42, 0.16) 0 5px, transparent 6px),
+    radial-gradient(circle at 72% 20%, rgba(239, 247, 184, 0.13) 0 5px, transparent 6px) !important;
+  opacity: 0.48;
+  z-index: 2;
+}
+
+body .forest-pixel-tree {
+  bottom: calc(5px + var(--tree-shift-y));
+  height: 106px;
+  width: 106px;
+}
+
+body .tree-sprite {
+  height: 106px;
+  width: 106px;
+}
+
+body .growth-metadata {
+  --growth-scale: 0.94;
+}
+
+body .growth-translation {
+  --growth-scale: 1;
+}
+
+body .growth-summary {
+  --growth-scale: 1.08;
+}
+
+body .growth-full_text {
+  --growth-scale: 1.15;
+}
+
+body .forest-score-chip {
+  background: #fff1aa;
+  border-color: #b78b36;
+  border-radius: 3px;
+  color: #5a4216;
+}
+
+body .forest-tile-mark {
+  background: rgba(30, 70, 38, 0.88);
+  border-radius: 3px;
+}
+
+@media (max-width: 760px) {
+  body .forest-grid {
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  }
+
+  body .forest-tile {
+    min-height: 88px;
+  }
+
+  body .forest-pixel-tree {
+    height: 92px;
+    width: 92px;
+  }
+
+  body .tree-sprite {
+    height: 92px;
+    width: 92px;
+  }
+
+  body .forest-tile-ground::before {
+    inset: 8px;
+  }
+}
+
+/* Forest polish: make the grid read as one hand-built pixel map. */
+body .forest-stage {
+  scroll-margin-top: 136px;
+}
+
+body .forest-grid {
+  background-image:
+    radial-gradient(circle at 16% 18%, rgba(232, 241, 171, 0.16) 0 8%, transparent 9%),
+    radial-gradient(circle at 82% 78%, rgba(54, 103, 55, 0.2) 0 13%, transparent 14%),
+    repeating-linear-gradient(90deg, rgba(42, 84, 40, 0.035) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(180deg, rgba(42, 84, 40, 0.035) 0 1px, transparent 1px 104px),
+    linear-gradient(180deg, #83b660 0%, #6ea151 60%, #5b8845 100%) !important;
+}
+
+body .forest-grid::before,
+body .forest-grid::after {
+  content: "";
+  image-rendering: pixelated;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+body .forest-grid::before {
+  background-image:
+    linear-gradient(132deg, transparent 0 36%, rgba(132, 108, 58, 0.12) 36% 42%, transparent 42% 100%),
+    radial-gradient(ellipse at 13% 10%, rgba(46, 96, 45, 0.24) 0 9%, transparent 10%),
+    radial-gradient(ellipse at 88% 21%, rgba(59, 119, 50, 0.18) 0 8%, transparent 9%),
+    radial-gradient(ellipse at 28% 85%, rgba(39, 83, 43, 0.18) 0 11%, transparent 12%),
+    radial-gradient(ellipse at 74% 86%, rgba(244, 230, 135, 0.1) 0 7%, transparent 8%);
+  opacity: 0.86;
+}
+
+body .forest-grid::after {
+  background:
+    linear-gradient(90deg, transparent 0 14px, rgba(43, 91, 42, 0.42) 14px 26px, transparent 26px 52px) 0 6px / 104px 16px repeat-x,
+    linear-gradient(90deg, transparent 0 20px, rgba(82, 137, 63, 0.32) 20px 34px, transparent 34px 64px) 12px calc(100% - 18px) / 116px 16px repeat-x,
+    linear-gradient(180deg, rgba(35, 74, 39, 0.18), transparent 18%, transparent 82%, rgba(33, 69, 38, 0.2));
+  opacity: 0.42;
+}
+
+body .forest-tile {
+  z-index: 1;
+}
+
+body .forest-tile-ground::before {
+  border: 0;
+  box-shadow:
+    inset 0 1px 0 rgba(242, 252, 202, 0.06),
+    inset 0 -1px 0 rgba(39, 74, 37, 0.06);
+  filter: saturate(0.94);
+  inset: 12px 12px 7px;
+  opacity: 0.58;
+}
+
+body .land-flower .forest-tile-ground::before {
+  opacity: 0.64;
+}
+
+body .land-clay .forest-tile-ground::before,
+body .land-stone .forest-tile-ground::before,
+body .land-water .forest-tile-ground::before,
+body .land-shade .forest-tile-ground::before {
+  opacity: 0.5;
+}
+
+body .forest-tile-ground::after {
+  opacity: 0.38;
+}
+
+body .tree-shadow {
+  opacity: 0.72;
+}
+
+body .forest-tile-caption {
+  bottom: 8px;
+}
+
+@media (max-width: 760px) {
+  body .forest-stage {
+    scroll-margin-top: 124px;
+  }
+
+  body .forest-grid::after {
+    opacity: 0.32;
+  }
+
+  body .forest-tile-ground::before {
+    inset: 10px 8px 6px;
+  }
+
+  body .forest-tile-caption {
+    bottom: 7px;
+    font-size: 9px;
+    max-width: calc(100% - 18px);
+  }
+}
+
+/* Forest-app style density modes: many papers become a browsable canopy, not a long board. */
+body .forest-map-status {
+  align-items: center;
+  background: rgba(255, 250, 226, 0.92);
+  border: 1px solid rgba(55, 88, 42, 0.2);
+  border-radius: 6px;
+  box-shadow: 0 6px 14px rgba(35, 75, 42, 0.12);
+  color: #315a34;
+  display: inline-flex;
+  gap: 8px;
+  image-rendering: pixelated;
+  padding: 7px 9px;
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  z-index: 5;
+}
+
+body .forest-map-status span {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+body .forest-map-status strong {
+  background: #254d2d;
+  border-radius: 4px;
+  color: #f8fff1;
+  font-size: 12px;
+  line-height: 1;
+  padding: 5px 7px;
+}
+
+body .forest-growth-status-badge {
+  --forest-grown-progress: 0%;
+  align-items: center;
+  background:
+    linear-gradient(180deg, #f5ffd8, #d9edb8);
+  border: 2px solid #5d7b3c;
+  border-radius: 3px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 232, 0.45),
+    0 3px 0 rgba(64, 87, 39, 0.16);
+  display: inline-flex;
+  gap: 5px;
+  isolation: isolate;
+  min-height: 27px;
+  overflow: hidden;
+  padding: 3px 5px;
+  position: relative;
+}
+
+body .forest-growth-status-badge::after {
+  background-color: #78b657;
+  background:
+    repeating-linear-gradient(90deg, #78b657 0 4px, #6ba64e 4px 8px);
+  bottom: 2px;
+  box-shadow: 0 -1px 0 rgba(255, 255, 211, 0.26);
+  content: "";
+  height: 3px;
+  left: 5px;
+  position: absolute;
+  transition: width 0.28s steps(5, end);
+  width: var(--forest-grown-progress);
+  z-index: 0;
+}
+
+body .forest-growth-status-badge.has-growth::after {
+  min-width: 3px;
+}
+
+body .forest-map-status .forest-growth-status-badge .forest-growth-status-fill {
+  background-color: #78b657;
+  background-image:
+    repeating-linear-gradient(90deg, #78b657 0 4px, #6ba64e 4px 8px);
+  bottom: 2px;
+  box-shadow: 0 -1px 0 rgba(255, 255, 211, 0.26);
+  display: block;
+  height: 3px;
+  left: 5px;
+  min-width: 0;
+  padding: 0;
+  pointer-events: none;
+  position: absolute;
+  transition: width 0.28s steps(5, end);
+  width: var(--forest-grown-progress);
+  z-index: 0;
+}
+
+body .forest-map-status .forest-growth-status-badge.has-growth .forest-growth-status-fill {
+  min-width: 3px;
+}
+
+body .forest-growth-status-badge i {
+  background: #5f9e45;
+  box-shadow:
+    0 -4px 0 #75b750,
+    -4px -3px 0 #8fca63,
+    4px -3px 0 #4f8738,
+    0 4px 0 #6a4a2d;
+  display: block;
+  height: 5px;
+  image-rendering: pixelated;
+  position: relative;
+  width: 5px;
+  z-index: 1;
+}
+
+body .forest-map-status .forest-growth-status-badge span:not(.forest-growth-status-fill) {
+  font-size: 10px;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+}
+
+body .forest-map-status .forest-growth-status-badge strong {
+  background: #315a34;
+  border-radius: 2px;
+  color: #fff4d4;
+  font-size: 11px;
+  padding: 4px 5px;
+  position: relative;
+  z-index: 1;
+}
+
+body .forest-growth-status-badge.has-growth {
+  background:
+    linear-gradient(180deg, #fff4bf, #dcec9f);
+  border-color: #6b7e2d;
+}
+
+body .forest-density-dense .forest-grid,
+body .forest-density-canopy .forest-grid {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(47, 88, 45, 0.58) rgba(225, 240, 179, 0.42);
+  scrollbar-width: thin;
+}
+
+body .forest-density-dense .forest-grid::-webkit-scrollbar,
+body .forest-density-canopy .forest-grid::-webkit-scrollbar {
+  width: 10px;
+}
+
+body .forest-density-dense .forest-grid::-webkit-scrollbar-track,
+body .forest-density-canopy .forest-grid::-webkit-scrollbar-track {
+  background: rgba(225, 240, 179, 0.42);
+}
+
+body .forest-density-dense .forest-grid::-webkit-scrollbar-thumb,
+body .forest-density-canopy .forest-grid::-webkit-scrollbar-thumb {
+  background: rgba(47, 88, 45, 0.58);
+  border: 2px solid rgba(225, 240, 179, 0.42);
+}
+
+body .forest-density-dense .forest-grid {
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  max-height: min(72vh, 680px);
+}
+
+body .forest-density-canopy .forest-grid {
+  background-image:
+    radial-gradient(circle at 14% 14%, rgba(232, 241, 171, 0.12) 0 8%, transparent 9%),
+    radial-gradient(circle at 82% 78%, rgba(54, 103, 55, 0.2) 0 13%, transparent 14%),
+    linear-gradient(180deg, #81b65e 0%, #6da052 58%, #5b8845 100%) !important;
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+  max-height: min(70vh, 650px);
+}
+
+body .forest-density-dense .forest-tile {
+  min-height: 82px;
+}
+
+body .forest-density-canopy .forest-tile {
+  min-height: 74px;
+}
+
+body .forest-density-dense .forest-pixel-tree,
+body .forest-density-dense .tree-sprite {
+  height: 94px;
+  width: 94px;
+}
+
+body .forest-density-canopy .forest-pixel-tree,
+body .forest-density-canopy .tree-sprite {
+  height: 82px;
+  width: 82px;
+}
+
+body .forest-density-canopy .growth-metadata {
+  --growth-scale: 0.9;
+}
+
+body .forest-density-canopy .growth-translation {
+  --growth-scale: 0.96;
+}
+
+body .forest-density-canopy .growth-summary {
+  --growth-scale: 1.02;
+}
+
+body .forest-density-canopy .growth-full_text {
+  --growth-scale: 1.08;
+}
+
+body .forest-density-dense .forest-tile-ground::before,
+body .forest-density-canopy .forest-tile-ground::before {
+  inset: 13px 10px 6px;
+  opacity: 0.46;
+}
+
+body .forest-density-canopy .forest-tile-ground::after {
+  opacity: 0.28;
+}
+
+body .forest-density-canopy .forest-tile:nth-child(2n) {
+  --tree-shift-x: -3px;
+}
+
+body .forest-density-canopy .forest-tile:nth-child(3n) {
+  --tree-shift-x: 4px;
+  --tree-shift-y: 1px;
+}
+
+body .forest-density-canopy .forest-tile:nth-child(5n) {
+  --tree-shift-x: -5px;
+  --tree-shift-y: -2px;
+}
+
+body .forest-density-canopy .forest-tile:nth-child(7n) {
+  --tree-shift-x: 5px;
+  --tree-shift-y: -1px;
+}
+
+body .forest-density-canopy .forest-tile-mark,
+body .forest-density-canopy .forest-score-chip,
+body .forest-density-canopy .forest-tile-caption {
+  transform: scale(0.88);
+  transform-origin: top left;
+}
+
+body .forest-density-canopy .forest-score-chip {
+  right: 3px;
+  top: 3px;
+}
+
+body .forest-density-canopy .forest-tile-mark {
+  left: 3px;
+  top: 3px;
+}
+
+body .forest-density-canopy .forest-tile-caption {
+  bottom: 4px;
+  left: 5px;
+  max-width: calc(100% - 10px);
+}
+
+body .forest-density-canopy .forest-tile:hover,
+body .forest-density-canopy .forest-tile:focus-visible,
+body .forest-density-canopy .forest-tile.is-selected {
+  z-index: 8;
+}
+
+body .forest-density-canopy .forest-tile:hover .forest-pixel-tree,
+body .forest-density-canopy .forest-tile:focus-visible .forest-pixel-tree,
+body .forest-density-canopy .forest-tile.is-selected .forest-pixel-tree {
+  transform:
+    translateX(calc(-50% + var(--tree-shift-x)))
+    rotate(var(--tree-tilt))
+    scale(calc(var(--growth-scale) * var(--stage-scale, 1) * var(--select-scale, 1.06)));
+}
+
+body .forest-density-canopy .is-flipped:hover .forest-pixel-tree,
+body .forest-density-canopy .is-flipped:focus-visible .forest-pixel-tree,
+body .forest-density-canopy .is-flipped.is-selected .forest-pixel-tree {
+  transform:
+    translateX(calc(-50% + var(--tree-shift-x)))
+    rotate(calc(var(--tree-tilt) * -1))
+    scaleX(-1)
+    scale(calc(var(--growth-scale) * var(--stage-scale, 1) * var(--select-scale, 1.06)));
+}
+
+@media (min-width: 1181px) {
+  body .forest-density-canopy.forest-experience {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-map-status {
+    flex-wrap: wrap;
+    left: 16px;
+    max-width: calc(100% - 32px);
+    right: auto;
+    top: 12px;
+  }
+
+  body .forest-growth-status-badge {
+    gap: 4px;
+    min-height: 25px;
+    padding: 3px 4px;
+  }
+
+  body .forest-density-dense .forest-grid,
+  body .forest-density-canopy .forest-grid {
+    max-height: min(68vh, 560px);
+  }
+
+  body .forest-density-dense .forest-grid {
+    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  }
+
+  body .forest-density-canopy .forest-grid {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  }
+
+  body .forest-density-dense .forest-tile {
+    min-height: 76px;
+  }
+
+  body .forest-density-canopy .forest-tile {
+    min-height: 68px;
+  }
+
+  body .forest-density-dense .forest-pixel-tree,
+  body .forest-density-dense .tree-sprite {
+    height: 80px;
+    width: 80px;
+  }
+
+  body .forest-density-canopy .forest-pixel-tree,
+  body .forest-density-canopy .tree-sprite {
+    height: 72px;
+    width: 72px;
+  }
+
+  body .forest-density-canopy .forest-tile-ground::before {
+    inset: 12px 7px 5px;
+  }
+}
+
+/* Forest reference pass: organize trees into topic groves instead of one endless grid. */
+body .forest-stage {
+  padding-top: 14px;
+}
+
+body .forest-map-status {
+  margin: 0 0 10px auto;
+  position: relative;
+  right: auto;
+  top: auto;
+  width: max-content;
+}
+
+body .forest-grid,
+body .forest-density-dense .forest-grid,
+body .forest-density-canopy .forest-grid {
+  align-content: start;
+  align-items: start;
+  gap: 10px;
+  grid-auto-flow: dense;
+  grid-template-columns: repeat(auto-fit, minmax(172px, 1fr));
+  padding: 10px;
+}
+
+body .forest-density-canopy .forest-grid {
+  max-height: min(69vh, 640px);
+}
+
+body .forest-grove {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 248, 192, 0.1) 0 18%, transparent 19%),
+    radial-gradient(circle at 84% 88%, rgba(38, 74, 37, 0.12) 0 22%, transparent 23%),
+    rgba(91, 139, 72, 0.22);
+  border: 1px solid rgba(34, 74, 39, 0.18);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 1px 0 rgba(240, 250, 204, 0.1),
+    inset 0 -8px 0 rgba(43, 82, 43, 0.08);
+  box-sizing: border-box;
+  display: grid;
+  gap: 3px;
+  align-self: start;
+  min-height: 128px;
+  overflow: visible;
+  padding: 7px;
+  position: relative;
+  z-index: 1;
+}
+
+body .forest-grove.is-major {
+  grid-column: 1 / -1;
+}
+
+body .forest-grove::before {
+  background:
+    linear-gradient(90deg, transparent 0 8px, rgba(54, 104, 47, 0.22) 8px 16px, transparent 16px) 0 0 / 36px 10px repeat-x,
+    linear-gradient(90deg, transparent 0 11px, rgba(238, 218, 110, 0.18) 11px 17px, transparent 17px) 0 100% / 42px 8px repeat-x;
+  content: "";
+  image-rendering: pixelated;
+  inset: 3px;
+  opacity: 0.44;
+  pointer-events: none;
+  position: absolute;
+}
+
+body .grove-vla {
+  background-color: rgba(113, 154, 76, 0.28);
+}
+
+body .grove-world_model {
+  background-color: rgba(71, 139, 124, 0.22);
+}
+
+body .grove-dataset {
+  background-color: rgba(130, 141, 93, 0.24);
+}
+
+body .grove-robotics,
+body .grove-manipulation {
+  background-color: rgba(104, 135, 84, 0.24);
+}
+
+body .grove-embodied_ai,
+body .grove-navigation {
+  background-color: rgba(127, 163, 83, 0.22);
+}
+
+body .grove-simulation {
+  background-color: rgba(142, 151, 78, 0.2);
+}
+
+body .forest-grove-label {
+  align-items: center;
+  color: #f8fff1;
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  min-height: 20px;
+  position: relative;
+  z-index: 20;
+}
+
+body .forest-grove-label span,
+body .forest-grove-label strong {
+  background: rgba(31, 70, 37, 0.84);
+  border: 1px solid rgba(246, 255, 219, 0.18);
+  border-radius: 4px;
+  box-shadow: 0 3px 0 rgba(31, 70, 37, 0.12);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  min-width: 24px;
+  padding: 5px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+body .forest-grove-label strong {
+  background: rgba(255, 239, 158, 0.94);
+  color: #4c3a12;
+  min-width: 18px;
+}
+
+body .forest-grove-trees {
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  padding-top: 2px;
+  position: relative;
+  z-index: 2;
+}
+
+body .forest-density-dense .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+}
+
+body .forest-density-canopy .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+}
+
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+}
+
+body .forest-grove-trees .forest-tile {
+  min-height: 68px;
+}
+
+body .forest-density-dense .forest-grove-trees .forest-tile {
+  min-height: 66px;
+}
+
+body .forest-density-canopy .forest-grove-trees .forest-tile {
+  min-height: 58px;
+}
+
+body .forest-density-canopy .forest-grove-trees .forest-pixel-tree,
+body .forest-density-canopy .forest-grove-trees .tree-sprite {
+  height: 66px;
+  width: 66px;
+}
+
+body .forest-density-dense .forest-grove-trees .forest-pixel-tree,
+body .forest-density-dense .forest-grove-trees .tree-sprite {
+  height: 74px;
+  width: 74px;
+}
+
+body .forest-grove-trees .forest-tile-ground::before {
+  inset: 10px 7px 4px;
+  opacity: 0.36;
+}
+
+body .forest-grove-trees .forest-tile-ground::after {
+  opacity: 0.24;
+}
+
+body .forest-grove-trees .forest-tile-caption {
+  display: none;
+}
+
+body .forest-grove-trees .forest-tile:hover .forest-tile-caption,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-caption,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-caption {
+  display: block;
+}
+
+body .forest-grove-trees .forest-score-chip {
+  transform: scale(0.82);
+  transform-origin: top right;
+}
+
+body .forest-grove-trees .forest-tile-mark {
+  transform: scale(0.82);
+  transform-origin: top left;
+}
+
+@media (max-width: 760px) {
+  body .forest-map-status {
+    margin-left: 0;
+    width: max-content;
+  }
+
+  body .forest-grid,
+  body .forest-density-dense .forest-grid,
+  body .forest-density-canopy .forest-grid {
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+    max-height: min(68vh, 560px);
+    padding: 8px;
+  }
+
+  body .forest-grove {
+    min-height: 116px;
+    padding: 6px;
+  }
+
+  body .forest-grove.is-major {
+    grid-column: 1 / -1;
+  }
+
+  body .forest-grove-trees,
+  body .forest-density-dense .forest-grove-trees,
+  body .forest-density-canopy .forest-grove-trees,
+  body .forest-grove.is-major .forest-grove-trees,
+  body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+  body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  }
+
+  body .forest-grove-trees .forest-tile,
+  body .forest-density-dense .forest-grove-trees .forest-tile,
+  body .forest-density-canopy .forest-grove-trees .forest-tile {
+    min-height: 52px;
+  }
+
+  body .forest-grove-trees .forest-pixel-tree,
+  body .forest-grove-trees .tree-sprite,
+  body .forest-density-dense .forest-grove-trees .forest-pixel-tree,
+  body .forest-density-dense .forest-grove-trees .tree-sprite,
+  body .forest-density-canopy .forest-grove-trees .forest-pixel-tree,
+  body .forest-density-canopy .forest-grove-trees .tree-sprite {
+    height: 58px;
+    width: 58px;
+  }
+
+  body .forest-grove-label span,
+  body .forest-grove-label strong {
+    font-size: 9px;
+    padding: 4px 5px;
+  }
+}
+
+/* Forest-app inspired interaction pass: trees grow from summary state and respond like planted items. */
+body .forest-tile {
+  --stage-scale: 1;
+  --select-scale: 1;
+  --sway-delay: 0ms;
+  --plant-delay: 0ms;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1),
+    filter 0.22s ease;
+}
+
+body .forest-tile[hidden],
+body .forest-grove[hidden] {
+  display: none !important;
+}
+
+body .forest-tile[data-plant-stage="sapling"] {
+  --stage-scale: 0.68;
+}
+
+body .forest-tile[data-plant-stage="sapling"].growth-translation {
+  --stage-scale: 0.74;
+}
+
+body .forest-tile[data-plant-stage="tree"].growth-summary {
+  --stage-scale: 0.98;
+}
+
+body .forest-tile[data-plant-stage="tree"].growth-full_text {
+  --stage-scale: 1.08;
+}
+
+body .forest-grove-trees .forest-tile {
+  animation: forest-tree-enter 0.42s cubic-bezier(0.2, 0.8, 0.22, 1) both;
+  animation-delay: var(--plant-delay);
+  transform: translate(0, 0);
+}
+
+body .forest-grove-trees .forest-tile:hover,
+body .forest-grove-trees .forest-tile:focus-visible,
+body .forest-grove-trees .forest-tile.is-selected {
+  transform: translateY(-3px);
+}
+
+body .forest-grove-trees .forest-pixel-tree {
+  transition:
+    filter 0.2s ease,
+    transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transform:
+    translateX(calc(-50% + var(--tree-shift-x)))
+    rotate(var(--tree-tilt))
+    scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+}
+
+body .forest-grove-trees .is-flipped .forest-pixel-tree {
+  transform:
+    translateX(calc(-50% + var(--tree-shift-x)))
+    rotate(calc(var(--tree-tilt) * -1))
+    scaleX(-1)
+    scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+}
+
+body .forest-grove-trees .forest-tile:hover,
+body .forest-grove-trees .forest-tile:focus-visible,
+body .forest-grove-trees .forest-tile.is-selected {
+  --select-scale: 1.08;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-sprite {
+  display: none;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+  height: 54px;
+  width: 54px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-trunk,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-crown,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-detail {
+  display: block;
+  image-rendering: pixelated;
+  position: absolute;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-trunk {
+  background: #6b4d2c;
+  bottom: 8px;
+  box-shadow:
+    0 -5px 0 #6b4d2c,
+    0 -10px 0 #765633,
+    -3px -5px 0 #5b4228,
+    3px -13px 0 #7d5b35;
+  height: 9px;
+  left: 25px;
+  width: 4px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-crown {
+  background: #5ea143;
+  border-radius: 1px;
+  height: 8px;
+  width: 10px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .crown-one {
+  bottom: 27px;
+  box-shadow:
+    -5px 5px 0 #4d893b,
+    5px 5px 0 #75b85a,
+    0 10px 0 #4f8f3b;
+  left: 21px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .crown-two {
+  background: #79bd57;
+  bottom: 21px;
+  box-shadow:
+    -7px 4px 0 #579943,
+    6px 3px 0 #4f8f3b;
+  height: 7px;
+  left: 18px;
+  width: 11px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .crown-three {
+  background: #3f7a35;
+  bottom: 20px;
+  box-shadow:
+    6px -2px 0 #65aa49,
+    10px 4px 0 #3f7a35;
+  height: 6px;
+  left: 28px;
+  width: 8px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .detail-one {
+  background: #d8ef94;
+  bottom: 33px;
+  height: 3px;
+  left: 27px;
+  width: 4px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .detail-two {
+  background: #e7c75e;
+  bottom: 12px;
+  box-shadow:
+    16px 0 0 rgba(231, 199, 94, 0.72),
+    -10px 2px 0 rgba(231, 199, 94, 0.5);
+  height: 3px;
+  left: 18px;
+  width: 3px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .detail-three {
+  background: rgba(57, 91, 49, 0.46);
+  bottom: 5px;
+  box-shadow:
+    8px 0 0 rgba(57, 91, 49, 0.35),
+    18px -1px 0 rgba(57, 91, 49, 0.42);
+  height: 3px;
+  left: 15px;
+  width: 6px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 8px, rgba(72, 118, 56, 0.2) 8px 10px, transparent 10px 18px),
+    linear-gradient(180deg, rgba(238, 247, 184, 0.14), rgba(58, 99, 47, 0.12)) !important;
+  border-radius: 5px;
+  opacity: 0.7;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-sprite {
+  animation: forest-leaf-breathe 3.8s ease-in-out infinite;
+  animation-delay: var(--sway-delay);
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-shadow {
+  opacity: 0.38;
+  transform: translateX(-50%) scale(0.58);
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-shadow {
+  opacity: 0.78;
+}
+
+body .forest-grove-trees .forest-tile.is-planting .forest-pixel-tree {
+  animation: forest-plant-pop 0.62s cubic-bezier(0.18, 0.85, 0.25, 1.12);
+}
+
+body .forest-grove-trees .forest-tile.is-planting .tree-shadow {
+  animation: forest-shadow-pop 0.62s cubic-bezier(0.18, 0.85, 0.25, 1.12);
+}
+
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before {
+  opacity: 0.72;
+}
+
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::after {
+  background-image:
+    radial-gradient(circle at 28% 68%, rgba(255, 236, 129, 0.44) 0 4px, transparent 5px),
+    radial-gradient(circle at 70% 28%, rgba(255, 251, 210, 0.38) 0 4px, transparent 5px) !important;
+  opacity: 0.76;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-score-chip {
+  display: none;
+}
+
+body .forest-inspector {
+  transition:
+    box-shadow 0.22s ease,
+    transform 0.22s ease,
+    background-color 0.22s ease;
+}
+
+body .forest-inspector.is-updating {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 34px rgba(46, 88, 48, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+body .forest-inspector.is-sapling-stage .forest-inspector-kicker::after,
+body .forest-inspector.is-tree-stage .forest-inspector-kicker::after {
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 900;
+  margin-left: 8px;
+  padding: 4px 6px;
+}
+
+body .forest-inspector.is-sapling-stage .forest-inspector-kicker::after {
+  background: #eaf5d7;
+  color: #315a34;
+  content: "树苗";
+}
+
+body .forest-inspector.is-tree-stage .forest-inspector-kicker::after {
+  background: #fff0a8;
+  color: #594414;
+  content: "已成长";
+}
+
+body .forest-filter {
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+body .forest-filter:hover,
+body .forest-filter:focus-visible {
+  transform: translateY(-1px);
+}
+
+body .forest-filter.is-active {
+  box-shadow:
+    inset 0 -2px 0 rgba(0, 0, 0, 0.12),
+    0 6px 12px rgba(37, 76, 43, 0.12);
+}
+
+body .forest-growth-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+body .growth-legend-item {
+  align-items: center;
+  background: #f8fff1;
+  border: 1px solid #bed6a8;
+  border-radius: 7px;
+  color: #315a34;
+  display: inline-grid;
+  gap: 2px 8px;
+  grid-template-columns: 26px auto;
+  min-height: 42px;
+  padding: 7px 10px 7px 8px;
+}
+
+body .growth-legend-item i {
+  display: block;
+  grid-row: 1 / span 2;
+  image-rendering: pixelated;
+  position: relative;
+}
+
+body .growth-legend-item.is-sapling i {
+  background: #6b4d2c;
+  box-shadow:
+    0 -5px 0 #6b4d2c,
+    0 -10px 0 #765633,
+    -6px -15px 0 #579943,
+    0 -20px 0 #79bd57,
+    6px -14px 0 #3f7a35,
+    -8px 2px 0 rgba(57, 91, 49, 0.36),
+    8px 2px 0 rgba(57, 91, 49, 0.36);
+  height: 8px;
+  margin: 20px 0 0 11px;
+  width: 4px;
+}
+
+body .growth-legend-item.is-grown i {
+  background: #6b4d2c;
+  box-shadow:
+    0 -6px 0 #765633,
+    0 -12px 0 #765633,
+    -8px -20px 0 #4f8f3b,
+    0 -27px 0 #79bd57,
+    8px -21px 0 #3f7a35,
+    -13px -14px 0 #65aa49,
+    13px -14px 0 #4d893b,
+    -8px 2px 0 rgba(57, 91, 49, 0.36),
+    8px 2px 0 rgba(57, 91, 49, 0.36);
+  height: 12px;
+  margin: 25px 0 0 11px;
+  width: 5px;
+}
+
+body .growth-legend-item strong {
+  font-size: 12px;
+  line-height: 1;
+}
+
+body .growth-legend-item small {
+  color: #6b7a5b;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+body .forest-grove {
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+body .forest-grove:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(240, 250, 204, 0.12),
+    inset 0 -8px 0 rgba(43, 82, 43, 0.08),
+    0 8px 18px rgba(40, 78, 42, 0.1);
+}
+
+@keyframes forest-tree-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.82);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes forest-leaf-breathe {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-2px);
+  }
+}
+
+@keyframes forest-plant-pop {
+  0% {
+    filter: brightness(1);
+  }
+
+  42% {
+    filter: brightness(1.16) saturate(1.08);
+    transform:
+      translateX(calc(-50% + var(--tree-shift-x)))
+      rotate(var(--tree-tilt))
+      scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale) * 1.16));
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes forest-shadow-pop {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+
+  42% {
+    opacity: 0.46;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-grove-trees .forest-tile,
+  body .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-sprite,
+  body .forest-grove-trees .forest-tile.is-planting .forest-pixel-tree,
+  body .forest-grove-trees .forest-tile.is-planting .tree-shadow {
+    animation: none;
+  }
+
+  body .forest-tile,
+  body .forest-grove,
+  body .forest-inspector,
+  body .forest-filter {
+    transition: none;
+  }
+}
+
+/* Map patch pass: groves should read like terrain islands on one forest map, not framed boxes. */
+body .forest-stage {
+  padding: 18px;
+}
+
+body .forest-grid,
+body .forest-density-dense .forest-grid,
+body .forest-density-canopy .forest-grid {
+  background-color: #76a957;
+  background-image:
+    radial-gradient(ellipse at 15% 17%, rgba(237, 244, 177, 0.18) 0 7%, transparent 8%),
+    radial-gradient(ellipse at 83% 75%, rgba(49, 99, 52, 0.18) 0 12%, transparent 13%),
+    linear-gradient(135deg, transparent 0 43%, rgba(130, 105, 55, 0.08) 43% 48%, transparent 48%),
+    linear-gradient(180deg, #86b962 0%, #70a553 58%, #5e8f48 100%) !important;
+  border-color: #2e5531;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+  padding: 16px;
+}
+
+body .forest-grid::after {
+  opacity: 0.2;
+}
+
+body .forest-grove,
+body .forest-grove:hover {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 0;
+  min-height: 126px;
+  overflow: visible;
+  padding: 36px 9px 10px;
+  position: relative;
+  z-index: 1;
+}
+
+body .forest-grove.is-focused-grove {
+  z-index: 4;
+}
+
+body .forest-grove::before {
+  background:
+    radial-gradient(ellipse at 18% 20%, rgba(238, 248, 185, 0.2) 0 11%, transparent 12%),
+    radial-gradient(ellipse at 82% 72%, rgba(54, 98, 45, 0.16) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 54%, rgba(102, 151, 73, 0.62) 0 66%, transparent 67%);
+  border: 0;
+  border-radius: 44% 56% 47% 53% / 33% 39% 61% 67%;
+  box-shadow:
+    inset 0 2px 0 rgba(238, 248, 185, 0.08),
+    inset 0 -10px 0 rgba(42, 79, 40, 0.08);
+  content: "";
+  inset: 9px 3px 3px;
+  opacity: 0.82;
+  position: absolute;
+  transform: rotate(-0.8deg);
+  z-index: -1;
+}
+
+body .forest-grove.is-focused-grove::before {
+  box-shadow:
+    inset 0 2px 0 rgba(238, 248, 185, 0.12),
+    inset 0 -10px 0 rgba(42, 79, 40, 0.08),
+    0 0 0 2px rgba(255, 239, 142, 0.38),
+    0 10px 22px rgba(47, 84, 43, 0.16);
+  opacity: 0.94;
+}
+
+body .forest-grove::after {
+  background:
+    linear-gradient(90deg, transparent 0 11px, rgba(238, 224, 132, 0.2) 11px 18px, transparent 18px 44px) 8px 12px / 56px 12px repeat-x,
+    radial-gradient(circle at 18% 78%, rgba(40, 82, 39, 0.16) 0 4px, transparent 5px),
+    radial-gradient(circle at 78% 28%, rgba(238, 248, 185, 0.14) 0 4px, transparent 5px);
+  content: "";
+  inset: 18px 10px 8px;
+  opacity: 0.42;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+body .grove-dataset::before {
+  background:
+    radial-gradient(ellipse at 15% 18%, rgba(234, 229, 178, 0.2) 0 10%, transparent 11%),
+    radial-gradient(ellipse at 78% 72%, rgba(87, 101, 65, 0.16) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 54%, rgba(104, 141, 78, 0.64) 0 66%, transparent 67%);
+}
+
+body .grove-vla::before {
+  background:
+    radial-gradient(ellipse at 22% 18%, rgba(246, 235, 147, 0.24) 0 10%, transparent 11%),
+    radial-gradient(ellipse at 82% 72%, rgba(56, 118, 58, 0.2) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 54%, rgba(117, 163, 76, 0.7) 0 66%, transparent 67%);
+}
+
+body .grove-robotics::before,
+body .grove-manipulation::before {
+  background:
+    radial-gradient(ellipse at 18% 20%, rgba(210, 227, 171, 0.18) 0 11%, transparent 12%),
+    radial-gradient(ellipse at 80% 72%, rgba(54, 94, 86, 0.16) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 54%, rgba(88, 130, 84, 0.66) 0 66%, transparent 67%);
+}
+
+body .grove-world_model::before {
+  background:
+    radial-gradient(ellipse at 18% 20%, rgba(209, 245, 236, 0.2) 0 11%, transparent 12%),
+    radial-gradient(ellipse at 80% 72%, rgba(43, 101, 104, 0.18) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 54%, rgba(75, 139, 123, 0.6) 0 66%, transparent 67%);
+}
+
+body .grove-simulation::before {
+  background:
+    radial-gradient(ellipse at 20% 18%, rgba(246, 230, 143, 0.18) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 78% 72%, rgba(116, 106, 51, 0.18) 0 18%, transparent 19%),
+    radial-gradient(ellipse at 50% 54%, rgba(132, 146, 70, 0.6) 0 66%, transparent 67%);
+}
+
+body .forest-grove-label {
+  align-items: start;
+  display: grid;
+  gap: 4px 6px;
+  grid-template-columns: auto auto;
+  left: 10px;
+  margin: 0;
+  min-height: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 9px;
+  z-index: 18;
+}
+
+body .forest-grove-label span,
+body .forest-grove-label strong,
+body .forest-grove-label em {
+  border: 0;
+  border-radius: 5px;
+  box-shadow:
+    0 3px 0 rgba(31, 70, 37, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-style: normal;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+body .forest-grove-label span {
+  align-items: start;
+  background: rgba(31, 70, 37, 0.82);
+  color: #f8fff1;
+  display: grid;
+  gap: 3px;
+  padding: 4px 6px;
+}
+
+body .forest-grove.is-focused-grove .forest-grove-label span {
+  background: rgba(25, 61, 34, 0.96);
+}
+
+body .forest-grove.is-focused-grove .forest-grove-label strong {
+  background: #ffe783;
+}
+
+body .forest-grove-label span b {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+body .forest-grove-label span small {
+  color: rgba(229, 244, 201, 0.76);
+  font-size: 7px;
+  font-weight: 800;
+  max-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body .forest-grove-label strong {
+  background: #fff0a8;
+  color: #4c3a12;
+  font-size: 9px;
+  font-weight: 900;
+  min-width: 22px;
+  padding: 5px 6px;
+  text-align: center;
+}
+
+body .forest-grove-label em {
+  background: rgba(248, 255, 241, 0.84);
+  color: #315a34;
+  font-size: 7px;
+  font-weight: 900;
+  grid-column: 1 / span 2;
+  padding: 3px 5px;
+  width: max-content;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees {
+  gap: 2px;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  overflow: visible;
+  padding: 5px 4px 3px;
+  z-index: 2;
+}
+
+body .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove-trees .forest-tile {
+  min-height: 62px;
+}
+
+body .forest-grove-trees .forest-tile-ground::before {
+  border: 2px solid rgba(73, 105, 42, 0.34);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 2px 0 rgba(242, 236, 160, 0.16),
+    inset 0 -3px 0 rgba(56, 91, 39, 0.14),
+    0 2px 0 rgba(49, 76, 39, 0.12);
+  filter: saturate(0.9);
+  inset: 18px 8px 4px;
+  opacity: 0.62;
+}
+
+body .forest-grove-trees .forest-tile-ground::after {
+  background-image:
+    linear-gradient(90deg, rgba(244, 238, 164, 0.18) 0 1px, transparent 1px 50%),
+    linear-gradient(180deg, rgba(42, 82, 39, 0.12) 0 1px, transparent 1px 50%) !important;
+  background-size: 8px 8px;
+  border-radius: 5px;
+  inset: 22px 12px 8px;
+  opacity: 0.32;
+}
+
+body .forest-grove-trees .forest-pixel-tree,
+body .forest-grove-trees .tree-sprite,
+body .forest-density-dense .forest-grove-trees .forest-pixel-tree,
+body .forest-density-dense .forest-grove-trees .tree-sprite,
+body .forest-density-canopy .forest-grove-trees .forest-pixel-tree,
+body .forest-density-canopy .forest-grove-trees .tree-sprite {
+  height: 68px;
+  width: 68px;
+}
+
+body .forest-grove-trees .forest-tile-caption {
+  bottom: -2px;
+  left: 50%;
+  max-width: 76px;
+  transform: translateX(-50%);
+}
+
+body .forest-grove.is-canopy-grove,
+body .forest-grove.is-large-grove {
+  grid-column: 1 / -1;
+}
+
+body .forest-grove.is-canopy-grove {
+  min-height: 176px;
+  padding: 40px 10px 12px;
+}
+
+body .forest-grove.is-canopy-grove::before {
+  border-radius: 36% 64% 42% 58% / 28% 34% 66% 72%;
+  inset: 8px 0 2px;
+  opacity: 0.86;
+  transform: rotate(0.35deg);
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees {
+  align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  max-height: 136px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 8px 12px 6px;
+  scrollbar-color: rgba(46, 83, 43, 0.44) transparent;
+  scrollbar-width: thin;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees::-webkit-scrollbar {
+  width: 6px;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees::-webkit-scrollbar-thumb {
+  background: rgba(46, 83, 43, 0.44);
+}
+
+body .forest-grove.is-canopy-grove .forest-tile {
+  min-height: 36px;
+}
+
+body .forest-grove.is-canopy-grove .forest-pixel-tree,
+body .forest-grove.is-canopy-grove .tree-sprite {
+  height: 52px;
+  width: 52px;
+}
+
+body .forest-grove.is-canopy-grove .forest-tile-ground::before,
+body .forest-grove.is-canopy-grove .forest-tile-ground::after,
+body .forest-grove.is-canopy-grove .terrain-shadow,
+body .forest-grove.is-canopy-grove .terrain-sprite {
+  opacity: 0.12;
+}
+
+body .forest-grove.is-canopy-grove .tree-shadow {
+  bottom: 7px;
+  height: 5px;
+  opacity: 0.42;
+}
+
+body .forest-grove.is-canopy-grove .forest-tile-mark,
+body .forest-grove.is-canopy-grove .forest-score-chip {
+  display: none;
+}
+
+body .forest-grove.is-canopy-grove .forest-tile-caption {
+  bottom: -7px;
+}
+
+body .forest-grove.is-medium-grove {
+  min-height: 142px;
+}
+
+body .forest-grove.is-small-grove {
+  min-height: 116px;
+}
+
+body .forest-grove.is-small-grove .forest-grove-label em {
+  display: none;
+}
+
+body .forest-tile.is-selected .forest-tile-ground {
+  box-shadow: none;
+}
+
+body .forest-tile.is-selected .forest-tile-ground::before {
+  opacity: 0.64;
+  outline: 2px solid rgba(255, 239, 142, 0.7);
+  outline-offset: -1px;
+}
+
+body .forest-tile:hover .forest-tile-ground,
+body .forest-tile:focus-visible .forest-tile-ground {
+  box-shadow: none;
+}
+
+body .forest-tile:hover .forest-tile-ground::before,
+body .forest-tile:focus-visible .forest-tile-ground::before {
+  opacity: 0.56;
+  outline: 2px solid rgba(255, 250, 202, 0.42);
+  outline-offset: -1px;
+}
+
+@media (max-width: 760px) {
+  body .forest-stage {
+    padding: 12px;
+  }
+
+  body .forest-grid,
+  body .forest-density-dense .forest-grid,
+  body .forest-density-canopy .forest-grid {
+    gap: 4px;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    padding: 12px;
+  }
+
+  body .forest-grove,
+  body .forest-grove:hover {
+    min-height: 112px;
+    padding: 34px 6px 8px;
+  }
+
+  body .forest-grove-label span small,
+  body .forest-grove-label em {
+    display: none;
+  }
+
+  body .forest-grove-trees,
+  body .forest-density-dense .forest-grove-trees,
+  body .forest-density-canopy .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  }
+
+  body .forest-grove-trees .forest-tile,
+  body .forest-density-dense .forest-grove-trees .forest-tile,
+  body .forest-density-canopy .forest-grove-trees .forest-tile {
+    min-height: 48px;
+  }
+
+  body .forest-grove-trees .forest-pixel-tree,
+  body .forest-grove-trees .tree-sprite,
+  body .forest-density-dense .forest-grove-trees .forest-pixel-tree,
+  body .forest-density-dense .forest-grove-trees .tree-sprite,
+  body .forest-density-canopy .forest-grove-trees .forest-pixel-tree,
+  body .forest-density-canopy .forest-grove-trees .tree-sprite {
+    height: 58px;
+    width: 58px;
+  }
+
+  body .forest-grove.is-canopy-grove {
+    min-height: 154px;
+  }
+
+  body .forest-grove.is-canopy-grove .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+    max-height: 112px;
+    padding-inline: 8px;
+  }
+
+  body .forest-grove.is-canopy-grove .forest-tile {
+    min-height: 32px;
+  }
+
+  body .forest-grove.is-canopy-grove .forest-pixel-tree,
+  body .forest-grove.is-canopy-grove .tree-sprite {
+    height: 46px;
+    width: 46px;
+  }
+}
+
+/* Compact grove pass: mid-size topics should feel like tight clusters, not tall columns. */
+body .forest-grove:not(.is-canopy-grove) {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  padding-inline: 4px;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-tile,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-tile,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-tile {
+  min-height: 50px;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-pixel-tree,
+body .forest-grove:not(.is-canopy-grove) .tree-sprite,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-pixel-tree,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .tree-sprite,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-pixel-tree,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .tree-sprite {
+  height: 60px;
+  width: 60px;
+}
+
+body .forest-grove.is-medium-grove {
+  min-height: 132px;
+}
+
+body .forest-grove.is-small-grove {
+  min-height: 104px;
+}
+
+body .forest-grove.is-small-grove .forest-grove-trees {
+  align-content: center;
+}
+
+body .forest-grove:not(.is-canopy-grove)::after {
+  inset-inline: 14px;
+}
+
+@media (max-width: 760px) {
+  body .forest-grove:not(.is-canopy-grove) {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  body .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+  body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+  body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  }
+
+  body .forest-grove:not(.is-canopy-grove) .forest-tile,
+  body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-tile,
+  body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-tile {
+    min-height: 44px;
+  }
+
+  body .forest-grove:not(.is-canopy-grove) .forest-pixel-tree,
+  body .forest-grove:not(.is-canopy-grove) .tree-sprite,
+  body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-pixel-tree,
+  body .forest-density-dense .forest-grove:not(.is-canopy-grove) .tree-sprite,
+  body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-pixel-tree,
+  body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .tree-sprite {
+    height: 52px;
+    width: 52px;
+  }
+}
+
+/* Planting feedback pass: make clicks feel like a planted item settling into the map. */
+body .forest-grove-trees .forest-tile::after {
+  background:
+    radial-gradient(circle at 50% 70%, rgba(255, 239, 142, 0.28) 0 5px, transparent 6px),
+    radial-gradient(circle at 36% 58%, rgba(248, 255, 208, 0.22) 0 3px, transparent 4px),
+    radial-gradient(circle at 64% 52%, rgba(255, 217, 103, 0.18) 0 3px, transparent 4px);
+  border-radius: 50%;
+  content: "";
+  height: 56px;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 44%;
+  transform: translate(-50%, -50%) scale(0.72);
+  width: 56px;
+  z-index: 7;
+}
+
+body .forest-grove-trees .forest-tile.is-selected::after {
+  opacity: 0.5;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+body .forest-grove-trees .forest-tile.is-planting::after {
+  animation: forest-pixel-sparkle 0.72s steps(4, end);
+}
+
+body .forest-grove-trees .forest-tile.is-planting .tree-detail,
+body .forest-grove-trees .forest-tile.is-planting .tree-crown {
+  animation: forest-leaf-flash 0.62s steps(3, end);
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+  animation: forest-sapling-idle 3.2s steps(3, end) infinite;
+  animation-delay: var(--sway-delay);
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-flipped .forest-pixel-tree {
+  animation-name: forest-sapling-idle-flipped;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-planting .forest-pixel-tree {
+  animation: forest-plant-pop 0.62s cubic-bezier(0.18, 0.85, 0.25, 1.12);
+}
+
+body .forest-inspector.is-updating .forest-inspector-kicker::before {
+  background: #f0cc65;
+  box-shadow:
+    7px -4px 0 rgba(255, 255, 255, 0.9),
+    14px 1px 0 rgba(240, 204, 101, 0.8);
+  content: "";
+  display: inline-block;
+  height: 4px;
+  margin-right: 8px;
+  vertical-align: 2px;
+  width: 4px;
+}
+
+@keyframes forest-pixel-sparkle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.55);
+  }
+
+  35% {
+    opacity: 0.95;
+    transform: translate(-50%, -56%) scale(1.08);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -62%) scale(1.34);
+  }
+}
+
+@keyframes forest-leaf-flash {
+  0%,
+  100% {
+    filter: none;
+  }
+
+  45% {
+    filter: brightness(1.18) saturate(1.12);
+  }
+}
+
+@keyframes forest-sapling-idle {
+  0%,
+  100% {
+    transform:
+      translateX(calc(-50% + var(--tree-shift-x)))
+      rotate(var(--tree-tilt))
+      scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+  }
+
+  50% {
+    transform:
+      translateX(calc(-50% + var(--tree-shift-x)))
+      translateY(-1px)
+      rotate(calc(var(--tree-tilt) + 0.6deg))
+      scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+  }
+}
+
+@keyframes forest-sapling-idle-flipped {
+  0%,
+  100% {
+    transform:
+      translateX(calc(-50% + var(--tree-shift-x)))
+      rotate(calc(var(--tree-tilt) * -1))
+      scaleX(-1)
+      scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+  }
+
+  50% {
+    transform:
+      translateX(calc(-50% + var(--tree-shift-x)))
+      translateY(-1px)
+      rotate(calc((var(--tree-tilt) * -1) - 0.6deg))
+      scaleX(-1)
+      scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-grove-trees .forest-tile::after,
+  body .forest-grove-trees .forest-tile.is-planting::after,
+  body .forest-grove-trees .forest-tile.is-planting .tree-detail,
+  body .forest-grove-trees .forest-tile.is-planting .tree-crown,
+  body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+    animation: none;
+  }
+}
+
+/* Mobile control pass: keep filter controls compact above the map. */
+@media (max-width: 760px) {
+  body .forest-tools {
+    overflow: hidden;
+    padding: 8px;
+  }
+
+  body .forest-filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    margin: -2px -8px 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 8px 8px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  body .forest-filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  body .forest-filter {
+    flex: 0 0 auto;
+    font-size: 12px;
+    max-width: none;
+    min-height: 32px;
+    padding: 6px 9px;
+    scroll-snap-align: start;
+    white-space: nowrap;
+    width: auto;
+  }
+
+  body .forest-growth-legend {
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  body .growth-legend-item {
+    flex: 1 1 132px;
+    min-height: 38px;
+    padding: 6px 8px 6px 7px;
+  }
+}
+
+/* Category sprite pass: use matching sapling assets and make each paper topic read as its own grove. */
+body .forest-grove {
+  --grove-accent: #f0cc65;
+  --grove-base: rgba(91, 139, 72, 0.22);
+  --grove-leaf: rgba(242, 250, 204, 0.14);
+  background:
+    radial-gradient(circle at 18% 20%, var(--grove-leaf) 0 20%, transparent 21%),
+    radial-gradient(circle at 84% 86%, rgba(38, 74, 37, 0.13) 0 24%, transparent 25%),
+    var(--grove-base);
+}
+
+body .grove-vla {
+  --grove-accent: #d94b33;
+  --grove-base: rgba(116, 157, 74, 0.3);
+  --grove-leaf: rgba(255, 211, 107, 0.18);
+}
+
+body .grove-world_model {
+  --grove-accent: #7be7e2;
+  --grove-base: rgba(64, 139, 124, 0.24);
+  --grove-leaf: rgba(123, 231, 226, 0.16);
+}
+
+body .grove-dataset {
+  --grove-accent: #e0c982;
+  --grove-base: rgba(130, 141, 93, 0.28);
+  --grove-leaf: rgba(224, 201, 130, 0.16);
+}
+
+body .grove-robotics {
+  --grove-accent: #c7d3ca;
+  --grove-base: rgba(67, 119, 93, 0.26);
+  --grove-leaf: rgba(110, 209, 198, 0.13);
+}
+
+body .grove-embodied_ai {
+  --grove-accent: #f3dd7d;
+  --grove-base: rgba(154, 155, 68, 0.22);
+  --grove-leaf: rgba(243, 221, 125, 0.18);
+}
+
+body .grove-manipulation {
+  --grove-accent: #e59a41;
+  --grove-base: rgba(84, 143, 69, 0.26);
+  --grove-leaf: rgba(229, 154, 65, 0.14);
+}
+
+body .grove-navigation {
+  --grove-accent: #5ba7c7;
+  --grove-base: rgba(86, 135, 77, 0.25);
+  --grove-leaf: rgba(228, 195, 90, 0.15);
+}
+
+body .grove-simulation {
+  --grove-accent: #e68655;
+  --grove-base: rgba(116, 151, 75, 0.22);
+  --grove-leaf: rgba(241, 214, 134, 0.16);
+}
+
+body .grove-other {
+  --grove-accent: #c68a43;
+  --grove-base: rgba(92, 142, 74, 0.24);
+  --grove-leaf: rgba(240, 208, 108, 0.13);
+}
+
+body .forest-grove::before {
+  background:
+    linear-gradient(90deg, transparent 0 8px, var(--grove-accent) 8px 11px, transparent 11px 22px) 0 0 / 44px 8px repeat-x,
+    linear-gradient(90deg, transparent 0 12px, rgba(246, 255, 219, 0.2) 12px 18px, transparent 18px 42px) 0 100% / 46px 8px repeat-x,
+    radial-gradient(circle at 22% 82%, rgba(35, 76, 39, 0.18) 0 13%, transparent 14%),
+    radial-gradient(circle at 78% 18%, rgba(244, 230, 135, 0.14) 0 10%, transparent 11%);
+  opacity: 0.38;
+}
+
+body .forest-grove-label span {
+  border-left: 3px solid var(--grove-accent);
+}
+
+body .forest-grove-label strong {
+  border-color: rgba(246, 255, 219, 0.42);
+  box-shadow:
+    0 3px 0 rgba(31, 70, 37, 0.12),
+    0 0 0 1px var(--grove-accent);
+}
+
+body .forest-filter-bar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+body .forest-filter {
+  min-height: 34px;
+}
+
+body .forest-grove-trees .forest-tile {
+  --asset-size: 68px;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-tile {
+  --asset-size: 62px;
+}
+
+body .forest-grove.is-canopy-grove .forest-tile {
+  --asset-size: 54px;
+}
+
+body .forest-grove-trees .forest-pixel-tree,
+body .forest-grove-trees .tree-sprite,
+body .forest-density-dense .forest-grove-trees .forest-pixel-tree,
+body .forest-density-dense .forest-grove-trees .tree-sprite,
+body .forest-density-canopy .forest-grove-trees .forest-pixel-tree,
+body .forest-density-canopy .forest-grove-trees .tree-sprite {
+  height: var(--asset-size) !important;
+  width: var(--asset-size) !important;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] {
+  --stage-scale: 0.96;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"].growth-translation {
+  --stage-scale: 1.02;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"].growth-summary {
+  --stage-scale: 1.02;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"].growth-full_text {
+  --stage-scale: 1.1;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-sprite {
+  display: block !important;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-trunk,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-crown,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-detail,
+body .forest-grove-trees .forest-pixel-tree .tree-trunk,
+body .forest-grove-trees .forest-pixel-tree .tree-crown,
+body .forest-grove-trees .forest-pixel-tree .tree-detail {
+  display: none !important;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-shadow {
+  opacity: 0.42;
+  transform: translateX(-50%) scale(0.5);
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-shadow {
+  opacity: 0.76;
+  transform: translateX(-50%) scale(0.78);
+}
+
+body .forest-grove-trees .tree-sprite {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+body .forest-grove-trees .forest-tile-ground::before {
+  border-radius: 44% 56% 49% 51% / 54% 46% 50% 50%;
+  box-shadow:
+    inset 1px 0 0 rgba(249, 255, 219, 0.06),
+    inset 0 1px 0 rgba(249, 255, 219, 0.07),
+    inset -1px -1px 0 rgba(35, 71, 37, 0.08);
+  filter: saturate(1.05);
+  opacity: 0.5;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  inset: 17px 13px 5px;
+  opacity: 0.56;
+}
+
+body .forest-grove-trees .forest-tile-ground::after {
+  background-image:
+    radial-gradient(circle at 28% 72%, rgba(37, 78, 39, 0.16) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 22%, rgba(246, 255, 206, 0.14) 0 4px, transparent 5px),
+    linear-gradient(132deg, transparent 0 45%, rgba(104, 86, 45, 0.12) 45% 49%, transparent 49%) !important;
+  opacity: 0.34;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after {
+  opacity: 0.26;
+}
+
+body .forest-grid {
+  background-image:
+    radial-gradient(circle at 16% 18%, rgba(232, 241, 171, 0.15) 0 8%, transparent 9%),
+    radial-gradient(circle at 83% 79%, rgba(54, 103, 55, 0.22) 0 13%, transparent 14%),
+    linear-gradient(132deg, transparent 0 35%, rgba(133, 108, 58, 0.1) 35% 40%, transparent 40% 100%),
+    linear-gradient(180deg, #84b760 0%, #6fa252 58%, #5d8a46 100%) !important;
+}
+
+@media (max-width: 760px) {
+  body .forest-filter-bar {
+    flex-wrap: nowrap;
+  }
+
+  body .forest-grove-trees .forest-tile,
+  body .forest-grove:not(.is-canopy-grove) .forest-tile {
+    --asset-size: 54px;
+  }
+
+  body .forest-grove.is-canopy-grove .forest-tile {
+    --asset-size: 46px;
+  }
+
+  body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+    inset: 14px 10px 5px;
+  }
+}
+
+/* Living farm polish: subtle pixel atmosphere, selection ripples, and a matching detail preview. */
+body .forest-stage {
+  --forest-selection-x: 50%;
+  --forest-selection-y: 50%;
+}
+
+body .forest-stage::after {
+  background:
+    linear-gradient(90deg, transparent 0 6px, rgba(255, 238, 142, 0.42) 6px 12px, transparent 12px 24px),
+    radial-gradient(ellipse at 50% 55%, rgba(255, 241, 143, 0.44) 0 26%, transparent 28%);
+  content: "";
+  height: 34px;
+  image-rendering: pixelated;
+  left: var(--forest-selection-x);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: var(--forest-selection-y);
+  transform: translate(-50%, -50%) scale(0.65);
+  width: 74px;
+  z-index: 6;
+}
+
+body .forest-stage.is-selection-pulse::after {
+  animation: forest-soil-pulse 0.72s steps(5, end);
+}
+
+body .forest-stage.is-filtering .forest-grid {
+  animation: forest-filter-settle 0.48s steps(3, end);
+}
+
+body .forest-decor.fence {
+  background: #6e4b2f;
+  bottom: 12px;
+  box-shadow:
+    18px 0 0 #6e4b2f,
+    36px 0 0 #6e4b2f,
+    54px 0 0 #6e4b2f,
+    72px 0 0 #6e4b2f,
+    0 8px 0 #4f3424,
+    18px 8px 0 #4f3424,
+    36px 8px 0 #4f3424,
+    54px 8px 0 #4f3424,
+    72px 8px 0 #4f3424;
+  height: 18px;
+  left: 24px;
+  opacity: 0.34;
+  width: 5px;
+}
+
+body .forest-decor.fence::before,
+body .forest-decor.fence::after {
+  background: #8a623b;
+  box-shadow: 0 4px 0 #5d3f29;
+  content: "";
+  height: 4px;
+  left: -4px;
+  position: absolute;
+  width: 94px;
+}
+
+body .forest-decor.fence::before {
+  top: 4px;
+}
+
+body .forest-decor.fence::after {
+  top: 12px;
+}
+
+body .forest-decor.crop-row {
+  background:
+    linear-gradient(90deg, transparent 0 8px, rgba(50, 95, 45, 0.32) 8px 12px, transparent 12px 22px) 0 0 / 32px 7px repeat-x,
+    linear-gradient(90deg, transparent 0 12px, rgba(241, 216, 119, 0.18) 12px 16px, transparent 16px 28px) 0 8px / 36px 7px repeat-x;
+  height: 18px;
+  opacity: 0.32;
+  right: 22px;
+  transform: rotate(-2deg);
+  width: 168px;
+}
+
+body .forest-decor.row-a {
+  top: 78px;
+}
+
+body .forest-decor.row-b {
+  top: 104px;
+  transform: rotate(1.5deg);
+}
+
+body .forest-light-patch,
+body .forest-mote,
+body .forest-leaf-drift {
+  display: block;
+  image-rendering: pixelated;
+  pointer-events: none;
+  position: absolute;
+}
+
+body .forest-light-patch {
+  background:
+    linear-gradient(90deg, transparent 0 14px, rgba(255, 239, 159, 0.2) 14px 22px, transparent 22px 46px) 0 0 / 56px 8px repeat,
+    linear-gradient(180deg, rgba(255, 244, 175, 0.16), transparent);
+  height: 78px;
+  left: 13%;
+  opacity: 0.6;
+  top: 24px;
+  transform: skewX(-12deg);
+  width: 210px;
+}
+
+body .forest-mote {
+  background: #fff0a1;
+  box-shadow:
+    8px 12px 0 rgba(255, 240, 161, 0.72),
+    19px -5px 0 rgba(255, 247, 199, 0.64);
+  height: 3px;
+  opacity: 0.52;
+  width: 3px;
+}
+
+body .mote-a {
+  animation: forest-mote-float 5.6s steps(8, end) infinite;
+  left: 20%;
+  top: 35%;
+}
+
+body .mote-b {
+  animation: forest-mote-float 6.4s steps(8, end) 0.8s infinite;
+  left: 72%;
+  top: 28%;
+}
+
+body .mote-c {
+  animation: forest-mote-float 7.2s steps(8, end) 1.4s infinite;
+  left: 54%;
+  top: 68%;
+}
+
+body .forest-leaf-drift {
+  background: #d9b65a;
+  box-shadow:
+    4px 1px 0 #a07a35,
+    9px 4px 0 rgba(231, 199, 94, 0.82);
+  height: 3px;
+  opacity: 0.46;
+  width: 6px;
+}
+
+body .leaf-a {
+  animation: forest-leaf-drift 8.8s steps(12, end) infinite;
+  left: 8%;
+  top: 18%;
+}
+
+body .leaf-b {
+  animation: forest-leaf-drift 10.4s steps(12, end) 2s infinite;
+  left: 46%;
+  top: 12%;
+}
+
+body .forest-decor.pond::before {
+  background:
+    linear-gradient(90deg, transparent 0 8px, rgba(221, 255, 239, 0.56) 8px 28px, transparent 28px 44px),
+    linear-gradient(90deg, transparent 0 16px, rgba(255, 255, 255, 0.26) 16px 30px, transparent 30px 58px);
+  content: "";
+  height: 12px;
+  left: 8px;
+  opacity: 0.58;
+  position: absolute;
+  top: 13px;
+  width: 58px;
+}
+
+body .forest-decor.pond::after {
+  animation: forest-water-shimmer 2.8s steps(4, end) infinite;
+  background: rgba(221, 255, 239, 0.42);
+  content: "";
+  height: 3px;
+  left: 14px;
+  position: absolute;
+  top: 25px;
+  width: 35px;
+}
+
+body .forest-inspector-head {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+body .forest-inspector-plant {
+  align-self: start;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 219, 0.96), rgba(225, 240, 185, 0.82));
+  border: 2px solid #b8c88f;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.54),
+    0 5px 0 rgba(59, 91, 47, 0.12);
+  display: block;
+  flex: 0 0 74px;
+  height: 74px;
+  image-rendering: pixelated;
+  overflow: hidden;
+  position: relative;
+  width: 74px;
+}
+
+body .forest-inspector-plant::before {
+  background:
+    linear-gradient(90deg, transparent 0 9px, rgba(75, 119, 52, 0.28) 9px 13px, transparent 13px 28px) 0 0 / 32px 7px repeat-x,
+    linear-gradient(180deg, #87b85a, #63964b);
+  content: "";
+  inset: 45px 7px 6px;
+  position: absolute;
+}
+
+body .forest-inspector-plot {
+  background:
+    radial-gradient(ellipse at 50% 60%, rgba(58, 84, 43, 0.32) 0 48%, transparent 50%);
+  bottom: 9px;
+  height: 18px;
+  left: 13px;
+  position: absolute;
+  width: 48px;
+}
+
+body .forest-inspector-plant img {
+  bottom: 3px;
+  height: 86px;
+  image-rendering: pixelated;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 86px;
+  z-index: 2;
+}
+
+body .forest-inspector-plant.is-sapling-plant img {
+  bottom: 5px;
+  height: 66px;
+  width: 66px;
+}
+
+body .forest-inspector.is-updating .forest-inspector-plant img {
+  animation: forest-preview-pop 0.38s steps(4, end);
+}
+
+body .forest-grove-trees .forest-tile.is-selected .tree-sprite {
+  filter: saturate(1.12) brightness(1.04);
+}
+
+body .forest-grove-trees .forest-tile.is-selected .tree-shadow {
+  background: rgba(51, 75, 34, 0.34);
+}
+
+@keyframes forest-soil-pulse {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.56);
+  }
+
+  35% {
+    opacity: 0.72;
+    transform: translate(-50%, -52%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -54%) scale(1.38);
+  }
+}
+
+@keyframes forest-filter-settle {
+  0% {
+    filter: saturate(0.92) brightness(0.98);
+    transform: translateY(2px);
+  }
+
+  100% {
+    filter: none;
+    transform: translateY(0);
+  }
+}
+
+@keyframes forest-mote-float {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translate(0, 0);
+  }
+
+  50% {
+    opacity: 0.64;
+    transform: translate(14px, -10px);
+  }
+}
+
+@keyframes forest-leaf-drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  18% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(92px, 44px) rotate(16deg);
+  }
+}
+
+@keyframes forest-water-shimmer {
+  0%,
+  100% {
+    transform: translateX(0);
+    width: 28px;
+  }
+
+  50% {
+    transform: translateX(12px);
+    width: 40px;
+  }
+}
+
+@keyframes forest-preview-pop {
+  0% {
+    transform: translateX(-50%) translateY(4px) scale(0.94);
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-light-patch,
+  body .forest-decor.crop-row,
+  body .forest-decor.fence {
+    opacity: 0.22;
+  }
+
+  body .forest-mote,
+  body .forest-leaf-drift {
+    display: none;
+  }
+
+  body .forest-inspector-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  body .forest-inspector-head .button {
+    grid-column: 1 / -1;
+  }
+
+  body .forest-inspector-plant {
+    flex-basis: 62px;
+    height: 62px;
+    width: 62px;
+  }
+
+  body .forest-inspector-plant img {
+    height: 74px;
+    width: 74px;
+  }
+
+  body .forest-inspector-plant.is-sapling-plant img {
+    height: 56px;
+    width: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-stage.is-selection-pulse::after,
+  body .forest-stage.is-filtering .forest-grid,
+  body .mote-a,
+  body .mote-b,
+  body .mote-c,
+  body .leaf-a,
+  body .leaf-b,
+  body .forest-decor.pond::after,
+  body .forest-inspector.is-updating .forest-inspector-plant img {
+    animation: none !important;
+  }
+}
+
+/* Paper-state pixel layer: status should read on the map, not only in the inspector. */
+body .forest-status-pixels {
+  bottom: 9px;
+  display: block;
+  height: 24px;
+  pointer-events: none;
+  position: absolute;
+  right: 7px;
+  width: 28px;
+  z-index: 9;
+}
+
+body .forest-status-pixels .status-pixel {
+  display: none;
+  image-rendering: pixelated;
+  position: absolute;
+}
+
+body .forest-tile[data-summarized="true"] .status-pixel.is-grown {
+  background: #ffd466;
+  box-shadow:
+    -2px 2px 0 #a86628,
+    2px 2px 0 #e18a37,
+    0 4px 0 #6d4b25;
+  display: block;
+  height: 4px;
+  left: 2px;
+  top: 13px;
+  width: 4px;
+}
+
+body .forest-tile[data-high-relevance="true"] .status-pixel.is-high-relevance {
+  animation: forest-status-glint 2.2s steps(4, end) infinite;
+  background: #fff0a8;
+  box-shadow:
+    0 -3px 0 #fff0a8,
+    0 3px 0 #e2aa3a,
+    -3px 0 0 #f6ce58,
+    3px 0 0 #f6ce58,
+    0 0 0 2px rgba(85, 58, 19, 0.14);
+  display: block;
+  height: 3px;
+  left: 17px;
+  top: 4px;
+  width: 3px;
+}
+
+body .forest-tile.growth-full_text .status-pixel.is-full-text {
+  background: #f7ead0;
+  border-left: 2px solid #7a5633;
+  box-shadow:
+    0 2px 0 #c99a55,
+    5px 0 0 #e7c06b,
+    5px 2px 0 #9a6a38;
+  display: block;
+  height: 8px;
+  left: 12px;
+  top: 14px;
+  width: 7px;
+}
+
+body .forest-tile[data-summarized="true"] .tree-sprite {
+  filter: saturate(1.08) brightness(1.03);
+}
+
+body .forest-tile.growth-full_text .tree-sprite {
+  filter:
+    saturate(1.1)
+    brightness(1.04)
+    drop-shadow(0 0 2px rgba(255, 220, 102, 0.54));
+}
+
+body .forest-tile[data-high-relevance="true"] .forest-tile-ground::after {
+  background-image:
+    radial-gradient(circle at 23% 68%, rgba(255, 230, 112, 0.32) 0 4px, transparent 5px),
+    radial-gradient(circle at 72% 22%, rgba(255, 247, 198, 0.22) 0 4px, transparent 5px),
+    linear-gradient(132deg, transparent 0 45%, rgba(141, 94, 29, 0.16) 45% 49%, transparent 49%) !important;
+  opacity: 0.52;
+}
+
+body .forest-tile.growth-full_text .forest-tile-ground::before {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 202, 0.12),
+    inset 0 -1px 0 rgba(80, 60, 30, 0.08),
+    0 0 0 1px rgba(232, 197, 91, 0.18);
+}
+
+body .forest-inspector-plant.is-high-relevance-plant .forest-inspector-plot::after {
+  animation: forest-status-glint 2.2s steps(4, end) infinite;
+  background: #fff0a8;
+  box-shadow:
+    0 -4px 0 #fff0a8,
+    0 4px 0 #e2aa3a,
+    -4px 0 0 #f6ce58,
+    4px 0 0 #f6ce58;
+  content: "";
+  height: 3px;
+  position: absolute;
+  right: 4px;
+  top: -20px;
+  width: 3px;
+  z-index: 4;
+}
+
+body .forest-inspector-plant.is-full-text-plant::after {
+  background: #f7ead0;
+  border-left: 2px solid #7a5633;
+  box-shadow:
+    0 2px 0 #c99a55,
+    7px 0 0 #e7c06b,
+    7px 2px 0 #9a6a38;
+  content: "";
+  height: 10px;
+  left: 9px;
+  position: absolute;
+  top: 9px;
+  width: 9px;
+  z-index: 5;
+}
+
+@keyframes forest-status-glint {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: scale(0.9);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-status-pixels {
+    bottom: 7px;
+    right: 5px;
+    transform: scale(0.86);
+    transform-origin: bottom right;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-tile[data-high-relevance="true"] .status-pixel.is-high-relevance,
+  body .forest-inspector-plant.is-high-relevance-plant .forest-inspector-plot::after {
+    animation: none !important;
+  }
+}
+
+/* Grove wayfinding pass: labels read as in-world wooden signs, with a path to the active grove. */
+body .forest-grove-label {
+  transform-origin: 12px 28px;
+}
+
+body .forest-grove-label::before {
+  background: #704b2e;
+  box-shadow:
+    0 3px 0 #4e3423,
+    4px 0 0 #8b6239,
+    4px 3px 0 #5e3d28;
+  content: "";
+  height: 18px;
+  left: 11px;
+  position: absolute;
+  top: 23px;
+  width: 4px;
+  z-index: -1;
+}
+
+body .forest-grove-label::after {
+  background: #543722;
+  box-shadow:
+    10px 0 0 rgba(84, 55, 34, 0.82),
+    22px 0 0 rgba(84, 55, 34, 0.62);
+  content: "";
+  height: 3px;
+  left: 4px;
+  opacity: 0.42;
+  position: absolute;
+  top: 39px;
+  width: 9px;
+  z-index: -2;
+}
+
+body .forest-grove-label span {
+  background:
+    linear-gradient(180deg, #9a683b 0 4px, #775033 4px 100%);
+  border: 2px solid #4f3422;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 154, 0.22),
+    inset 0 -2px 0 rgba(67, 42, 25, 0.3),
+    0 3px 0 rgba(47, 31, 19, 0.24);
+  color: #fff4d4;
+  min-width: 68px;
+  padding: 6px 8px 5px 9px;
+  position: relative;
+  text-shadow: 0 1px 0 rgba(59, 37, 22, 0.75);
+}
+
+body .forest-grove-label span::before,
+body .forest-grove-label span::after {
+  background: #4b2f1d;
+  box-shadow: 1px 1px 0 rgba(255, 230, 155, 0.25);
+  content: "";
+  height: 3px;
+  position: absolute;
+  top: 5px;
+  width: 3px;
+}
+
+body .forest-grove-label span::before {
+  left: 4px;
+}
+
+body .forest-grove-label span::after {
+  right: 4px;
+}
+
+body .forest-grove-label span b {
+  color: #fff8de;
+}
+
+body .forest-grove-label span small {
+  color: #ffe7a8;
+}
+
+body .forest-grove-label strong {
+  background:
+    linear-gradient(180deg, #ffe783 0 4px, #dcae4c 4px 100%);
+  border: 2px solid #6d4b25;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 220, 0.42),
+    0 3px 0 rgba(83, 56, 24, 0.2);
+}
+
+body .forest-grove-label em {
+  background: rgba(37, 67, 35, 0.84);
+  border: 1px solid rgba(255, 231, 131, 0.18);
+}
+
+body .forest-grove.is-focused-grove .forest-grove-label {
+  animation: forest-sign-wobble 0.48s steps(3, end);
+}
+
+body .forest-grove.is-focused-grove .forest-grove-label span {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 226, 154, 0.28),
+    inset 0 -2px 0 rgba(67, 42, 25, 0.32),
+    0 0 0 2px rgba(255, 231, 131, 0.36),
+    0 5px 0 rgba(47, 31, 19, 0.2);
+}
+
+body .forest-grove-trees::before {
+  background:
+    linear-gradient(115deg, transparent 0 30%, rgba(151, 116, 61, 0.18) 30% 38%, transparent 38% 100%),
+    radial-gradient(circle at 22% 72%, rgba(94, 73, 43, 0.22) 0 3px, transparent 4px),
+    radial-gradient(circle at 54% 46%, rgba(238, 222, 139, 0.18) 0 3px, transparent 4px),
+    radial-gradient(circle at 82% 64%, rgba(75, 107, 54, 0.18) 0 4px, transparent 5px);
+  border-radius: 46% 54% 50% 50%;
+  content: "";
+  inset: 16px 7px 2px;
+  opacity: 0.18;
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+}
+
+body .forest-grove.is-focused-grove .forest-grove-trees::before {
+  animation: forest-path-glimmer 0.78s steps(4, end);
+  opacity: 0.48;
+}
+
+body .forest-grove-trees .forest-tile {
+  position: relative;
+  z-index: 1;
+}
+
+body .forest-grove-trees .forest-tile::before {
+  background:
+    linear-gradient(#ffe783, #ffe783) left top / 10px 3px no-repeat,
+    linear-gradient(#ffe783, #ffe783) left top / 3px 10px no-repeat,
+    linear-gradient(#ffe783, #ffe783) right top / 10px 3px no-repeat,
+    linear-gradient(#ffe783, #ffe783) right top / 3px 10px no-repeat,
+    linear-gradient(#ffe783, #ffe783) left bottom / 10px 3px no-repeat,
+    linear-gradient(#ffe783, #ffe783) left bottom / 3px 10px no-repeat,
+    linear-gradient(#ffe783, #ffe783) right bottom / 10px 3px no-repeat,
+    linear-gradient(#ffe783, #ffe783) right bottom / 3px 10px no-repeat;
+  content: "";
+  height: 34px;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: 48px;
+  z-index: 8;
+}
+
+body .forest-grove-trees .forest-tile.is-selected::before,
+body .forest-grove-trees .forest-tile:focus-visible::before {
+  opacity: 0.9;
+}
+
+@keyframes forest-sign-wobble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  33% {
+    transform: rotate(-1.4deg);
+  }
+
+  66% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes forest-path-glimmer {
+  0%,
+  100% {
+    filter: none;
+  }
+
+  50% {
+    filter: brightness(1.12) saturate(1.08);
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-grove-label span {
+    min-width: 0;
+    padding: 5px 7px;
+  }
+
+  body .forest-grove-trees .forest-tile::before {
+    height: 28px;
+    width: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-grove.is-focused-grove .forest-grove-label,
+  body .forest-grove.is-focused-grove .forest-grove-trees::before {
+    animation: none !important;
+  }
+}
+
+/* Harvest cue pass: mature, relevant, and full-text states should feel collectible. */
+body .forest-tile[data-summarized="true"] .status-pixel.is-grown {
+  animation: forest-ripe-fruit-bob 3.4s steps(4, end) infinite;
+  border-radius: 1px;
+}
+
+body .forest-tile[data-summarized="true"] .status-pixel.is-grown::before {
+  background: #6f9b3d;
+  box-shadow: 1px 0 0 #416d2d;
+  content: "";
+  height: 2px;
+  left: 2px;
+  position: absolute;
+  top: -2px;
+  width: 4px;
+}
+
+body .forest-tile[data-summarized="true"] .status-pixel.is-grown::after {
+  background: rgba(255, 246, 179, 0.8);
+  content: "";
+  height: 1px;
+  left: 1px;
+  position: absolute;
+  top: 1px;
+  width: 2px;
+}
+
+body .forest-tile[data-high-relevance="true"] .forest-status-pixels::after {
+  animation: forest-star-halo 2.2s steps(4, end) infinite;
+  background:
+    linear-gradient(90deg, transparent 0 3px, rgba(255, 239, 150, 0.72) 3px 8px, transparent 8px 11px),
+    linear-gradient(180deg, transparent 0 3px, rgba(255, 239, 150, 0.72) 3px 8px, transparent 8px 11px);
+  content: "";
+  height: 11px;
+  left: 13px;
+  opacity: 0.72;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 11px;
+  z-index: -1;
+}
+
+body .forest-tile.growth-full_text .status-pixel.is-full-text {
+  animation: forest-paper-flutter 3.1s steps(4, end) infinite;
+  transform-origin: 50% 100%;
+}
+
+body .forest-tile.growth-full_text .status-pixel.is-full-text::before {
+  background: #7a5633;
+  box-shadow:
+    0 3px 0 #7a5633,
+    3px 0 0 #b98243,
+    3px 3px 0 #b98243;
+  content: "";
+  height: 1px;
+  left: 2px;
+  position: absolute;
+  top: 2px;
+  width: 3px;
+}
+
+body .forest-tile.growth-full_text .status-pixel.is-full-text::after {
+  background: rgba(255, 245, 199, 0.9);
+  content: "";
+  height: 2px;
+  left: 5px;
+  position: absolute;
+  top: 1px;
+  width: 2px;
+}
+
+body .forest-tile.is-selected[data-high-relevance="true"] .forest-status-pixels::after,
+body .forest-tile.is-selected.growth-full_text .status-pixel.is-full-text,
+body .forest-tile.is-selected[data-summarized="true"] .status-pixel.is-grown {
+  filter: drop-shadow(0 0 2px rgba(255, 231, 131, 0.62));
+}
+
+body .forest-inspector-plant.is-full-text-plant::after {
+  animation: forest-paper-flutter 3.1s steps(4, end) infinite;
+  transform-origin: 50% 100%;
+}
+
+@keyframes forest-ripe-fruit-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes forest-star-halo {
+  0%,
+  100% {
+    opacity: 0.26;
+    transform: scale(0.74);
+  }
+
+  45% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+}
+
+@keyframes forest-paper-flutter {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  45% {
+    transform: rotate(-4deg);
+  }
+
+  70% {
+    transform: rotate(3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-tile[data-summarized="true"] .status-pixel.is-grown,
+  body .forest-tile[data-high-relevance="true"] .forest-status-pixels::after,
+  body .forest-tile.growth-full_text .status-pixel.is-full-text,
+  body .forest-inspector-plant.is-full-text-plant::after {
+    animation: none !important;
+  }
+}
+
+/* Growth diary pass: make the Forest-style processing stages visible per paper. */
+body .forest-growth-diary {
+  --forest-growth-progress: 0%;
+  align-items: start;
+  border-bottom: 2px solid rgba(198, 169, 109, 0.32);
+  border-top: 2px solid rgba(198, 169, 109, 0.32);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 12px 0 14px;
+  overflow: hidden;
+  padding: 14px 4px 10px;
+  position: relative;
+}
+
+body .forest-growth-diary::before {
+  background:
+    linear-gradient(90deg, transparent 0 10px, rgba(112, 75, 46, 0.1) 10px 12px, transparent 12px 22px),
+    linear-gradient(180deg, rgba(255, 245, 200, 0.35), rgba(232, 211, 161, 0.12));
+  content: "";
+  inset: 0;
+  opacity: 0.72;
+  pointer-events: none;
+  position: absolute;
+}
+
+body .forest-growth-rail {
+  background: #7b6a3e;
+  box-shadow:
+    0 2px 0 rgba(65, 56, 34, 0.32),
+    inset 0 1px 0 rgba(255, 238, 161, 0.24);
+  height: 6px;
+  left: 36px;
+  position: absolute;
+  right: 36px;
+  top: 26px;
+  z-index: 1;
+}
+
+body .forest-growth-rail::after {
+  background:
+    linear-gradient(90deg, #7eb14c, #f1cc5e);
+  box-shadow:
+    0 0 0 1px rgba(80, 109, 42, 0.22),
+    0 0 8px rgba(255, 220, 99, 0.28);
+  content: "";
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  transition: width 0.28s steps(4, end);
+  width: var(--forest-growth-progress);
+}
+
+body .forest-growth-step {
+  color: #6e7355;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-width: 0;
+  position: relative;
+  text-align: center;
+  z-index: 2;
+}
+
+body .forest-growth-step i {
+  background: #b7a174;
+  border: 2px solid #6d5731;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 203, 0.4),
+    0 3px 0 rgba(83, 65, 34, 0.22);
+  display: block;
+  height: 22px;
+  image-rendering: pixelated;
+  position: relative;
+  width: 22px;
+}
+
+body .forest-growth-step[data-growth-step="metadata"] i {
+  border-radius: 50% 50% 45% 45%;
+  transform: scale(0.84);
+}
+
+body .forest-growth-step[data-growth-step="translation"] i {
+  background: #7db653;
+  box-shadow:
+    -6px 4px 0 #4e823e,
+    6px 5px 0 #9bd468,
+    inset 0 1px 0 rgba(255, 245, 203, 0.36),
+    0 3px 0 rgba(83, 65, 34, 0.18);
+  height: 17px;
+  margin-top: 5px;
+  width: 7px;
+}
+
+body .forest-growth-step[data-growth-step="summary"] i {
+  background: #6b4d2c;
+  box-shadow:
+    0 -6px 0 #6b4d2c,
+    -8px -13px 0 #4f8f3b,
+    0 -19px 0 #79bd57,
+    8px -13px 0 #3f7a35,
+    inset 0 1px 0 rgba(255, 245, 203, 0.28),
+    0 3px 0 rgba(83, 65, 34, 0.16);
+  height: 13px;
+  margin-top: 9px;
+  width: 5px;
+}
+
+body .forest-growth-step[data-growth-step="full_text"] i {
+  background: #6b4d2c;
+  box-shadow:
+    0 -7px 0 #6b4d2c,
+    -10px -15px 0 #5fa442,
+    0 -23px 0 #8dcc5d,
+    10px -15px 0 #477f38,
+    -5px -27px 0 #f1cc5e,
+    5px -28px 0 #f8e084,
+    inset 0 1px 0 rgba(255, 245, 203, 0.28),
+    0 3px 0 rgba(83, 65, 34, 0.16);
+  height: 15px;
+  margin-top: 11px;
+  width: 6px;
+}
+
+body .forest-growth-step.is-complete {
+  color: #315a34;
+}
+
+body .forest-growth-step.is-complete i {
+  border-color: #315a34;
+  filter: saturate(1.08);
+}
+
+body .forest-growth-step.is-current i::after {
+  animation: forest-growth-step-spark 1.8s steps(4, end) infinite;
+  background: #fff0a8;
+  box-shadow:
+    0 -3px 0 #fff0a8,
+    0 3px 0 #dfaa3f,
+    -3px 0 0 #f1cc5e,
+    3px 0 0 #f1cc5e;
+  content: "";
+  height: 3px;
+  position: absolute;
+  right: -7px;
+  top: -8px;
+  width: 3px;
+}
+
+body .forest-growth-step b {
+  color: inherit;
+  display: block;
+  font-size: 12px;
+  line-height: 1.1;
+  min-width: 0;
+}
+
+body .forest-growth-step small {
+  color: #768065;
+  display: block;
+  font-size: 11px;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+body .forest-growth-step.is-current b,
+body .forest-growth-step.is-complete small {
+  color: #315a34;
+}
+
+body .forest-inspector.is-updating .forest-growth-rail::after {
+  animation: forest-growth-rail-flash 0.44s steps(4, end);
+}
+
+@keyframes forest-growth-step-spark {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.86);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes forest-growth-rail-flash {
+  0%,
+  100% {
+    filter: none;
+  }
+
+  50% {
+    filter: brightness(1.18) saturate(1.12);
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-growth-diary {
+    gap: 4px;
+    margin: 10px 0 12px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  body .forest-growth-rail {
+    left: 26px;
+    right: 26px;
+  }
+
+  body .forest-growth-step b {
+    font-size: 11px;
+  }
+
+  body .forest-growth-step small {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-growth-rail::after {
+    transition: none !important;
+  }
+
+  body .forest-growth-step.is-current i::after,
+  body .forest-inspector.is-updating .forest-growth-rail::after {
+    animation: none !important;
+  }
+}
+
+/* Seasonal scene pass: each paper day gets a stable pixel-farm atmosphere. */
+body .forest-stage {
+  --forest-season-sky: rgba(255, 243, 178, 0.24);
+  --forest-season-glow: rgba(255, 238, 137, 0.2);
+  --forest-season-ground-a: #8bbd5f;
+  --forest-season-ground-b: #6fa250;
+  --forest-season-ground-c: #587f43;
+  --forest-season-speck: #f7d77b;
+  --forest-season-speck-dark: #a77c39;
+}
+
+body .forest-stage.season-spring {
+  --forest-season-sky: rgba(255, 228, 190, 0.3);
+  --forest-season-glow: rgba(255, 216, 169, 0.22);
+  --forest-season-ground-a: #92c96a;
+  --forest-season-ground-b: #71aa52;
+  --forest-season-ground-c: #5d8f46;
+  --forest-season-speck: #ffd0dc;
+  --forest-season-speck-dark: #d77f98;
+}
+
+body .forest-stage.season-summer {
+  --forest-season-sky: rgba(255, 238, 139, 0.36);
+  --forest-season-glow: rgba(255, 225, 95, 0.22);
+  --forest-season-ground-a: #86bd54;
+  --forest-season-ground-b: #639a46;
+  --forest-season-ground-c: #4d7839;
+  --forest-season-speck: #ffdd6b;
+  --forest-season-speck-dark: #b7842f;
+}
+
+body .forest-stage.season-autumn {
+  --forest-season-sky: rgba(255, 204, 125, 0.28);
+  --forest-season-glow: rgba(237, 158, 80, 0.2);
+  --forest-season-ground-a: #b0a85d;
+  --forest-season-ground-b: #8e8d49;
+  --forest-season-ground-c: #69783d;
+  --forest-season-speck: #e8a34f;
+  --forest-season-speck-dark: #9a6031;
+}
+
+body .forest-stage.season-winter {
+  --forest-season-sky: rgba(220, 246, 255, 0.34);
+  --forest-season-glow: rgba(196, 232, 245, 0.22);
+  --forest-season-ground-a: #a7c7ad;
+  --forest-season-ground-b: #86aa8f;
+  --forest-season-ground-c: #6b8d76;
+  --forest-season-speck: #eefcff;
+  --forest-season-speck-dark: #a6d2dc;
+}
+
+body .forest-stage.season-spring,
+body .forest-stage.season-summer,
+body .forest-stage.season-autumn,
+body .forest-stage.season-winter {
+  background-color: var(--forest-season-ground-b);
+  background-image:
+    radial-gradient(circle at 12% 16%, var(--forest-season-sky) 0 8%, transparent 9%),
+    radial-gradient(circle at 82% 74%, rgba(65, 122, 70, 0.22) 0 13%, transparent 14%),
+    linear-gradient(180deg, var(--forest-season-glow) 0%, transparent 42%),
+    linear-gradient(180deg, var(--forest-season-ground-a) 0%, var(--forest-season-ground-b) 48%, var(--forest-season-ground-c) 100%) !important;
+}
+
+body .forest-stage.season-spring .forest-grid,
+body .forest-stage.season-summer .forest-grid,
+body .forest-stage.season-autumn .forest-grid,
+body .forest-stage.season-winter .forest-grid {
+  background-color: var(--forest-season-ground-b);
+  background-image:
+    linear-gradient(180deg, rgba(255, 244, 184, 0.12), rgba(40, 83, 43, 0.12)),
+    repeating-linear-gradient(90deg, rgba(37, 78, 38, 0.08) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(180deg, rgba(37, 78, 38, 0.08) 0 1px, transparent 1px 104px),
+    radial-gradient(circle at 18% 24%, var(--forest-season-glow) 0 8%, transparent 9%) !important;
+}
+
+body .forest-scene-decor::before,
+body .forest-scene-decor::after {
+  content: "";
+  image-rendering: pixelated;
+  pointer-events: none;
+  position: absolute;
+}
+
+body .forest-scene-decor::before {
+  background:
+    linear-gradient(90deg, transparent 0 14px, var(--forest-season-glow) 14px 22px, transparent 22px 48px) 0 0 / 56px 8px repeat,
+    linear-gradient(180deg, var(--forest-season-sky), transparent);
+  height: 96px;
+  left: 9%;
+  opacity: 0.58;
+  top: 12px;
+  transform: skewX(-11deg);
+  width: min(360px, 68%);
+}
+
+body .forest-stage.mood-dusk .forest-scene-decor::before {
+  opacity: 0.74;
+  transform: skewX(-11deg) translateY(8px);
+}
+
+body .forest-stage.mood-dew .forest-scene-decor::after {
+  background:
+    radial-gradient(circle at 12% 78%, rgba(232, 255, 242, 0.5) 0 2px, transparent 3px),
+    radial-gradient(circle at 38% 68%, rgba(232, 255, 242, 0.42) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 82%, rgba(232, 255, 242, 0.45) 0 2px, transparent 3px);
+  bottom: 48px;
+  height: 34px;
+  left: 18px;
+  opacity: 0.62;
+  width: calc(100% - 36px);
+}
+
+body .forest-stage.mood-breeze .forest-scene-decor::after {
+  animation: forest-season-breeze 6.4s steps(9, end) infinite;
+  background:
+    linear-gradient(90deg, transparent 0 20px, rgba(255, 255, 219, 0.3) 20px 54px, transparent 54px 96px),
+    linear-gradient(90deg, transparent 0 32px, rgba(255, 255, 219, 0.18) 32px 78px, transparent 78px 120px);
+  height: 22px;
+  left: -80px;
+  opacity: 0.5;
+  top: 70px;
+  width: 240px;
+}
+
+body .forest-season-badge {
+  background:
+    linear-gradient(180deg, rgba(255, 244, 198, 0.95), rgba(232, 202, 124, 0.92));
+  border: 2px solid #765432;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 232, 0.46),
+    0 3px 0 rgba(74, 53, 30, 0.2);
+  color: #513921;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+  padding: 3px 6px;
+  text-shadow: 0 1px 0 rgba(255, 247, 211, 0.58);
+}
+
+body .forest-season-speck {
+  animation: forest-season-speck-drift 7.6s steps(11, end) infinite;
+  background: var(--forest-season-speck);
+  box-shadow:
+    5px 2px 0 var(--forest-season-speck-dark),
+    11px 5px 0 rgba(255, 255, 255, 0.28);
+  display: block;
+  height: 3px;
+  image-rendering: pixelated;
+  opacity: 0.55;
+  pointer-events: none;
+  position: absolute;
+  width: 5px;
+}
+
+body .forest-stage.season-winter .forest-season-speck {
+  box-shadow:
+    7px 4px 0 var(--forest-season-speck),
+    14px 0 0 rgba(235, 252, 255, 0.68);
+  height: 3px;
+  width: 3px;
+}
+
+body .forest-stage.season-summer .forest-season-speck {
+  border-radius: 1px;
+  box-shadow:
+    0 -5px 0 rgba(255, 238, 132, 0.72),
+    0 5px 0 rgba(218, 159, 62, 0.5),
+    -5px 0 0 rgba(255, 228, 105, 0.72),
+    5px 0 0 rgba(255, 228, 105, 0.72);
+}
+
+body .speck-a {
+  left: 14%;
+  top: 24%;
+}
+
+body .speck-b {
+  animation-delay: 1.4s;
+  left: 64%;
+  top: 18%;
+}
+
+body .speck-c {
+  animation-delay: 2.6s;
+  left: 42%;
+  top: 58%;
+}
+
+body .forest-stage.season-winter .forest-tile-ground::after {
+  background-image:
+    radial-gradient(circle at 22% 70%, rgba(238, 252, 255, 0.24) 0 5px, transparent 6px),
+    radial-gradient(circle at 72% 20%, rgba(238, 252, 255, 0.18) 0 5px, transparent 6px) !important;
+}
+
+body .forest-stage.season-autumn .land-autumn .forest-tile-ground,
+body .forest-stage.season-autumn .land-flower .forest-tile-ground {
+  filter: saturate(1.08) sepia(0.12);
+}
+
+body .forest-stage.season-spring .land-flower .forest-tile-ground,
+body .forest-stage.season-summer .land-sprout .forest-tile-ground {
+  filter: saturate(1.12) brightness(1.03);
+}
+
+@keyframes forest-season-speck-drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  18% {
+    opacity: 0.62;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(86px, 44px) rotate(14deg);
+  }
+}
+
+@keyframes forest-season-breeze {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(55vw);
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-season-badge {
+    font-size: 10px;
+    padding: 3px 5px;
+  }
+
+  body .forest-season-speck {
+    display: none;
+  }
+
+  body .forest-scene-decor::before {
+    height: 72px;
+    left: 4%;
+    width: 72%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body .forest-season-speck,
+  body .forest-stage.mood-breeze .forest-scene-decor::after {
+    animation: none !important;
+  }
+}
+
+/* Category plot pass: compact signs, orderly plots, and category labels over tree names. */
+body .forest-grove-label {
+  gap: 3px 4px;
+  left: 9px;
+  opacity: 0.9;
+  top: 8px;
+  transform: scale(0.84);
+  transform-origin: left top;
+}
+
+body .forest-grove-label::before {
+  height: 10px;
+  left: 8px;
+  opacity: 0.48;
+  top: 21px;
+  width: 3px;
+}
+
+body .forest-grove-label::after {
+  display: none;
+}
+
+body .forest-grove-label span {
+  min-width: 0;
+  max-width: 112px;
+  padding: 4px 6px;
+}
+
+body .forest-grove-label span b {
+  font-size: 10px;
+}
+
+body .forest-grove-label span small {
+  font-size: 8px;
+  max-width: 92px;
+}
+
+body .forest-grove-label strong {
+  font-size: 10px;
+  min-width: 20px;
+  padding: 5px;
+}
+
+body .forest-grove-label em {
+  display: none;
+}
+
+body .forest-grove.is-focused-grove .forest-grove-label em {
+  display: inline-block;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees {
+  gap: 3px;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  padding: 7px 5px 4px;
+}
+
+body .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove-trees .forest-tile {
+  min-height: 64px;
+}
+
+body .forest-grove-trees .forest-tile-ground::before {
+  border: 2px solid rgba(73, 105, 42, 0.36);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 2px 0 rgba(242, 236, 160, 0.16),
+    inset 0 -3px 0 rgba(56, 91, 39, 0.14),
+    0 2px 0 rgba(49, 76, 39, 0.12);
+  inset: 18px 8px 4px;
+  opacity: 0.66;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  inset: 19px 10px 5px;
+}
+
+body .forest-grove-trees .forest-tile-ground::after {
+  background-image:
+    linear-gradient(90deg, rgba(244, 238, 164, 0.18) 0 1px, transparent 1px 50%),
+    linear-gradient(180deg, rgba(42, 82, 39, 0.12) 0 1px, transparent 1px 50%) !important;
+  background-size: 8px 8px;
+  border-radius: 5px;
+  inset: 22px 12px 8px;
+  opacity: 0.34;
+}
+
+body .forest-grove-trees .forest-tile-caption {
+  max-width: 80px;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+}
+
+body .forest-grove.is-canopy-grove .forest-tile-caption {
+  bottom: -7px;
+}
+
+@media (max-width: 760px) {
+  body .forest-grove-label {
+    transform: scale(0.78);
+  }
+
+  body .forest-grove-trees,
+  body .forest-density-dense .forest-grove-trees,
+  body .forest-density-canopy .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  }
+}
+
+/* Pixel clarity pass: regular planted rows, sharper sprites, and clearer land plots. */
+body .forest-stage,
+body .forest-grid,
+body .forest-grove,
+body .forest-grove-trees,
+body .forest-tile,
+body .forest-tile-ground,
+body .forest-pixel-tree,
+body .tree-sprite,
+body .terrain-sprite,
+body .forest-inspector-plant,
+body .forest-inspector-plant img {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+body .forest-grove-trees .forest-tile {
+  --tree-shift-x: 0px !important;
+  --tree-shift-y: 0px !important;
+  --tree-tilt: 0deg !important;
+}
+
+body .forest-grove-trees .forest-pixel-tree,
+body .forest-grove-trees .is-flipped .forest-pixel-tree {
+  transform:
+    translateX(-50%)
+    scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+}
+
+body .forest-grove-trees .is-flipped .forest-pixel-tree {
+  transform:
+    translateX(-50%)
+    scaleX(-1)
+    scale(calc(var(--growth-scale) * var(--stage-scale) * var(--select-scale)));
+}
+
+body .forest-grove-trees .tree-sprite {
+  filter: none;
+}
+
+body .forest-tile[data-summarized="true"] .tree-sprite {
+  filter: saturate(1.03);
+}
+
+body .forest-tile.growth-full_text .tree-sprite,
+body .forest-grove-trees .forest-tile.is-selected .tree-sprite {
+  filter: saturate(1.06) brightness(1.02);
+}
+
+body .forest-grove-label,
+body .forest-tile-caption,
+body .forest-map-status,
+body .forest-growth-status-badge {
+  text-shadow: none;
+}
+
+body .forest-grove-trees .forest-tile-ground::before {
+  background:
+    linear-gradient(180deg, rgba(220, 185, 106, 0.74), rgba(111, 144, 67, 0.72)),
+    repeating-linear-gradient(90deg, rgba(62, 92, 43, 0.2) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(180deg, rgba(255, 244, 169, 0.16) 0 1px, transparent 1px 8px);
+  border-color: rgba(49, 84, 36, 0.5);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 239, 150, 0.22),
+    inset 0 -3px 0 rgba(43, 78, 35, 0.2),
+    0 2px 0 rgba(42, 68, 34, 0.16);
+  opacity: 0.78;
+}
+
+body .forest-grove-trees .forest-tile-ground::after {
+  opacity: 0.42;
+}
+
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before {
+  background-color: rgba(151, 132, 73, 0.72) !important;
+  background-image:
+    linear-gradient(180deg, rgba(232, 196, 110, 0.68), rgba(103, 142, 62, 0.68)),
+    repeating-linear-gradient(90deg, rgba(54, 84, 40, 0.24) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(180deg, rgba(255, 244, 169, 0.18) 0 1px, transparent 1px 8px) !important;
+  border-color: rgba(49, 84, 36, 0.55) !important;
+  opacity: 0.78 !important;
+}
+
+/* Interaction scale pass: make the forest readable and comfortably clickable. */
+body .shell:has(.forest-layout) {
+  max-width: min(1680px, calc(100vw - 28px));
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+body .forest-layout {
+  gap: 22px;
+  grid-template-columns: 1fr;
+}
+
+body .forest-layout .anchor-nav {
+  align-items: center;
+  border-left: 0;
+  border-bottom: 1px solid rgba(73, 105, 42, 0.26);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 0 12px;
+  position: relative;
+  top: auto;
+}
+
+body .forest-layout .anchor-nav .nav-label {
+  border-bottom: 0;
+  font-size: 13px;
+  padding: 0 10px 0 0;
+}
+
+body .forest-layout .anchor-nav a {
+  border: 1px solid rgba(73, 105, 42, 0.24);
+  border-radius: 999px;
+  font-size: 14px;
+  min-height: 38px;
+  padding: 9px 12px;
+}
+
+body .forest-head {
+  padding: 28px 30px;
+}
+
+body .forest-head h1 {
+  font-size: clamp(30px, 3vw, 42px);
+  line-height: 1.12;
+}
+
+body .forest-head p {
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 860px;
+}
+
+body .forest-summary .metric-card {
+  min-height: 96px;
+  padding: 18px 20px;
+}
+
+body .forest-summary .metric-card strong {
+  font-size: 32px;
+}
+
+body .forest-summary .metric-card span {
+  font-size: 14px;
+}
+
+body .forest-tools {
+  gap: 14px;
+  padding: 16px;
+}
+
+body .forest-filter-bar {
+  gap: 10px;
+}
+
+body .forest-filter {
+  font-size: 14px;
+  min-height: 44px;
+  padding: 10px 14px;
+}
+
+body .forest-growth-legend {
+  gap: 12px;
+}
+
+body .growth-legend-item {
+  min-height: 46px;
+  padding: 9px 12px;
+}
+
+body .growth-legend-item strong {
+  font-size: 14px;
+}
+
+body .growth-legend-item small {
+  font-size: 12px;
+}
+
+body .forest-experience {
+  gap: 24px;
+  grid-template-columns: minmax(860px, 1fr) minmax(440px, 500px);
+}
+
+body .forest-density-canopy.forest-experience,
+body .forest-density-dense.forest-experience {
+  grid-template-columns: minmax(860px, 1fr) minmax(440px, 500px);
+}
+
+body .forest-stage {
+  min-height: min(84vh, 920px);
+  padding: 24px;
+}
+
+body .forest-map-status {
+  gap: 9px;
+  margin-bottom: 14px;
+  min-height: 42px;
+  padding: 7px 9px;
+}
+
+body .forest-map-status span {
+  font-size: 14px;
+}
+
+body .forest-map-status strong {
+  font-size: 15px;
+  padding: 7px 9px;
+}
+
+body .forest-season-badge {
+  font-size: 14px;
+  min-height: 32px;
+  padding: 7px 10px;
+}
+
+body .forest-growth-status-badge {
+  min-height: 34px;
+  padding: 5px 7px;
+}
+
+body .forest-map-status .forest-growth-status-badge span:not(.forest-growth-status-fill) {
+  font-size: 12px;
+}
+
+body .forest-map-status .forest-growth-status-badge strong {
+  font-size: 13px;
+  padding: 6px 7px;
+}
+
+body .forest-grid,
+body .forest-density-dense .forest-grid,
+body .forest-density-canopy .forest-grid {
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  max-height: min(82vh, 860px);
+  min-height: 680px;
+  overflow: auto;
+  padding: 14px;
+}
+
+body .forest-grove {
+  gap: 7px;
+  min-height: 172px;
+  padding: 10px;
+}
+
+body .forest-grove.is-major {
+  min-height: 360px;
+}
+
+body .forest-grove-label {
+  gap: 6px;
+  left: 10px;
+  top: 9px;
+  transform: none;
+}
+
+body .forest-grove-label span {
+  max-width: 160px;
+  padding: 6px 8px;
+}
+
+body .forest-grove-label span b,
+body .forest-grove-label strong {
+  font-size: 12px;
+}
+
+body .forest-grove-label span small {
+  font-size: 10px;
+  max-width: 140px;
+}
+
+body .forest-grove-label strong {
+  min-width: 28px;
+  padding: 7px;
+}
+
+body .forest-grove.is-focused-grove .forest-grove-label em {
+  font-size: 10px;
+  padding: 6px 8px;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees,
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  padding: 10px 6px 6px;
+}
+
+body .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove-trees .forest-tile {
+  --asset-size: 82px;
+  min-height: 88px;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+}
+
+body .forest-grove.is-canopy-grove .forest-tile {
+  --asset-size: 72px;
+  min-height: 78px;
+}
+
+body .forest-grove-trees .forest-tile-ground::before {
+  inset: 22px 9px 5px;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  inset: 24px 12px 6px;
+}
+
+body .forest-tile-mark {
+  font-size: 12px;
+  min-height: 19px;
+  min-width: 19px;
+}
+
+body .forest-score-chip {
+  font-size: 12px;
+  min-height: 21px;
+  min-width: 26px;
+}
+
+body .forest-grove-trees .forest-tile-caption {
+  font-size: 12px;
+  max-width: 112px;
+}
+
+body .forest-inspector {
+  font-size: 15px;
+  max-height: calc(100vh - 96px);
+  padding: 18px;
+}
+
+body .forest-inspector-head {
+  gap: 16px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+body .forest-inspector-plant {
+  height: 94px;
+  width: 94px;
+}
+
+body .forest-inspector-plot {
+  bottom: 12px;
+  height: 22px;
+  left: 16px;
+  width: 62px;
+}
+
+body .forest-inspector-plant img {
+  height: 106px;
+  width: 106px;
+}
+
+body .forest-inspector-head h2 {
+  font-size: 23px;
+  line-height: 1.32;
+}
+
+body .forest-inspector-kicker,
+body .forest-detail-label {
+  font-size: 13px;
+}
+
+body .forest-inspector-head .button {
+  font-size: 14px;
+  min-height: 44px;
+  padding: 11px 14px;
+}
+
+body .forest-inspector-meta {
+  gap: 8px;
+}
+
+body .forest-inspector-meta span {
+  font-size: 14px;
+  padding: 7px 10px;
+}
+
+body .forest-growth-diary {
+  gap: 10px;
+  padding: 14px 8px 8px;
+}
+
+body .forest-growth-step b {
+  font-size: 14px;
+}
+
+body .forest-growth-step small {
+  font-size: 12px;
+}
+
+body .forest-detail-grid {
+  gap: 12px;
+}
+
+body .forest-detail-grid section,
+body .forest-abstract {
+  padding: 16px;
+}
+
+body .forest-detail-grid p,
+body .forest-abstract p {
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+body .forest-abstract p {
+  max-height: 260px;
+}
+
+@media (max-width: 1180px) {
+  body .shell:has(.forest-layout) {
+    max-width: min(100vw - 20px, 1120px);
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  body .forest-layout {
+    grid-template-columns: 1fr;
+  }
+
+  body .forest-layout .anchor-nav {
+    position: relative;
+    top: auto;
+  }
+
+  body .forest-experience,
+  body .forest-density-canopy.forest-experience,
+  body .forest-density-dense.forest-experience {
+    grid-template-columns: 1fr;
+  }
+
+  body .forest-inspector {
+    max-height: none;
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-head {
+    padding: 22px;
+  }
+
+  body .forest-head h1 {
+    font-size: 28px;
+  }
+
+  body .forest-filter-bar {
+    flex-wrap: wrap;
+  }
+
+  body .forest-filter {
+    flex: 1 1 132px;
+  }
+
+  body .forest-stage {
+    min-height: 680px;
+    padding: 16px;
+  }
+
+  body .forest-grid,
+  body .forest-density-dense .forest-grid,
+  body .forest-density-canopy .forest-grid {
+    grid-template-columns: 1fr;
+    max-height: 720px;
+    min-height: 560px;
+    padding: 10px;
+  }
+
+  body .forest-grove-trees,
+  body .forest-density-dense .forest-grove-trees,
+  body .forest-density-canopy .forest-grove-trees,
+  body .forest-grove.is-major .forest-grove-trees,
+  body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+  body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+
+  body .forest-grove-trees .forest-tile,
+  body .forest-density-dense .forest-grove-trees .forest-tile,
+  body .forest-density-canopy .forest-grove-trees .forest-tile {
+    --asset-size: 70px;
+    min-height: 78px;
+  }
+
+  body .forest-grove-label span b,
+  body .forest-grove-label strong {
+    font-size: 11px;
+  }
+
+  body .forest-inspector-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  body .forest-inspector-head .button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  body .forest-inspector-head h2 {
+    font-size: 20px;
+  }
+}
+
+/* Proportion tuning pass: keep the forest readable without letting the map dominate the page. */
+body .shell:has(.forest-layout) {
+  max-width: min(1880px, calc(100vw - 44px));
+}
+
+body .forest-experience,
+body .forest-density-canopy.forest-experience,
+body .forest-density-dense.forest-experience {
+  gap: 24px;
+  grid-template-columns: minmax(820px, 1.42fr) minmax(480px, 0.68fr);
+}
+
+body .forest-stage {
+  min-height: clamp(700px, 70vh, 800px);
+  padding: 22px;
+}
+
+body .forest-grid,
+body .forest-density-dense .forest-grid,
+body .forest-density-canopy .forest-grid {
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  max-height: clamp(600px, 61vh, 670px);
+  min-height: 560px;
+  padding: 12px;
+}
+
+body .forest-grove {
+  min-height: 142px;
+  padding: 9px;
+}
+
+body .forest-grove.is-major {
+  min-height: 292px;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees,
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+  gap: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  padding: 9px 5px 5px;
+}
+
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+}
+
+body .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove-trees .forest-tile {
+  --asset-size: 84px;
+  min-height: 88px;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+}
+
+body .forest-grove.is-canopy-grove .forest-tile {
+  --asset-size: 78px;
+  min-height: 84px;
+}
+
+body .forest-inspector {
+  max-height: min(calc(100vh - 104px), 900px);
+  padding: 17px;
+}
+
+body .forest-inspector-head {
+  gap: 14px;
+}
+
+body .forest-inspector-plant {
+  height: 88px;
+  width: 88px;
+}
+
+body .forest-inspector-plot {
+  bottom: 11px;
+  left: 15px;
+  width: 58px;
+}
+
+body .forest-inspector-plant img {
+  height: 100px;
+  width: 100px;
+}
+
+body .forest-inspector-head h2 {
+  font-size: 22px;
+  line-height: 1.34;
+}
+
+body .forest-detail-grid {
+  gap: 11px;
+}
+
+body .forest-detail-grid section,
+body .forest-abstract {
+  padding: 15px;
+}
+
+body .forest-density-open.forest-experience {
+  grid-template-columns: minmax(680px, 1.28fr) minmax(400px, 0.72fr);
+}
+
+body .forest-stage.forest-density-open {
+  min-height: clamp(500px, 58vh, 620px);
+}
+
+body .forest-grid.forest-density-open {
+  align-content: start;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  max-height: clamp(380px, 47vh, 460px);
+  min-height: 360px;
+}
+
+body .forest-density-open .forest-grove {
+  min-height: 138px;
+}
+
+body .forest-density-open .forest-grove.is-major {
+  min-height: 238px;
+}
+
+body .forest-density-open .forest-grove-trees,
+body .forest-density-open .forest-grove.is-major .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 2px;
+  padding: 8px 4px 4px;
+}
+
+body .forest-density-open .forest-grove-trees .forest-tile {
+  --asset-size: 64px;
+  min-height: 68px;
+}
+
+body .forest-density-open .forest-grove.is-canopy-grove .forest-tile {
+  --asset-size: 64px;
+  min-height: 68px;
+}
+
+@media (max-width: 1320px) {
+  body .shell:has(.forest-layout) {
+    max-width: min(100vw - 28px, 1240px);
+  }
+
+  body .forest-experience,
+  body .forest-density-canopy.forest-experience,
+  body .forest-density-dense.forest-experience {
+    grid-template-columns: minmax(680px, 1.3fr) minmax(390px, 0.7fr);
+  }
+
+  body .forest-density-open.forest-experience {
+    grid-template-columns: minmax(640px, 1.25fr) minmax(360px, 0.75fr);
+  }
+
+  body .forest-stage {
+    min-height: clamp(660px, 72vh, 760px);
+  }
+
+  body .forest-grid,
+  body .forest-density-dense .forest-grid,
+  body .forest-density-canopy .forest-grid {
+    max-height: clamp(580px, 68vh, 640px);
+  }
+
+  body .forest-inspector {
+    max-height: min(calc(100vh - 104px), 820px);
+  }
+}
+
+@media (max-width: 1120px) {
+  body .forest-experience,
+  body .forest-density-canopy.forest-experience,
+  body .forest-density-dense.forest-experience,
+  body .forest-density-open.forest-experience {
+    grid-template-columns: 1fr;
+  }
+
+  body .forest-inspector {
+    max-height: none;
+    position: relative;
+    top: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-stage {
+    min-height: 640px;
+    padding: 14px;
+  }
+
+  body .forest-stage.forest-density-open {
+    min-height: 520px;
+  }
+
+  body .forest-grid,
+  body .forest-density-dense .forest-grid,
+  body .forest-density-canopy .forest-grid {
+    max-height: 610px;
+    min-height: 500px;
+    padding: 9px;
+  }
+
+  body .forest-grid.forest-density-open {
+    max-height: 480px;
+    min-height: 360px;
+  }
+
+  body .forest-grove {
+    min-height: 132px;
+  }
+
+  body .forest-grove.is-major {
+    min-height: 286px;
+  }
+
+  body .forest-grove-trees,
+  body .forest-density-dense .forest-grove-trees,
+  body .forest-density-canopy .forest-grove-trees,
+  body .forest-grove.is-major .forest-grove-trees,
+  body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+  body .forest-density-canopy .forest-grove.is-major .forest-grove-trees {
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  }
+
+  body .forest-grove-trees .forest-tile,
+  body .forest-density-dense .forest-grove-trees .forest-tile,
+  body .forest-density-canopy .forest-grove-trees .forest-tile {
+    --asset-size: 68px;
+    min-height: 76px;
+  }
+
+  body .forest-grove.is-canopy-grove .forest-tile {
+    --asset-size: 68px;
+    min-height: 76px;
+  }
+
+  body .forest-inspector {
+    padding: 15px;
+  }
+
+  body .forest-inspector-plant {
+    height: 84px;
+    width: 84px;
+  }
+
+  body .forest-inspector-plant img {
+    height: 96px;
+    width: 96px;
+  }
+}
+
+/* Top-level proportion pass: bring the forest into the first viewport. */
+body .forest-head {
+  padding: 22px 28px;
+}
+
+body .forest-head h1 {
+  font-size: clamp(30px, 2.7vw, 38px);
+}
+
+body .forest-head p {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+body .forest-layout {
+  gap: 18px;
+}
+
+body .forest-summary {
+  gap: 10px;
+}
+
+body .forest-summary .metric-card {
+  min-height: 74px;
+  padding: 12px 16px;
+}
+
+body .forest-summary .metric-card strong {
+  font-size: 28px;
+}
+
+body .forest-tools {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+  padding: 13px 16px;
+}
+
+body .forest-filter-bar {
+  flex-wrap: wrap;
+  gap: 8px;
+  overflow-x: visible;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+body .forest-filter {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 9px 13px;
+}
+
+body .forest-growth-legend {
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
+body .growth-legend-item {
+  min-height: 42px;
+  padding: 7px 10px;
+}
+
+body .forest-stage.forest-density-open {
+  min-height: clamp(400px, 52vh, 500px);
+}
+
+body .forest-grid.forest-density-open {
+  max-height: clamp(280px, 38vh, 360px);
+  min-height: clamp(280px, 38vh, 340px);
+}
+
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-caption {
+  opacity: 0;
+}
+
+body .forest-grove-trees .forest-tile:hover .forest-tile-caption,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-caption {
+  opacity: 1;
+}
+
+@media (max-width: 960px) {
+  body .forest-tools {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  body .forest-growth-legend {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-head {
+    padding: 20px;
+  }
+
+  body .forest-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body .forest-summary .metric-card {
+    min-height: 72px;
+  }
+
+  body .forest-stage.forest-density-open {
+    min-height: 500px;
+  }
+
+  body .forest-grid.forest-density-open {
+    max-height: 450px;
+    min-height: 330px;
+  }
+}
+
+/* First-screen compaction: summary numbers become a data strip, repeated legend copy steps out. */
+body .forest-head {
+  padding: 18px 24px;
+}
+
+body .forest-summary {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+body .forest-summary .metric-card {
+  align-items: baseline;
+  display: flex;
+  flex: 1 1 180px;
+  gap: 8px;
+  min-height: 50px;
+  padding: 10px 14px;
+}
+
+body .forest-summary .metric-card strong {
+  font-size: 24px;
+  line-height: 1;
+}
+
+body .forest-summary .metric-card span {
+  font-size: 13px;
+}
+
+body .forest-tools {
+  padding: 12px 16px;
+}
+
+body .forest-filter {
+  min-height: 40px;
+  padding: 8px 12px;
+}
+
+body .forest-growth-legend {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  body .forest-summary .metric-card {
+    flex-basis: calc(50% - 6px);
+    min-height: 52px;
+  }
+}
+
+/* Map label hierarchy: grove signs identify areas; individual trees stay visual. */
+body .forest-grove-trees .forest-tile-caption,
+body .forest-grove-trees .forest-tile:hover .forest-tile-caption,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-caption,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-caption {
+  display: none;
+  opacity: 0;
+}
+
+body .forest-density-canopy .forest-grove-label,
+body .forest-density-dense .forest-grove-label {
+  gap: 5px;
+  left: 8px;
+  top: 8px;
+}
+
+body .forest-density-canopy .forest-grove-label span,
+body .forest-density-dense .forest-grove-label span {
+  max-width: 150px;
+  padding: 5px 7px;
+}
+
+body .forest-density-canopy .forest-grove-label span b,
+body .forest-density-dense .forest-grove-label span b {
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+body .forest-density-canopy .forest-grove-label span small,
+body .forest-density-dense .forest-grove-label span small {
+  font-size: 9px;
+  line-height: 1.1;
+}
+
+body .forest-density-canopy .forest-grove-label strong,
+body .forest-density-dense .forest-grove-label strong {
+  font-size: 11px;
+  min-width: 24px;
+  padding: 6px;
+}
+
+body .forest-density-canopy .forest-grove.is-major .forest-grove-label,
+body .forest-density-dense .forest-grove.is-major .forest-grove-label {
+  transform: scale(0.92);
+  transform-origin: top left;
+}
+
+body .forest-density-canopy .forest-grove.is-major .forest-grove-label span,
+body .forest-density-dense .forest-grove.is-major .forest-grove-label span {
+  max-width: 180px;
+}
+
+/* Plot repair: trees sit on connected land blocks, and signs no longer cover trees. */
+body .forest-grid,
+body .forest-density-dense .forest-grid,
+body .forest-density-canopy .forest-grid,
+body .forest-grid.forest-density-open {
+  background:
+    repeating-linear-gradient(90deg, rgba(38, 77, 42, 0.08) 0 1px, transparent 1px 104px),
+    repeating-linear-gradient(180deg, rgba(38, 77, 42, 0.07) 0 1px, transparent 1px 96px),
+    linear-gradient(180deg, #8cbd61 0%, #74aa52 62%, #65984b 100%);
+}
+
+body .forest-grid::before,
+body .forest-grid::after {
+  display: none !important;
+  opacity: 0;
+}
+
+body .forest-decor.path,
+body .forest-light-patch {
+  opacity: 0.18;
+}
+
+body .forest-grove,
+body .forest-density-open .forest-grove,
+body .forest-density-dense .forest-grove,
+body .forest-density-canopy .forest-grove {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 7px;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: visible;
+  padding: 8px;
+}
+
+body .forest-grove.is-major,
+body .forest-density-open .forest-grove.is-major,
+body .forest-density-dense .forest-grove.is-major,
+body .forest-density-canopy .forest-grove.is-major {
+  min-height: 326px;
+}
+
+body .forest-grove.is-minor,
+body .forest-density-open .forest-grove,
+body .forest-density-dense .forest-grove,
+body .forest-density-canopy .forest-grove {
+  min-height: 154px;
+}
+
+body .forest-grove-label,
+body .forest-density-canopy .forest-grove-label,
+body .forest-density-dense .forest-grove-label,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-label,
+body .forest-density-dense .forest-grove.is-major .forest-grove-label {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  grid-row: 1;
+  justify-self: start;
+  left: auto;
+  margin: 0;
+  opacity: 1;
+  position: relative;
+  top: auto;
+  transform: none;
+  z-index: 5;
+}
+
+body .forest-grove-label::before,
+body .forest-grove-label::after {
+  display: none;
+}
+
+body .forest-grove-label span,
+body .forest-density-canopy .forest-grove-label span,
+body .forest-density-dense .forest-grove-label span,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-label span,
+body .forest-density-dense .forest-grove.is-major .forest-grove-label span {
+  max-width: 210px;
+  padding: 6px 9px;
+}
+
+body .forest-grove-label span b,
+body .forest-density-canopy .forest-grove-label span b,
+body .forest-density-dense .forest-grove-label span b {
+  font-size: 12px;
+}
+
+body .forest-grove-label span small,
+body .forest-density-canopy .forest-grove-label span small,
+body .forest-density-dense .forest-grove-label span small {
+  font-size: 10px;
+}
+
+body .forest-grove-label strong,
+body .forest-density-canopy .forest-grove-label strong,
+body .forest-density-dense .forest-grove-label strong {
+  font-size: 12px;
+  min-width: 28px;
+  padding: 6px 7px;
+}
+
+body .forest-grove-label em,
+body .forest-grove.is-focused-grove .forest-grove-label em {
+  display: none;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees,
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees,
+body .forest-density-open .forest-grove-trees,
+body .forest-density-open .forest-grove.is-major .forest-grove-trees {
+  --plot-land-a: #8ec260;
+  --plot-land-b: #79ad55;
+  --plot-land-c: #638f49;
+  align-content: start;
+  background-color: var(--plot-land-b);
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      rgba(151, 196, 96, 0.2) 0,
+      rgba(151, 196, 96, 0.2) 38px,
+      rgba(115, 151, 75, 0.68) 38px,
+      rgba(115, 151, 75, 0.68) 72px,
+      rgba(78, 113, 57, 0.58) 72px,
+      rgba(78, 113, 57, 0.58) 78px,
+      rgba(151, 196, 96, 0.18) 78px,
+      rgba(151, 196, 96, 0.18) 92px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(54, 91, 42, 0.16) 0,
+      rgba(54, 91, 42, 0.16) 1px,
+      transparent 1px,
+      transparent 70px
+    ),
+    linear-gradient(180deg, rgba(231, 244, 177, 0.18), transparent 34%),
+    linear-gradient(180deg, #8ec260, #79ad55 58%, #638f49) !important;
+  border: 3px solid rgba(45, 88, 38, 0.52);
+  border-radius: 7px;
+  box-shadow:
+    inset 0 0 0 3px rgba(238, 255, 200, 0.16),
+    inset 0 -10px 0 rgba(44, 83, 37, 0.16),
+    0 3px 0 rgba(42, 67, 35, 0.14);
+  gap: 0;
+  grid-row: 2;
+  overflow: hidden;
+  padding: 13px 8px 10px;
+  position: relative;
+}
+
+body .grove-dataset .forest-grove-trees {
+  --plot-land-a: #91bd63;
+  --plot-land-b: #7aa658;
+  --plot-land-c: #658e49;
+}
+
+body .grove-robotics .forest-grove-trees {
+  --plot-land-a: #88af69;
+  --plot-land-b: #719957;
+  --plot-land-c: #5e804a;
+}
+
+body .grove-world_model .forest-grove-trees {
+  --plot-land-a: #86bfa8;
+  --plot-land-b: #6aa58f;
+  --plot-land-c: #548777;
+}
+
+body .grove-vla .forest-grove-trees,
+body .grove-manipulation .forest-grove-trees {
+  --plot-land-a: #93c66a;
+  --plot-land-b: #7eb358;
+  --plot-land-c: #67964a;
+}
+
+body .grove-navigation .forest-grove-trees,
+body .grove-simulation .forest-grove-trees,
+body .grove-other .forest-grove-trees,
+body .grove-embodied_ai .forest-grove-trees {
+  --plot-land-a: #96bd67;
+  --plot-land-b: #80a857;
+  --plot-land-c: #6b8c49;
+}
+
+body .forest-grove-trees::before,
+body .forest-grove.is-focused-grove .forest-grove-trees::before {
+  display: none;
+}
+
+body .forest-grove-trees::after {
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 40px,
+      rgba(255, 239, 156, 0.12) 40px,
+      rgba(255, 239, 156, 0.12) 42px,
+      transparent 42px,
+      transparent 73px,
+      rgba(45, 78, 38, 0.16) 73px,
+      rgba(45, 78, 38, 0.16) 78px,
+      transparent 78px,
+      transparent 92px
+    ),
+    linear-gradient(90deg, rgba(58, 93, 40, 0.16), transparent 18%, transparent 82%, rgba(58, 93, 40, 0.12));
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+body .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove-trees .forest-tile {
+  background: transparent;
+  display: block !important;
+  min-height: 86px;
+  padding: 0 !important;
+  position: relative;
+  z-index: 2;
+}
+
+body .forest-grove.is-canopy-grove .forest-tile,
+body .forest-density-canopy .forest-grove.is-canopy-grove .forest-tile {
+  min-height: 82px;
+}
+
+body .forest-density-open .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove.is-canopy-grove .forest-tile {
+  min-height: 74px;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-canopy-grove .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-canopy-grove .forest-grove-trees {
+  max-height: 252px;
+  min-height: 232px;
+  overflow-y: auto;
+}
+
+body .forest-tile {
+  --tile-land-a: #91c76a;
+  --tile-land-b: #74aa50;
+  --tile-land-edge: #5f8a42;
+  --tile-land-line: rgba(52, 85, 38, 0.22);
+}
+
+body .land-moss {
+  --tile-land-a: #7fb75c;
+  --tile-land-b: #639b49;
+  --tile-land-edge: #527c3d;
+}
+
+body .land-fern,
+body .land-sprout {
+  --tile-land-a: #8fc961;
+  --tile-land-b: #6dac4f;
+  --tile-land-edge: #57873f;
+}
+
+body .land-flower {
+  --tile-land-a: #99cd69;
+  --tile-land-b: #78b353;
+  --tile-land-edge: #5d8d44;
+}
+
+body .land-clay {
+  --tile-land-a: #b99a5e;
+  --tile-land-b: #927447;
+  --tile-land-edge: #725c39;
+  --tile-land-line: rgba(75, 54, 30, 0.22);
+}
+
+body .land-stone {
+  --tile-land-a: #9fab78;
+  --tile-land-b: #7b8e63;
+  --tile-land-edge: #647553;
+}
+
+body .land-water {
+  --tile-land-a: #76b8aa;
+  --tile-land-b: #579a8b;
+  --tile-land-edge: #477e74;
+}
+
+body .land-shade {
+  --tile-land-a: #7ca462;
+  --tile-land-b: #5e844d;
+  --tile-land-edge: #4e6d41;
+}
+
+body .land-autumn {
+  --tile-land-a: #b8a05c;
+  --tile-land-b: #927d45;
+  --tile-land-edge: #75653a;
+}
+
+body .forest-tile-ground,
+body .land-moss .forest-tile-ground,
+body .land-fern .forest-tile-ground,
+body .land-sprout .forest-tile-ground,
+body .land-stone .forest-tile-ground,
+body .land-water .forest-tile-ground,
+body .land-flower .forest-tile-ground,
+body .land-clay .forest-tile-ground,
+body .land-shade .forest-tile-ground,
+body .land-autumn .forest-tile-ground {
+  background: transparent;
+  box-shadow: none;
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+
+body .forest-grove-trees .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  background:
+    linear-gradient(180deg, var(--tile-land-a), var(--tile-land-b) 74%, var(--tile-land-edge)),
+    repeating-linear-gradient(90deg, var(--tile-land-line) 0 1px, transparent 1px 10px) !important;
+  border: 0;
+  border-radius: 0;
+  bottom: 5px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 244, 171, 0.2),
+    inset 0 -3px 0 rgba(43, 76, 34, 0.18);
+  content: "";
+  height: 36px;
+  left: -1px;
+  opacity: 0.78 !important;
+  position: absolute;
+  right: -1px;
+  top: auto;
+  z-index: 1;
+}
+
+body .forest-grove-trees .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after {
+  background:
+    linear-gradient(90deg, transparent 0 24%, rgba(255, 244, 170, 0.22) 24% 40%, transparent 40% 100%),
+    repeating-linear-gradient(90deg, rgba(50, 82, 38, 0.18) 0 1px, transparent 1px 12px);
+  bottom: 14px;
+  content: "";
+  height: 8px;
+  left: 0;
+  opacity: 0.75;
+  position: absolute;
+  right: 0;
+  top: auto;
+  z-index: 2;
+}
+
+body .forest-grove-trees .terrain-shadow {
+  bottom: 26px;
+  height: 8px;
+  z-index: 3;
+}
+
+body .forest-grove-trees .tree-shadow {
+  bottom: 28px;
+  height: 8px;
+  z-index: 4;
+}
+
+body .forest-grove-trees .terrain-sprite {
+  display: none;
+}
+
+body .forest-grove-trees .sprite-two {
+  bottom: 22px;
+  left: auto;
+  right: calc(50% - 13px);
+}
+
+body .forest-grove-trees .forest-pixel-tree,
+body .forest-grove-trees .is-flipped .forest-pixel-tree {
+  bottom: 24px;
+  z-index: 6;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+  bottom: 22px;
+}
+
+body .forest-grove-trees .forest-tile-mark,
+body .forest-grove-trees .forest-score-chip,
+body .forest-grove-trees .forest-status-pixels {
+  z-index: 8;
+}
+
+body .forest-grove-trees .forest-tile-mark,
+body .forest-grove-trees .forest-score-chip,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-mark,
+body .forest-grove-trees .forest-tile.is-selected .forest-score-chip,
+body .forest-grove-trees .rarity-rare .forest-tile-mark,
+body .forest-grove-trees .rarity-rare .forest-score-chip,
+body .forest-grove-trees .rarity-legendary .forest-tile-mark,
+body .forest-grove-trees .rarity-legendary .forest-score-chip {
+  opacity: 0;
+}
+
+body .forest-grove-trees .forest-tile:hover .forest-tile-mark,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-mark,
+body .forest-grove-trees .forest-tile:hover .forest-score-chip,
+body .forest-grove-trees .forest-tile:focus-visible .forest-score-chip {
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  body .forest-grove-label,
+  body .forest-density-canopy .forest-grove-label,
+  body .forest-density-dense .forest-grove-label {
+    transform: none;
+  }
+
+  body .forest-grove-trees,
+  body .forest-density-dense .forest-grove-trees,
+  body .forest-density-canopy .forest-grove-trees,
+  body .forest-density-open .forest-grove-trees {
+    padding: 11px 7px 9px;
+  }
+
+  body .forest-grove-trees .forest-tile,
+  body .forest-density-dense .forest-grove-trees .forest-tile,
+  body .forest-density-canopy .forest-grove-trees .forest-tile,
+  body .forest-density-open .forest-grove-trees .forest-tile {
+    min-height: 74px;
+  }
+}
+
+/* Plot correction pass: only true canopies span wide; medium groves stay compact. */
+body .forest-grove:not(.is-canopy-grove),
+body .forest-grove.is-small-grove {
+  grid-column: auto !important;
+}
+
+body .forest-grove.is-large-grove,
+body .forest-grove.is-medium-grove {
+  grid-column: span 2 !important;
+}
+
+body .forest-grove.is-canopy-grove {
+  grid-column: 1 / -1 !important;
+}
+
+body .forest-grove.is-large-grove,
+body .forest-grove.is-medium-grove,
+body .forest-grove.is-small-grove {
+  min-height: 166px;
+}
+
+body .forest-grove.is-large-grove .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-large-grove .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-large-grove .forest-grove-trees,
+body .forest-grove.is-medium-grove .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-medium-grove .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-medium-grove .forest-grove-trees {
+  grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+  min-height: 112px;
+}
+
+body .forest-grove.is-canopy-grove .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-canopy-grove .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-canopy-grove .forest-grove-trees {
+  max-height: 252px;
+  min-height: 232px;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees,
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees,
+body .forest-density-open .forest-grove-trees,
+body .forest-density-open .forest-grove.is-major .forest-grove-trees {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(55, 93, 42, 0.06) 0,
+      rgba(55, 93, 42, 0.06) 1px,
+      transparent 1px,
+      transparent 78px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(45, 83, 39, 0.04) 0,
+      rgba(45, 83, 39, 0.04) 1px,
+      transparent 1px,
+      transparent 88px
+    ),
+    linear-gradient(180deg, rgba(242, 255, 205, 0.08), transparent 30%),
+    linear-gradient(180deg, #94c868, #78ae56 64%, #68994b) !important;
+}
+
+body .forest-grove-trees::after {
+  background: linear-gradient(90deg, rgba(45, 82, 39, 0.1), transparent 16%, transparent 84%, rgba(45, 82, 39, 0.08));
+  opacity: 0.28;
+}
+
+body .forest-grove-trees .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  bottom: 9px;
+  height: 20px;
+  left: 9%;
+  opacity: 0.3 !important;
+  right: 9%;
+}
+
+body .forest-grove-trees .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after {
+  bottom: 16px;
+  height: 5px;
+  left: 24%;
+  opacity: 0.18;
+  right: 24%;
+}
+
+@media (max-width: 760px) {
+  body .forest-grove.is-large-grove,
+  body .forest-grove.is-medium-grove {
+    grid-column: auto !important;
+  }
+}
+
+body .forest-stage.forest-density-open {
+  min-height: clamp(480px, 56vh, 560px);
+}
+
+body .forest-grid.forest-density-open {
+  max-height: none;
+  min-height: 390px;
+  overflow: visible;
+}
+
+@media (max-width: 760px) {
+  body .forest-stage.forest-density-open {
+    min-height: 520px;
+  }
+
+  body .forest-grid.forest-density-open {
+    min-height: 420px;
+  }
+}
+
+/* Ground visibility pass: keep trees anchored without vertical bobbing. */
+body .forest-grove-trees .forest-tile {
+  animation-name: forest-tile-fade-in;
+}
+
+body .forest-grove-trees .forest-tile:hover,
+body .forest-grove-trees .forest-tile:focus-visible,
+body .forest-grove-trees .forest-tile.is-selected {
+  transform: none !important;
+}
+
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-sprite,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+  animation: none !important;
+}
+
+body .forest-grove-trees .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  background:
+    linear-gradient(180deg, rgba(255, 244, 169, 0.36), transparent 34%),
+    linear-gradient(180deg, #b7c56e 0 46%, #829d55 47% 74%, #536f3d 75% 100%) !important;
+  border: 1px solid rgba(34, 65, 31, 0.58);
+  border-radius: 2px;
+  bottom: 10px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 244, 167, 0.32),
+    inset 0 -3px 0 rgba(31, 59, 28, 0.24),
+    0 2px 0 rgba(30, 58, 28, 0.18);
+  height: 17px;
+  left: 13%;
+  opacity: 0.98 !important;
+  right: 13%;
+  top: auto !important;
+  width: auto !important;
+  z-index: 3;
+}
+
+body .forest-grove-trees .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after {
+  background:
+    linear-gradient(90deg, transparent 0 18%, rgba(255, 245, 171, 0.46) 18% 48%, transparent 48% 100%),
+    linear-gradient(90deg, rgba(39, 70, 34, 0.2), transparent 30%, transparent 70%, rgba(39, 70, 34, 0.18)) !important;
+  bottom: 17px;
+  height: 4px;
+  left: 18%;
+  opacity: 0.62;
+  right: 18%;
+  top: auto !important;
+  width: auto !important;
+  z-index: 4;
+}
+
+body .forest-grove-trees .terrain-shadow {
+  background: rgba(39, 74, 34, 0.24);
+  bottom: 13px;
+  height: 7px;
+  left: 20%;
+  opacity: 0.74;
+  width: 60%;
+  z-index: 3;
+}
+
+body .forest-grove-trees .tree-shadow {
+  background: rgba(27, 50, 25, 0.3);
+  bottom: 24px;
+  height: 8px;
+  opacity: 0.7;
+  z-index: 4;
+}
+
+body .forest-grove-trees .terrain-sprite {
+  display: none !important;
+}
+
+body .forest-grove-trees .sprite-one {
+  bottom: 12px;
+  left: 16%;
+}
+
+body .forest-grove-trees .sprite-two {
+  bottom: 10px;
+  left: auto;
+  right: 17%;
+}
+
+@keyframes forest-tile-fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Canopy clearance pass: mature trees should not collide with signs or chips. */
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove:not(.is-canopy-grove) .forest-grove-trees {
+  overflow: visible !important;
+  padding-top: 20px;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile {
+  min-height: 96px !important;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-pixel-tree,
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees .is-flipped .forest-pixel-tree {
+  bottom: 12px !important;
+  z-index: 7;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile[data-plant-stage="tree"].growth-full_text {
+  --stage-scale: 1;
+}
+
+body .forest-grove-trees .forest-tile-mark,
+body .forest-grove-trees .forest-score-chip,
+body .forest-grove-trees .forest-status-pixels,
+body .forest-grove-trees .forest-tile:hover .forest-tile-mark,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-mark,
+body .forest-grove-trees .forest-tile:hover .forest-score-chip,
+body .forest-grove-trees .forest-tile:focus-visible .forest-score-chip {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Connected plot rows: land should read as rows inside the grove, not detached pads. */
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees,
+body .forest-density-open .forest-grove-trees {
+  column-gap: 0 !important;
+  overflow-x: hidden !important;
+  row-gap: 8px !important;
+}
+
+body .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove-trees .forest-tile {
+  aspect-ratio: auto !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-grove-trees .forest-tile:hover,
+body .forest-grove-trees .forest-tile:focus-visible,
+body .forest-grove-trees .forest-tile.is-selected {
+  --select-scale: 1 !important;
+}
+
+body .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile {
+  --asset-size: 62px;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove:not(.is-canopy-grove) .forest-grove-trees {
+  overflow: hidden !important;
+}
+
+body .forest-grove-trees .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  border-left: 0;
+  border-radius: 0;
+  border-right: 0;
+  left: 0 !important;
+  right: 0 !important;
+}
+
+body .forest-grove-trees .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after {
+  left: 0 !important;
+  right: 0 !important;
+}
+
+/* Sparse groves should center their tree group instead of starting from the left edge. */
+body .forest-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: minmax(76px, 96px) !important;
+  justify-content: center;
+}
+
+body .forest-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: repeat(2, minmax(76px, 96px)) !important;
+  justify-content: center;
+}
+
+body .forest-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: repeat(3, minmax(76px, 96px)) !important;
+  justify-content: center;
+}
+
+body .forest-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: repeat(4, minmax(68px, 92px)) !important;
+  justify-content: center;
+}
+
+body .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: repeat(3, minmax(56px, 62px)) !important;
+}
+
+body .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="3"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile {
+  --asset-size: 54px;
+}
+
+body .forest-grove.is-small-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="4"]:not(.is-canopy-grove) .forest-grove-trees {
+  grid-template-columns: repeat(2, minmax(76px, 96px)) !important;
+}
+
+/* Center every wrapped row; CSS Grid leaves partial final rows stuck to the left. */
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove:not(.is-canopy-grove) .forest-grove-trees {
+  --grove-tile-width: 96px;
+  align-content: flex-start;
+  column-gap: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 8px !important;
+}
+
+body .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile {
+  flex: 0 0 var(--grove-tile-width) !important;
+  max-width: var(--grove-tile-width) !important;
+  width: var(--grove-tile-width) !important;
+}
+
+body .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees {
+  --grove-tile-width: 48px;
+}
+
+body .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove.is-small-grove:not(.is-canopy-grove) .forest-grove-trees .forest-tile {
+  --asset-size: 48px;
+}
+
+body .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees {
+  --grove-tile-width: 84px;
+}
+
+body .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="1"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-dense .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-canopy .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile,
+body .forest-density-open .forest-grove.is-small-grove[data-grove-count="2"]:not(.is-canopy-grove) .forest-grove-trees .forest-tile {
+  --asset-size: 62px;
+}
+
+/* Shadow cleanup: connected land rows should not inherit per-tile ground streaks. */
+body .forest-grove-trees .terrain-shadow {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+body .forest-grove-trees .tree-shadow,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-shadow,
+body .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-shadow {
+  background: rgba(28, 54, 26, 0.24);
+  border-radius: 999px;
+  bottom: 23px;
+  height: 5px;
+  left: 50%;
+  opacity: 0.58;
+  transform: translateX(-50%) scale(1);
+  width: 28px;
+}
+
+body .forest-grove-trees .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  background:
+    linear-gradient(180deg, rgba(255, 244, 169, 0.3), transparent 34%),
+    linear-gradient(180deg, #bdcf78 0 50%, #99b767 51% 80%, #7e9859 81% 100%) !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 244, 167, 0.22) !important;
+}
+
+body .forest-grove-trees .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after {
+  background:
+    linear-gradient(90deg, transparent 0 22%, rgba(255, 245, 171, 0.34) 22% 42%, transparent 42% 100%) !important;
+  bottom: 20px;
+  height: 3px;
+  opacity: 0.42;
+}
+
+/* Selection cleanup: avoid bottom bars being mistaken for stray land rows. */
+body .forest-grove-trees .forest-tile::before,
+body .forest-grove-trees .forest-tile.is-selected::before,
+body .forest-grove-trees .forest-tile:focus-visible::before,
+body .forest-grove-trees .forest-tile:hover::before {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+body .forest-grove-trees .forest-tile.is-selected::after,
+body .forest-grove-trees .forest-tile:focus-visible::after,
+body .forest-grove-trees .forest-tile:hover::after {
+  opacity: 0 !important;
+}
+
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile:hover .forest-tile-ground::before {
+  outline: 0 !important;
+  opacity: 0.98 !important;
+}
+
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile:hover .forest-tile-ground::after {
+  background:
+    linear-gradient(90deg, transparent 0 22%, rgba(255, 245, 171, 0.34) 22% 42%, transparent 42% 100%) !important;
+  display: none !important;
+  opacity: 0.42 !important;
+}
+
+body .forest-grove-trees .forest-tile:focus-visible {
+  outline: 2px solid rgba(255, 239, 142, 0.65);
+  outline-offset: 2px;
+}
+
+/* Horizontal line cleanup: remove decorative row strokes that read as rendering artifacts. */
+body .forest-decor.crop-row {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+body .forest-grove-trees::after,
+body .forest-grove.is-focused-grove .forest-grove-trees::after {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+body .forest-grove-trees,
+body .forest-density-dense .forest-grove-trees,
+body .forest-density-canopy .forest-grove-trees,
+body .forest-grove.is-major .forest-grove-trees,
+body .forest-density-dense .forest-grove.is-major .forest-grove-trees,
+body .forest-density-canopy .forest-grove.is-major .forest-grove-trees,
+body .forest-density-open .forest-grove-trees,
+body .forest-density-open .forest-grove.is-major .forest-grove-trees {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(55, 93, 42, 0.055) 0,
+      rgba(55, 93, 42, 0.055) 1px,
+      transparent 1px,
+      transparent 78px
+    ),
+    linear-gradient(180deg, rgba(242, 255, 205, 0.08), transparent 30%),
+    linear-gradient(180deg, #94c868, #78ae56 64%, #68994b) !important;
+}
+
+body .forest-grove-trees .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::after,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::after {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Final artifact cleanup: no tile panel or per-segment dark platform edge. */
+body .forest-grove-trees .forest-tile,
+body .forest-grove-trees .forest-tile:hover,
+body .forest-grove-trees .forest-tile:focus-visible,
+body .forest-grove-trees .forest-tile.is-selected {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+body .forest-grove-trees .forest-tile-ground,
+body .forest-grove-trees .forest-tile:hover .forest-tile-ground,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: 0 !important;
+}
+
+body .forest-grove-trees .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile:hover .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before,
+body .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  background:
+    linear-gradient(180deg, rgba(255, 244, 169, 0.22), transparent 46%),
+    linear-gradient(180deg, #bfd47c 0 100%) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  height: 13px;
+  opacity: 0.92 !important;
+}
+
+body .forest-grove-trees .forest-tile:focus-visible .forest-pixel-tree {
+  filter: drop-shadow(0 0 6px rgba(255, 239, 142, 0.72));
+}
+
+/* Detail preview + hover feedback pass. Keep tree sprites fully inside their frames,
+   and make map hover visible without moving trees or restoring overlay labels. */
+body .forest-inspector-plant {
+  box-sizing: border-box;
+  flex-basis: 108px;
+  height: 108px !important;
+  min-width: 108px;
+  overflow: hidden;
+  width: 108px !important;
+}
+
+body .forest-inspector-plant::before {
+  inset: 70px 12px 10px;
+}
+
+body .forest-inspector-plot {
+  bottom: 14px !important;
+  height: 22px !important;
+  left: 17px !important;
+  width: 72px !important;
+}
+
+body .forest-inspector-plant img,
+body .forest-inspector-plant.is-tree-plant img,
+body .forest-inspector-plant.is-full-text-plant img {
+  bottom: 14px !important;
+  height: 84px !important;
+  object-fit: contain;
+  width: 84px !important;
+}
+
+body .forest-inspector-plant.is-sapling-plant img {
+  bottom: 16px !important;
+  height: 68px !important;
+  width: 68px !important;
+}
+
+body .forest-grove-trees .forest-tile {
+  cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body .forest-grove-trees .forest-tile:hover,
+  body .forest-grove-trees .forest-tile:focus-visible {
+    z-index: 12;
+  }
+
+  body .forest-grove-trees .forest-tile:hover .forest-pixel-tree,
+  body .forest-grove-trees .forest-tile:focus-visible .forest-pixel-tree,
+  body .forest-grove-trees .forest-tile.is-selected .forest-pixel-tree {
+    filter:
+      drop-shadow(0 0 7px rgba(255, 241, 151, 0.56))
+      brightness(1.06)
+      saturate(1.05);
+  }
+
+  body .forest-grove-trees .forest-tile:hover .tree-shadow,
+  body .forest-grove-trees .forest-tile:focus-visible .tree-shadow,
+  body .forest-grove-trees .forest-tile.is-selected .tree-shadow {
+    opacity: 0.78;
+    transform: translateX(-50%) scale(1.16);
+  }
+
+  body .forest-grove-trees .forest-tile:hover .forest-tile-ground::before,
+  body .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::before,
+  body .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before {
+    background:
+      linear-gradient(180deg, rgba(255, 249, 190, 0.34), transparent 46%),
+      linear-gradient(180deg, #c8dc86 0 100%) !important;
+    opacity: 1 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-inspector-plant {
+    flex-basis: 84px;
+    height: 84px !important;
+    min-width: 84px;
+    width: 84px !important;
+  }
+
+  body .forest-inspector-plot {
+    bottom: 11px !important;
+    height: 18px !important;
+    left: 13px !important;
+    width: 56px !important;
+  }
+
+  body .forest-inspector-plant img,
+  body .forest-inspector-plant.is-tree-plant img,
+  body .forest-inspector-plant.is-full-text-plant img {
+    bottom: 11px !important;
+    height: 66px !important;
+    width: 66px !important;
+  }
+
+  body .forest-inspector-plant.is-sapling-plant img {
+    bottom: 13px !important;
+    height: 52px !important;
+    width: 52px !important;
+  }
+}

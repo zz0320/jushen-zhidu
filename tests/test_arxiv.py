@@ -2,12 +2,19 @@ from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 import httpx
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 
-from arxiv_daily.arxiv import FetchQuotaExceeded, build_search_query, fetch_papers_for_date, fetch_quota_status, parse_atom_feed
+from arxiv_daily.arxiv import (
+    FetchQuotaExceeded,
+    build_search_query,
+    fetch_papers_for_date,
+    fetch_quota_status,
+    parse_atom_feed,
+    parse_atom_page,
+)
 from arxiv_daily.config import Settings
 from arxiv_daily.defaults import init_default_config
-from arxiv_daily.models import ArxivFetchRun
+from arxiv_daily.models import ArxivFetchRun, ArxivPageCache, Paper
 
 ATOM = """<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom"
@@ -35,6 +42,23 @@ ATOM = """<?xml version="1.0" encoding="UTF-8"?>
 </feed>
 """
 
+ATOM_WITH_OPENSEARCH = ATOM.replace(
+    'xmlns:arxiv="http://arxiv.org/schemas/atom">',
+    'xmlns:arxiv="http://arxiv.org/schemas/atom"\n      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">'
+    "\n  <opensearch:totalResults>1</opensearch:totalResults>"
+    "\n  <opensearch:startIndex>0</opensearch:startIndex>"
+    "\n  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>",
+)
+
+EMPTY_ATOM_WITH_OPENSEARCH = """<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">
+  <opensearch:totalResults>0</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <opensearch:itemsPerPage>1</opensearch:itemsPerPage>
+</feed>
+"""
+
 
 def test_parse_atom_feed_extracts_entry():
     entries = parse_atom_feed(ATOM)
@@ -46,6 +70,15 @@ def test_parse_atom_feed_extracts_entry():
     assert entries[0].affiliations == ["Embodied AI Lab, Test University", "Robotics Institute"]
     assert entries[0].primary_category == "cs.RO"
     assert entries[0].pdf_url == "http://arxiv.org/pdf/2605.00001v1"
+
+
+def test_parse_atom_page_extracts_opensearch_metadata():
+    page = parse_atom_page(ATOM_WITH_OPENSEARCH)
+
+    assert page.total_results == 1
+    assert page.start_index == 0
+    assert page.items_per_page == 1
+    assert page.entries[0].arxiv_id == "2605.00001v1"
 
 
 def test_build_search_query_uses_categories_and_submitted_date():
@@ -74,6 +107,34 @@ def test_fetch_papers_scores_and_saves_relevant_paper():
         assert paper.relevance_score > 0
         assert paper.affiliations == ["Embodied AI Lab, Test University", "Robotics Institute"]
         assert "world" in paper.matched_terms.lower()
+
+
+def test_fetch_papers_refreshes_existing_paper_timestamp(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(database_path=tmp_path / "test.sqlite3", arxiv_cache_enabled=False)
+    with Session(engine) as session:
+        init_default_config(session)
+
+        def fake_get(*args, **kwargs):
+            return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
+
+        fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        paper = session.get(Paper, "2605.00001v1")
+        assert paper is not None
+        old_refreshed_at = datetime(2026, 1, 1)
+        paper.refreshed_at = old_refreshed_at
+        session.add(paper)
+        session.commit()
+
+        result = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        paper = session.get(Paper, "2605.00001v1")
+
+    assert result.saved == 0
+    assert result.matched == 1
+    assert result.updated == 1
+    assert paper is not None
+    assert paper.refreshed_at > old_refreshed_at
 
 
 def test_fetch_papers_reports_progress():
@@ -129,6 +190,68 @@ def test_fetch_papers_uses_cached_page_on_repeated_query(tmp_path):
     assert any(event["stage"] == "cached" for event in events)
 
 
+def test_fetch_papers_bypasses_stale_empty_cache_for_recent_day(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(
+        database_path=tmp_path / "test.sqlite3",
+        arxiv_page_size=1,
+        arxiv_max_results=1,
+        arxiv_empty_cache_ttl_seconds=1,
+    )
+    target_day = datetime.now(ZoneInfo(settings.timezone)).date()
+    with Session(engine) as session:
+        init_default_config(session)
+        calls = []
+
+        def fake_get(*args, **kwargs):
+            calls.append(kwargs)
+            response_text = EMPTY_ATOM_WITH_OPENSEARCH if len(calls) == 1 else ATOM_WITH_OPENSEARCH
+            return httpx.Response(200, text=response_text, request=httpx.Request("GET", "https://example.test"))
+
+        empty = fetch_papers_for_date(session, target_day, settings=settings, http_get=fake_get)
+        cached_page = session.exec(select(ArxivPageCache)).first()
+        assert cached_page is not None
+        cached_page.fetched_at = datetime(2026, 1, 1)
+        session.add(cached_page)
+        session.commit()
+
+        refreshed = fetch_papers_for_date(session, target_day, settings=settings, http_get=fake_get)
+
+    assert empty.fetched == 0
+    assert refreshed.saved == 1
+    assert refreshed.network_requests == 1
+    assert refreshed.cached_pages == 0
+    assert len(calls) == 2
+
+
+def test_fetch_papers_uses_total_results_to_avoid_empty_extra_page(tmp_path):
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    settings = Settings(
+        database_path=tmp_path / "test.sqlite3",
+        arxiv_page_size=1,
+        arxiv_max_results=3,
+    )
+    with Session(engine) as session:
+        init_default_config(session)
+        calls = []
+
+        def fake_get(*args, **kwargs):
+            calls.append(kwargs)
+            return httpx.Response(
+                200,
+                text=ATOM_WITH_OPENSEARCH,
+                request=httpx.Request("GET", "https://example.test"),
+            )
+
+        result = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+
+    assert result.network_requests == 1
+    assert result.fetched == 1
+    assert len(calls) == 1
+
+
 def test_fetch_papers_force_refresh_ignores_cached_page(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
@@ -153,6 +276,7 @@ def test_fetch_papers_force_refresh_ignores_cached_page(tmp_path):
     assert result.network_requests == 1
     assert result.cached_pages == 0
     assert result.saved == 0
+    assert result.updated == 1
     assert result.daily_network_fetch_used == 1
     assert len(calls) == 2
 
