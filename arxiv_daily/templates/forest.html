@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v2">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v3">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -35,7 +35,7 @@
 
     {% if tiles %}
       {% set forest_density = 'canopy' if tiles|length >= 28 else 'dense' if tiles|length >= 16 else 'open' %}
-      {% set grove_preview_limit = 18 %}
+      {% set grove_preview_limit = 12 %}
       <div class="forest-board-v2 forest-density-{{ forest_density }}" data-forest-experience>
         <aside class="forest-sidebar-v2" aria-label="森林筛选">
           <section class="forest-panel-v2">
@@ -136,7 +136,7 @@
                         <span class="tree-shadow"></span>
                         <span class="forest-pixel-tree">
                           {% set sprite_prefix = 'sapling-' if tile.plant_stage == 'sapling' else 'tree-' %}
-                          <img class="tree-sprite" src="{{ url_for('static', path='/forest/generated/' ~ sprite_prefix ~ tile.asset ~ '.png') }}" alt="">
+                          <img class="tree-sprite" src="{{ url_for('static', path='/forest/generated/' ~ sprite_prefix ~ tile.asset ~ '.png') }}?v=20260526-ref-sprites" alt="">
                           <span class="tree-trunk"></span>
                           <span class="tree-crown crown-one"></span>
                           <span class="tree-crown crown-two"></span>
@@ -174,7 +174,7 @@
             {% set first_sprite_prefix = 'sapling-' if first_tile.plant_stage == 'sapling' else 'tree-' %}
             <span class="forest-inspector-plant tree-{{ first_tile.kind }} is-{{ first_tile.plant_stage }}-plant {{ 'is-high-relevance-plant' if first_tile.high_relevance else '' }} {{ 'is-full-text-plant' if first_tile.growth == 'full_text' else '' }}" data-forest-detail-plant aria-hidden="true">
               <span class="forest-inspector-plot"></span>
-              <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}" alt="">
+              <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-ref-sprites" alt="">
             </span>
             <div>
               <span class="forest-inspector-kicker" data-forest-detail-kind>{{ first_tile.kind_label }}</span>

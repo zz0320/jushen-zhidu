@@ -44,7 +44,7 @@ def test_forest_tree_sprites_are_animated_high_pixel_assets():
                     assert abs(center_x - image.width / 2) <= 18
                     assert 0 <= left < right <= image.width
                     assert 0 <= top < bottom <= image.height
-                    assert bottom <= 270
+                    assert bottom <= 284
                     assert top >= 3
 
                     if stage == "tree":

@@ -902,7 +902,7 @@
 
     const spritePath = (tile) => {
       const prefix = tile.plant_stage === "sapling" ? "sapling-" : "tree-";
-      return `/static/forest/generated/${prefix}${tile.asset}.png`;
+      return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-ref-sprites`;
     };
 
     const renderDetails = (tile) => {
