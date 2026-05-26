@@ -9415,3 +9415,158 @@ body .forest-empty-v2 {
     grid-column: auto;
   }
 }
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile:hover .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before {
+  background: var(--terrain-sprite) center bottom / contain no-repeat !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  bottom: 0 !important;
+  box-shadow: none !important;
+  content: "" !important;
+  display: block !important;
+  height: 58px !important;
+  image-rendering: pixelated;
+  left: 50% !important;
+  opacity: 1 !important;
+  position: absolute;
+  right: auto !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
+  width: 84px !important;
+  z-index: 1;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile:hover .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::after {
+  background: rgba(24, 51, 37, 0.2) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  bottom: 18px !important;
+  box-shadow: none !important;
+  content: "" !important;
+  display: block !important;
+  height: 6px !important;
+  left: 50% !important;
+  opacity: 0.72 !important;
+  position: absolute;
+  right: auto !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
+  width: 32px !important;
+  z-index: 3;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-tile-ground::before {
+  height: 62px !important;
+  width: 90px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  height: 56px !important;
+  width: 80px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .tree-shadow {
+  bottom: 19px !important;
+  display: block !important;
+  height: 5px !important;
+  opacity: 0.68 !important;
+  width: 28px !important;
+  z-index: 4;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.is-selected .forest-pixel-tree {
+  bottom: 20px !important;
+  z-index: 5;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+  --asset-size: 76px;
+  bottom: 18px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-shadow {
+  bottom: 17px !important;
+  height: 4px !important;
+  width: 22px !important;
+}
+
+@media (max-width: 900px) {
+  body .forest-shell-v2 .forest-grove-trees .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile:hover .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before {
+    height: 46px !important;
+    width: 68px !important;
+  }
+
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-tile-ground::before {
+    height: 50px !important;
+    width: 74px !important;
+  }
+
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+    height: 44px !important;
+    width: 64px !important;
+  }
+
+  body .forest-shell-v2 .forest-grove-trees .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile:hover .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile:focus-visible .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile.is-selected .forest-pixel-tree {
+    bottom: 17px !important;
+  }
+
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+    --asset-size: 54px;
+    bottom: 17px !important;
+  }
+}
+
+body .forest-detail-v2 .forest-inspector-plant {
+  overflow: hidden;
+  position: relative;
+}
+
+body .forest-detail-v2 .forest-inspector-plot {
+  background: var(--terrain-sprite, url("/static/forest/terrain/land-grass.png")) center bottom / contain no-repeat !important;
+  border: 0 !important;
+  bottom: 0 !important;
+  display: block !important;
+  height: 34px !important;
+  image-rendering: pixelated;
+  left: 50% !important;
+  opacity: 1 !important;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 52px !important;
+  z-index: 1;
+}
+
+body .forest-detail-v2 .forest-inspector-plant img,
+body .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 9px !important;
+  z-index: 2;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 9px !important;
+  height: 50px !important;
+  width: 50px !important;
+  z-index: 2;
+}

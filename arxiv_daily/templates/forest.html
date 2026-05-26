@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v32">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v33">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -130,7 +130,7 @@
                         <span class="tree-shadow"></span>
                         <span class="forest-pixel-tree">
                           {% set sprite_prefix = 'sapling-' if tile.plant_stage == 'sapling' else 'tree-' %}
-                          <img class="tree-sprite" src="{{ url_for('static', path='/forest/generated/' ~ sprite_prefix ~ tile.asset ~ '.png') }}?v=20260526-ref-sprites" alt="">
+                          <img class="tree-sprite" src="{{ url_for('static', path='/forest/generated/' ~ sprite_prefix ~ tile.asset ~ '.png') }}?v=20260526-plot-saplings" alt="">
                           <span class="tree-trunk"></span>
                           <span class="tree-crown crown-one"></span>
                           <span class="tree-crown crown-two"></span>
@@ -171,9 +171,9 @@
         <aside class="forest-detail-v2 forest-inspector" id="forest-detail" aria-live="polite">
           <div class="forest-inspector-head">
             {% set first_sprite_prefix = 'sapling-' if first_tile.plant_stage == 'sapling' else 'tree-' %}
-            <span class="forest-inspector-plant tree-{{ first_tile.kind }} is-{{ first_tile.plant_stage }}-plant {{ 'is-high-relevance-plant' if first_tile.high_relevance else '' }} {{ 'is-full-text-plant' if first_tile.growth == 'full_text' else '' }}" data-forest-detail-plant aria-hidden="true">
+            <span class="forest-inspector-plant tree-{{ first_tile.kind }} land-{{ first_tile.land }} is-{{ first_tile.plant_stage }}-plant {{ 'is-high-relevance-plant' if first_tile.high_relevance else '' }} {{ 'is-full-text-plant' if first_tile.growth == 'full_text' else '' }}" data-forest-detail-plant aria-hidden="true">
               <span class="forest-inspector-plot"></span>
-              <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-ref-sprites" alt="">
+              <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-plot-saplings" alt="">
             </span>
             <div class="forest-inspector-copy">
               <span class="forest-inspector-kicker" data-forest-detail-kind>{{ first_tile.kind_label }}</span>
@@ -197,7 +197,7 @@
               <span class="forest-growth-step is-complete {{ 'is-current' if loop.last else '' }} is-{{ step.plant_stage }}-step" data-growth-step="{{ step.key }}" data-growth-rank="{{ step.rank }}">
                 <i class="forest-growth-icon" aria-hidden="true">
                   {% set step_sprite_prefix = 'sapling-' if step.plant_stage == 'sapling' else 'tree-' %}
-                  <img src="{{ url_for('static', path='/forest/generated/' ~ step_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-ref-sprites" alt="">
+                  <img src="{{ url_for('static', path='/forest/generated/' ~ step_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-plot-saplings" alt="">
                 </i>
                 <b>{{ step.label }}</b>
                 <small>{{ step.detail }}</small>

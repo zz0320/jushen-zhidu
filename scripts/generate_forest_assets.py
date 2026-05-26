@@ -89,6 +89,19 @@ TERRAIN_BASES = {
     "autumn": "#83a356",
 }
 
+TERRAIN_PALETTES = {
+    "grass": ("#8fc466", "#6da64f", "#4f7d3b", "#3d5d31"),
+    "moss": ("#7fba5d", "#619948", "#4b7839", "#36572c"),
+    "fern": ("#8ac463", "#6aa74f", "#4d813e", "#355d30"),
+    "flower": ("#96c86a", "#78ad54", "#5a8640", "#3f6332"),
+    "clay": ("#b98758", "#956b43", "#704f33", "#4d3527"),
+    "stone": ("#98a87d", "#788b65", "#5d704f", "#404f3c"),
+    "water": ("#75b8a9", "#57988c", "#43776f", "#2f5754"),
+    "shade": ("#739c62", "#557c4c", "#40613d", "#2d4630"),
+    "sprout": ("#94ca64", "#72aa4f", "#56843f", "#3c6232"),
+    "autumn": ("#baa45f", "#927c45", "#715e37", "#4e4029"),
+}
+
 
 def rect(draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int, fill: str) -> None:
     draw.rectangle((x, y, x + w - 1, y + h - 1), fill=fill)
@@ -224,6 +237,126 @@ def save_sprite(base: Image.Image, path: Path, stage: str) -> None:
     )
 
 
+def draw_stem(draw: ImageDraw.ImageDraw, points: list[tuple[int, int]], width: int = 4) -> None:
+    for dx in range(-(width // 2), width // 2 + 1):
+        shifted = [(x + dx, y) for x, y in points]
+        draw.line(shifted, fill="#2a3f28", width=1, joint="curve")
+    draw.line(points, fill="#8a5430", width=max(1, width - 2), joint="curve")
+    if width >= 4:
+        draw.line([(x - 1, y) for x, y in points], fill="#c07b3e", width=1, joint="curve")
+
+
+def draw_leaf(draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int, fill: str, outline: str = "#264729") -> None:
+    draw.ellipse((x, y, x + w, y + h), fill=outline)
+    draw.ellipse((x + 1, y + 1, x + w - 1, y + h - 1), fill=fill)
+    rect(draw, x + w // 2, y + h // 2, 1, max(1, h // 3), "#d7f08a")
+
+
+def draw_sign(draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int, fill: str = "#b98247") -> None:
+    rect(draw, x - 1, y - 1, w + 2, h + 2, "#3a2a1d")
+    rect(draw, x, y, w, h, fill)
+    rect(draw, x + 2, y + h // 2, max(1, w - 4), 1, "#e1ba70")
+
+
+def draw_tiny_tablet(draw: ImageDraw.ImageDraw, x: int, y: int, w: int = 10, h: int = 14) -> None:
+    rect(draw, x - 1, y - 1, w + 2, h + 2, "#465047")
+    rect(draw, x, y, w, h, "#bebaa0")
+    rect(draw, x + 2, y + 3, w - 4, 1, "#777462")
+    rect(draw, x + 2, y + 7, w - 3, 1, "#8b876f")
+    rect(draw, x + 3, y + 11, w - 6, 1, "#777462")
+
+
+def draw_crystal(draw: ImageDraw.ImageDraw, x: int, y: int, w: int, h: int, fill: str = "#7ed9ff") -> None:
+    outline = "#304c8e"
+    draw.polygon([(x + w // 2, y - 1), (x + w, y + h // 3), (x + w - 2, y + h), (x + 2, y + h), (x, y + h // 3)], fill=outline)
+    draw.polygon([(x + w // 2, y), (x + w - 1, y + h // 3), (x + w - 3, y + h - 1), (x + 3, y + h - 1), (x + 1, y + h // 3)], fill=fill)
+    draw.polygon([(x + w // 2, y), (x + w - 2, y + h // 3), (x + w // 2, y + h - 1)], fill="#b9f5ff")
+
+
+def draw_sapling_sprite(kind: str, variant: int) -> Image.Image:
+    """Draw a young plant form that is structurally different from the adult tree."""
+    rng = random.Random(f"sapling-v4-{kind}-{variant}")
+    canvas = Image.new("RGBA", (96, 96), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    lean = variant - 1
+    base_x = 48 + lean
+    rect(draw, 29, 84, 38, 3, "#263b28")
+    rect(draw, 34, 82, 28, 3, "#6d4a2f")
+
+    if kind == "vla":
+        draw_stem(draw, [(base_x, 82), (base_x - 1, 63), (base_x + 1, 44), (base_x + 3, 28)], 5)
+        draw_leaf(draw, 27, 30 + variant, 24, 15, "#72b949")
+        draw_leaf(draw, 49, 25, 25, 16, "#8bcf55")
+        draw_leaf(draw, 37, 45, 22, 14, "#579b3d")
+        for x, y in [(34, 37), (62, 33), (52, 49)]:
+            draw.ellipse((x - 3, y - 3, x + 4, y + 4), fill="#70431e")
+            draw.ellipse((x - 2, y - 2, x + 3, y + 3), fill="#ffb133")
+    elif kind == "world_model":
+        draw_stem(draw, [(base_x, 82), (base_x, 58), (base_x + 2, 39), (base_x + 5, 22)], 4)
+        draw_crystal(draw, 24, 48, 17, 24, "#6dcaff")
+        draw_crystal(draw, 43, 24, 18, 31, "#9b82ff")
+        draw_crystal(draw, 58, 43, 16, 25, "#6bdfff")
+        rect(draw, 35, 77, 28, 4, "#513622")
+    elif kind == "dataset":
+        draw_stem(draw, [(base_x, 82), (base_x - 1, 62), (base_x, 42), (base_x + 2, 28)], 5)
+        draw_tiny_tablet(draw, 38, 27, 16, 24)
+        draw.line((base_x, 50, 27, 43), fill="#2d442b", width=3)
+        draw.line((base_x, 55, 69, 48), fill="#2d442b", width=3)
+        draw_tiny_tablet(draw, 19, 36, 11, 15)
+        draw_tiny_tablet(draw, 67, 42, 11, 15)
+        draw_leaf(draw, 30, 58, 17, 10, "#75a94c")
+    elif kind == "robotics":
+        draw_stem(draw, [(base_x, 83), (base_x, 65), (base_x - 1, 48), (base_x, 28)], 5)
+        for y, w in [(34, 28), (47, 40), (60, 48)]:
+            draw.polygon([(base_x, y - 10), (base_x - w // 2, y + 11), (base_x + w // 2, y + 11)], fill="#263c31")
+            draw.polygon([(base_x, y - 7), (base_x - w // 2 + 4, y + 8), (base_x + w // 2 - 4, y + 8)], fill="#2f6b55")
+        rect(draw, base_x - 7, 48, 14, 14, "#1b2b31")
+        rect(draw, base_x - 4, 51, 8, 8, "#5ad9ff")
+    elif kind == "embodied_ai":
+        draw_stem(draw, [(base_x, 82), (base_x - 2, 64), (base_x, 46), (base_x + 1, 30)], 4)
+        for x, y, w in [(30, 32, 20), (48, 24, 23), (54, 43, 19), (37, 48, 18)]:
+            draw.ellipse((x - 2, y - 2, x + w + 2, y + w + 2), fill="#5a2a3d")
+            draw.ellipse((x, y, x + w, y + w), fill="#e978a7")
+            draw.ellipse((x + 4, y + 3, x + w - 4, y + w - 5), fill="#ffabc9")
+        for x, y in [(31, 65), (68, 61)]:
+            draw.line((base_x, 51, x, y), fill="#3f2a22", width=2)
+            rect(draw, x - 3, y, 7, 9, "#6b351e")
+            rect(draw, x - 2, y + 1, 5, 7, "#ffb247")
+    elif kind == "manipulation":
+        draw_stem(draw, [(base_x, 84), (base_x + 6, 67), (base_x - 4, 49), (base_x + 4, 30)], 5)
+        draw_leaf(draw, 15, 50, 20, 14, "#5d9a40")
+        draw_leaf(draw, 28, 40, 22, 15, "#6fac4b")
+        draw_leaf(draw, 50, 34, 25, 15, "#78bf50")
+        draw.line((62, 37, 77, 30), fill="#2a3f28", width=3)
+        rect(draw, 75, 24, 4, 15, "#444a42")
+        draw.arc((68, 19, 86, 39), 20, 160, fill="#c5c9bb", width=3)
+        draw.arc((73, 20, 91, 42), 105, 245, fill="#c5c9bb", width=3)
+    elif kind == "navigation":
+        draw_stem(draw, [(base_x, 84), (base_x, 62), (base_x, 42), (base_x, 21)], 5)
+        draw_sign(draw, 24, 31, 24, 11)
+        draw_sign(draw, 50, 45, 28, 12)
+        draw_leaf(draw, 34, 55, 18, 12, "#71a84a")
+        draw_leaf(draw, 54, 25, 17, 11, "#83bd50")
+        rect(draw, base_x - 2, 16, 5, 7, "#e4ba60")
+    elif kind == "simulation":
+        draw_stem(draw, [(base_x, 84), (base_x - 1, 63), (base_x + 2, 42), (base_x + 3, 27)], 4)
+        rect(draw, 32, 30, 30, 22, "#19515c")
+        rect(draw, 34, 32, 26, 18, "#6be8f3")
+        rect(draw, 37, 36, 8, 2, "#e8ffff")
+        rect(draw, 47, 41, 8, 2, "#d0ffff")
+        draw_crystal(draw, 42, 60, 15, 22, "#66e8ff")
+        for x, y in [(26, 55), (66, 58), (58, 23)]:
+            rect(draw, x, y, 3, 3, "#75e7ff")
+        rect(draw, 68, 36, 7, 7, "#153d49")
+        rect(draw, 70, 38, 3, 3, "#8ef7ff")
+    else:
+        draw_stem(draw, [(base_x, 84), (base_x - 1, 65), (base_x + 1, 46), (base_x, 30)], 5)
+        for x, y, w in [(27, 33, 24), (48, 28, 24), (39, 45, 26), (56, 47, 20), (30, 53, 20)]:
+            draw.ellipse((x - 2, y - 2, x + w + 2, y + w + 2), fill="#203b25")
+            draw.ellipse((x, y, x + w, y + w), fill=rng.choice(["#6eaf49", "#83c85b", "#5f9a3f"]))
+    return upscale(canvas, 3)
+
+
 def terrain_noise(draw: ImageDraw.ImageDraw, rng: random.Random, colors: list[str], count: int) -> None:
     for _ in range(count):
         x = rng.randrange(1, TERRAIN_CANVAS - 3)
@@ -238,26 +371,48 @@ def terrain_noise(draw: ImageDraw.ImageDraw, rng: random.Random, colors: list[st
 
 
 def draw_terrain(kind: str) -> Image.Image:
-    rng = random.Random(f"terrain-v3-{kind}")
-    image = Image.new("RGBA", (TERRAIN_CANVAS, TERRAIN_CANVAS), TERRAIN_BASES[kind])
+    rng = random.Random(f"terrain-v4-plot-{kind}")
+    top_color, mid_color, edge_color, outline = TERRAIN_PALETTES[kind]
+    image = Image.new("RGBA", (TERRAIN_CANVAS, TERRAIN_CANVAS), (0, 0, 0, 0))
     draw = ImageDraw.Draw(image)
-    terrain_noise(draw, rng, ["#5d9144", "#9ac86d", "#4c7c3d", "#bedf84"], 170)
+    top = [(32, 7), (60, 22), (32, 39), (4, 22)]
+    left_side = [(4, 22), (32, 39), (32, 49), (4, 31)]
+    right_side = [(60, 22), (32, 39), (32, 49), (60, 31)]
+    draw.polygon(left_side, fill=edge_color)
+    draw.polygon(right_side, fill=mid_color)
+    draw.polygon(top, fill=outline)
+    draw.polygon([(32, 9), (57, 23), (32, 37), (7, 23)], fill=top_color)
+
+    mask = Image.new("L", (TERRAIN_CANVAS, TERRAIN_CANVAS), 0)
+    ImageDraw.Draw(mask).polygon([(32, 9), (57, 23), (32, 37), (7, 23)], fill=255)
+    for _ in range(150):
+        x = rng.randrange(8, 57)
+        y = rng.randrange(11, 38)
+        if mask.getpixel((x, y)) == 0:
+            continue
+        color = rng.choice([top_color, mid_color, edge_color, "#cce08a", "#5a7c3e"])
+        rect(draw, x, y, 1 if rng.random() < 0.7 else 2, 1, color)
+
+    for offset in [15, 22, 29]:
+        draw.line((offset, 17, offset + 21, 29), fill=(75, 74, 42, 80), width=1)
+    draw.line((8, 23, 32, 37, 56, 23), fill="#d5df86", width=1)
+    draw.line((5, 31, 32, 49, 59, 31), fill=outline, width=1)
 
     if kind == "flower":
-        for x, y, color in [(12, 41, "#f3ca55"), (45, 18, "#e26f62"), (35, 48, "#f5ead0"), (21, 23, "#90ce6b")]:
+        for x, y, color in [(18, 24, "#f3ca55"), (44, 22, "#e26f62"), (34, 30, "#f5ead0")]:
             rect(draw, x, y, 3, 3, color)
             rect(draw, x + 1, y + 3, 1, 2, "#416f3a")
     elif kind == "clay":
-        draw.polygon([(0, 42), (17, 30), (39, 33), (64, 22), (64, 64), (0, 64)], fill="#9d7147")
-        draw.polygon([(0, 49), (18, 37), (40, 41), (64, 31), (64, 64), (0, 64)], fill="#b68250")
+        draw.line((15, 25, 38, 14), fill="#6d4930", width=1)
+        draw.line((24, 32, 49, 21), fill="#6d4930", width=1)
     elif kind == "stone":
-        for bbox in [(10, 38, 25, 49), (40, 15, 56, 28), (35, 45, 51, 56)]:
+        for bbox in [(17, 24, 25, 29), (41, 18, 51, 24), (35, 29, 44, 35)]:
             draw.ellipse(bbox, fill="#66705e")
             inset = (bbox[0] + 2, bbox[1] + 2, bbox[2] - 2, bbox[3] - 2)
             draw.ellipse(inset, fill="#949984")
     elif kind == "water":
-        draw.polygon([(0, 29), (16, 23), (32, 29), (45, 23), (64, 26), (64, 44), (46, 47), (29, 41), (13, 47), (0, 43)], fill="#4d9d98")
-        draw.polygon([(0, 34), (17, 30), (32, 35), (47, 30), (64, 34), (64, 39), (46, 42), (29, 37), (12, 42), (0, 39)], fill="#77cbc1")
+        draw.polygon([(12, 24), (23, 19), (34, 24), (45, 19), (54, 24), (45, 30), (34, 27), (23, 31)], fill="#4d9d98")
+        draw.line((14, 25, 28, 22, 43, 25, 52, 23), fill="#9ff3e7", width=1)
 
     return upscale(image, TERRAIN_SCALE)
 
@@ -274,12 +429,11 @@ def save_assets() -> int:
         tree_base = build_reference_sprite(sheet, REFERENCE_BOXES[kind]["tree"], "tree")
         for variant in range(3):
             save_sprite(tree_base, GENERATED_DIR / f"tree-{kind}-{variant}.png", "tree")
-            sapling_box = REFERENCE_BOXES[kind]["sapling"][variant]
-            sapling_base = build_reference_sprite(sheet, sapling_box, "sapling")
+            sapling_base = draw_sapling_sprite(kind, variant)
             save_sprite(sapling_base, GENERATED_DIR / f"sapling-{kind}-{variant}.png", "sapling")
             count += 2
         save_sprite(tree_base, GENERATED_DIR / f"tree-{kind}.png", "tree")
-        default_sapling = build_reference_sprite(sheet, REFERENCE_BOXES[kind]["sapling"][1], "sapling")
+        default_sapling = draw_sapling_sprite(kind, 1)
         save_sprite(default_sapling, GENERATED_DIR / f"sapling-{kind}.png", "sapling")
         count += 2
 
