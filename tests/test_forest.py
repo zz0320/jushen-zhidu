@@ -224,6 +224,7 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "data-forest-focus-start" not in response.text
     assert "forest-focus-harvest-badge" not in response.text
     assert "专注苗圃" not in response.text
+    assert "is-flipped" not in response.text
     assert 'data-forest-season="spring"' in response.text
     assert "春林" in response.text
     assert 'data-growth-step="full_text"' in response.text

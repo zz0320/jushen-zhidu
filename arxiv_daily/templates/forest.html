@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v3">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v4">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -117,7 +117,7 @@
                   {% for tile in grove.tiles %}
                     {% set is_grove_overflow = loop.index > grove_preview_limit %}
                     <button
-                      class="forest-tile land-{{ tile.land }} tree-{{ tile.kind }} rarity-{{ tile.rarity }} growth-{{ tile.growth }} accent-{{ tile.accent }} {{ 'is-flipped' if tile.flip else '' }} {{ 'is-selected' if tile.index == 1 else '' }} {{ 'is-grove-overflow' if is_grove_overflow else '' }}"
+                      class="forest-tile land-{{ tile.land }} tree-{{ tile.kind }} rarity-{{ tile.rarity }} growth-{{ tile.growth }} accent-{{ tile.accent }} {{ 'is-selected' if tile.index == 1 else '' }} {{ 'is-grove-overflow' if is_grove_overflow else '' }}"
                       type="button"
                       style="--sway-delay: {{ tile.sway_delay }}ms; --plant-delay: {{ tile.plant_delay }}ms;"
                       data-forest-tile

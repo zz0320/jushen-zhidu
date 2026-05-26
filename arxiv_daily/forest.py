@@ -216,7 +216,7 @@ def build_forest_tile(
         "has_ai_summary": has_ai_summary,
         "plant_stage": "tree" if has_ai_summary else "sapling",
         "land": LAND_VARIANTS[seed % len(LAND_VARIANTS)],
-        "flip": bool(seed % 2),
+        "flip": False,
         "accent": seed % 5,
         "scatter_x": 0,
         "scatter_y": 0,
