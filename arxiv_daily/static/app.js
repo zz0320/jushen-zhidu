@@ -706,6 +706,7 @@
     const filters = Array.from(document.querySelectorAll("[data-forest-filter]"));
     const groves = Array.from(document.querySelectorAll("[data-forest-grove]"));
     const moreButtons = Array.from(document.querySelectorAll("[data-forest-focus-grove]"));
+    const pagerButtons = Array.from(document.querySelectorAll("[data-grove-page-prev], [data-grove-page-next]"));
     const focusClearButton = document.querySelector("[data-forest-focus-clear]");
     const detailCloseButton = document.querySelector("[data-forest-detail-close]");
     const empty = document.querySelector("[data-forest-empty]");
@@ -715,6 +716,8 @@
       status: "all",
     };
     let focusedGrove = "";
+    const grovePages = new Map();
+    let resizeTimer = 0;
 
     const nodes = {
       kind: document.querySelector("[data-forest-detail-kind]"),
@@ -747,10 +750,13 @@
       return normalized || fallback;
     };
 
-    const visibleButtons = () => buttons.filter((button) => !button.hidden);
+    const matchedButtons = () => buttons.filter((button) => button.dataset.filterMatched === "true");
+    const currentPageSize = () => (window.matchMedia("(max-width: 900px)").matches ? 20 : 36);
+    const groveTiles = (grove) => Array.from(grove.querySelectorAll("[data-forest-tile]"));
+    const matchedGroveTiles = (grove) => groveTiles(grove).filter((button) => button.dataset.filterMatched === "true");
 
     const updateGrowthStatusSummary = () => {
-      const visible = visibleButtons();
+      const visible = matchedButtons();
       const grown = visible.filter((button) => button.dataset.summarized === "true").length;
       const growthPercent = visible.length ? Math.round((grown / visible.length) * 100) : 0;
       if (nodes.grownVisible) {
@@ -840,8 +846,86 @@
       });
     };
 
+    const shouldPageGrove = (grove, total) => {
+      if (!grove || total <= currentPageSize()) return false;
+      const key = grove.dataset.groveKey || "";
+      return Boolean((focusedGrove && focusedGrove === key) || (!focusedGrove && activeFilters.status !== "all"));
+    };
+
+    const updateGrovePagination = () => {
+      const pageSize = currentPageSize();
+      groves.forEach((grove) => {
+        const key = grove.dataset.groveKey || "";
+        const tilesForGrove = groveTiles(grove);
+        const matched = matchedGroveTiles(grove);
+        const pager = grove.querySelector("[data-grove-pager]");
+        const prev = grove.querySelector("[data-grove-page-prev]");
+        const next = grove.querySelector("[data-grove-page-next]");
+        const status = grove.querySelector("[data-grove-page-status]");
+        const paged = shouldPageGrove(grove, matched.length);
+        const totalPages = paged ? Math.max(1, Math.ceil(matched.length / pageSize)) : 1;
+        const page = paged ? Math.max(0, Math.min(grovePages.get(key) || 0, totalPages - 1)) : 0;
+        const start = page * pageSize;
+        const end = Math.min(start + pageSize, matched.length);
+
+        grovePages.set(key, page);
+        tilesForGrove.forEach((button) => {
+          const matchedFilter = button.dataset.filterMatched === "true";
+          if (!matchedFilter) {
+            button.hidden = true;
+            button.dataset.pageHidden = "false";
+            return;
+          }
+          const index = matched.indexOf(button);
+          const visibleOnPage = !paged || (index >= start && index < end);
+          button.hidden = !visibleOnPage;
+          button.dataset.pageHidden = visibleOnPage ? "false" : "true";
+        });
+
+        if (pager) {
+          pager.hidden = !paged;
+        }
+        if (prev) {
+          prev.disabled = !paged || page <= 0;
+        }
+        if (next) {
+          next.disabled = !paged || page >= totalPages - 1;
+        }
+        if (status) {
+          const pageLabel = paged ? `${start + 1}-${end} / ${matched.length}` : `${matched.length} / ${matched.length}`;
+          status.textContent = `第 ${page + 1} / ${totalPages} 页 · ${pageLabel}`;
+        }
+      });
+    };
+
+    const firstVisibleTileInGrove = (groveKey) =>
+      buttons.find((button) => !button.hidden && (!groveKey || groveKeyForButton(button) === groveKey));
+
+    const turnGrovePage = (button, direction) => {
+      const grove = button.closest("[data-forest-grove]");
+      if (!grove) return;
+      const key = grove.dataset.groveKey || "";
+      const total = matchedGroveTiles(grove).length;
+      const pageSize = currentPageSize();
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+      const current = grovePages.get(key) || 0;
+      grovePages.set(key, Math.max(0, Math.min(current + direction, totalPages - 1)));
+      applyFilterState(false);
+      const first = firstVisibleTileInGrove(key);
+      if (first) {
+        setSelected(first);
+        renderDetails(tileById.get(first.dataset.arxivId));
+      }
+      if (grid) {
+        grid.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+
     const setFocusedGrove = (key) => {
       focusedGrove = key || "";
+      if (focusedGrove && !grovePages.has(focusedGrove)) {
+        grovePages.set(focusedGrove, 0);
+      }
       if (stage) {
         stage.classList.toggle("is-focused-forest", Boolean(focusedGrove));
         if (focusedGrove) {
@@ -996,9 +1080,9 @@
 
     const applyGroveLayout = () => {
       groves.forEach((grove) => {
-        const visibleButtons = Array.from(grove.querySelectorAll("[data-forest-tile]")).filter((button) => !button.hidden);
-        const visible = visibleButtons.length;
-        const summarized = visibleButtons.filter((button) => button.dataset.summarized === "true").length;
+        const visibleButtonsForGrove = matchedGroveTiles(grove);
+        const visible = visibleButtonsForGrove.length;
+        const summarized = visibleButtonsForGrove.filter((button) => button.dataset.summarized === "true").length;
         const saplings = Math.max(visible - summarized, 0);
         const size = groveSizeForCount(visible);
         const countLabel = grove.querySelector("[data-grove-count-label]");
@@ -1026,6 +1110,8 @@
       let firstVisible = null;
       buttons.forEach((button) => {
         const matched = matchesActiveFilters(button);
+        button.dataset.filterMatched = matched ? "true" : "false";
+        button.dataset.pageHidden = "false";
         button.hidden = !matched;
         if (matched) {
           visible += 1;
@@ -1044,6 +1130,8 @@
         stage.classList.add("is-filtering");
         window.setTimeout(() => stage.classList.remove("is-filtering"), 520);
       }
+      updateGrovePagination();
+      firstVisible = firstVisibleTileInGrove("");
       applyGroveLayout();
       updateMoreButtons();
       if (empty) {
@@ -1071,6 +1159,7 @@
       button.addEventListener("click", () => {
         const group = buttonGroup(button);
         activeFilters[group] = button.dataset.forestFilter || "all";
+        grovePages.clear();
         if (group === "topic" && focusedGrove && (activeFilters.topic === "all" || activeFilters.topic !== focusedGrove)) {
           setFocusedGrove("");
         }
@@ -1080,8 +1169,16 @@
 
     moreButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        setFocusedGrove(button.dataset.forestFocusGrove || "");
+        const key = button.dataset.forestFocusGrove || "";
+        grovePages.set(key, 0);
+        setFocusedGrove(key);
         applyFilterState();
+      });
+    });
+
+    pagerButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        turnGrovePage(button, button.matches("[data-grove-page-prev]") ? -1 : 1);
       });
     });
 
@@ -1108,6 +1205,11 @@
         setFocusedGrove("");
         applyFilterState(false);
       }
+    });
+
+    window.addEventListener("resize", () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => applyFilterState(false), 120);
     });
 
     const initialButton = buttons.find((button) => button.classList.contains("is-selected")) || buttons[0];

@@ -209,6 +209,8 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "forest-growth-status-badge" in response.text
     assert "data-forest-growth-fill" in response.text
     assert "data-forest-grown-visible" in response.text
+    assert "data-grove-pager" in response.text
+    assert "data-grove-page-next" in response.text
     assert 'data-filter-group="topic"' in response.text
     assert 'data-filter-group="status"' in response.text
     assert "data-forest-active-topic" in response.text
