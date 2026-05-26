@@ -268,7 +268,8 @@ def test_forest_page_aggregates_large_groves_with_focus_action(tmp_path):
     assert 'data-grove-overflow="true"' in response.text
     assert 'data-forest-focus-grove="dataset"' in response.text
     assert "forest-grove-more" in response.text
-    assert "+14" in response.text
+    assert "余 14" in response.text
+    assert "分页查看" in response.text
 
 
 def test_forest_page_marks_saplings_and_grown_trees(tmp_path):

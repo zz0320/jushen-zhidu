@@ -8440,7 +8440,7 @@ body .forest-grove-v2 {
     inset 0 -7px 0 rgba(47, 92, 40, 0.14);
   display: grid;
   gap: 6px;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto;
   min-height: 154px;
   overflow: hidden;
   padding: 7px;
@@ -8464,6 +8464,7 @@ body .forest-shell-v2 .forest-grove-label {
   align-items: center;
   display: flex;
   gap: 5px;
+  grid-row: 1;
   left: auto;
   min-width: 0;
   position: relative;
@@ -8535,16 +8536,17 @@ body .forest-shell-v2 .forest-grove-trees {
   border-radius: 5px;
   column-gap: 6px !important;
   display: grid !important;
+  grid-row: 3;
   grid-template-columns: repeat(auto-fill, minmax(var(--grove-tile-width), var(--grove-tile-width)));
   justify-content: center;
-  min-height: 106px;
+  min-height: var(--grove-trees-min-height, 106px) !important;
   overflow: hidden !important;
   padding: 14px 7px 9px;
   row-gap: 10px !important;
 }
 
 body .forest-shell-v2 .forest-grove-v2.is-canopy-grove .forest-grove-trees {
-  min-height: 116px;
+  min-height: var(--grove-trees-min-height, 116px) !important;
 }
 
 body .forest-shell-v2 .forest-tile,
@@ -8584,24 +8586,41 @@ body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2:not(.is-
 }
 
 body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grid-v2 {
+  align-items: start;
   grid-template-columns: 1fr;
+}
+
+body .forest-shell-v2 .forest-map-v2.has-topic-filter .forest-grid-v2,
+body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-grid-v2 {
+  align-items: start;
 }
 
 body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2.is-focused-grove {
   min-height: min(100%, 520px);
 }
 
+body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2.is-focused-grove,
+body .forest-shell-v2 .forest-map-v2.has-topic-filter .forest-grove-v2,
+body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-grove-v2 {
+  align-self: start;
+  grid-template-rows: auto auto auto;
+}
+
 body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2.is-focused-grove .forest-grove-trees,
+body .forest-shell-v2 .forest-map-v2.has-topic-filter .forest-grove-trees,
 body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-grove-trees {
   --grove-tile-width: 84px;
+  overflow: visible !important;
 }
 
 body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2.is-focused-grove .forest-tile.is-grove-overflow,
+body .forest-shell-v2 .forest-map-v2.has-topic-filter .forest-tile.is-grove-overflow,
 body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-tile.is-grove-overflow {
   display: block !important;
 }
 
 body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2.is-focused-grove .forest-tile[hidden],
+body .forest-shell-v2 .forest-map-v2.has-topic-filter .forest-tile[hidden],
 body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-tile[hidden],
 body .forest-shell-v2 .forest-grove-trees .forest-tile[data-page-hidden="true"] {
   display: none !important;
@@ -8860,21 +8879,24 @@ body .forest-shell-v2 .forest-grove-more {
   color: #284332;
   cursor: pointer;
   display: grid;
-  flex: 0 0 82px;
+  flex: 0 0 102px;
   height: 84px;
   justify-items: center;
   line-height: 1;
   padding: 7px;
+  text-align: center;
 }
 
 body .forest-shell-v2 .forest-grove-more strong {
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1;
+  white-space: nowrap;
 }
 
 body .forest-shell-v2 .forest-grove-more span {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 body .forest-shell-v2 .forest-grove-pager {
@@ -8889,6 +8911,7 @@ body .forest-shell-v2 .forest-grove-pager {
     0 3px 0 rgba(38, 72, 42, 0.2);
   display: grid;
   gap: 8px;
+  grid-row: 2;
   grid-template-columns: auto minmax(0, 1fr) auto;
   min-height: 42px;
   padding: 6px;
@@ -8925,14 +8948,22 @@ body .forest-shell-v2 .forest-page-button:focus-visible {
 }
 
 body .forest-shell-v2 .forest-page-button:disabled {
+  background:
+    linear-gradient(180deg, rgba(238, 247, 218, 0.94), rgba(218, 232, 200, 0.9)),
+    repeating-linear-gradient(90deg, rgba(45, 82, 40, 0.08) 0 1px, transparent 1px 6px);
+  border-color: rgba(76, 102, 71, 0.28);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 238, 0.22),
+    0 2px 0 rgba(44, 75, 44, 0.12);
+  color: rgba(47, 77, 55, 0.62);
   cursor: default;
   filter: grayscale(0.3);
-  opacity: 0.48;
+  opacity: 1;
 }
 
 body .forest-shell-v2 .forest-page-status {
   color: #274b32;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
   overflow: hidden;
   text-align: center;

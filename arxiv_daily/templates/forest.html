@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v9">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v17">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -155,8 +155,8 @@
                   {% endfor %}
                   {% if grove.count > grove_preview_limit %}
                     <button class="forest-grove-more" type="button" data-forest-focus-grove="{{ grove.key }}" data-grove-more-count="{{ grove.count - grove_preview_limit }}">
-                      <strong>+{{ grove.count - grove_preview_limit }}</strong>
-                      <span>聚焦</span>
+                      <strong>余 {{ grove.count - grove_preview_limit }}</strong>
+                      <span>分页查看</span>
                     </button>
                   {% endif %}
                 </div>
