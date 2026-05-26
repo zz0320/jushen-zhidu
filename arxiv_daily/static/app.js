@@ -998,16 +998,19 @@
 
         if (pager) {
           pager.hidden = !paged;
+          pager.dataset.pagePosition = totalPages <= 1 ? "single" : page <= 0 ? "first" : page >= totalPages - 1 ? "last" : "middle";
         }
         if (prev) {
           prev.disabled = !paged || page <= 0;
+          prev.title = page <= 0 ? "已经是第一页" : `上一页：${Math.max(1, start - pageSize + 1)}-${start}`;
         }
         if (next) {
           next.disabled = !paged || page >= totalPages - 1;
+          next.title = page >= totalPages - 1 ? "已经是最后一页" : `下一页：${end + 1}-${Math.min(end + pageSize, matched.length)}`;
         }
         if (status) {
-          const pageLabel = paged ? `本页 ${start + 1}-${end} · 共 ${matched.length}` : `共 ${matched.length}`;
-          status.textContent = `第 ${page + 1} / ${totalPages} 页 · ${pageLabel}`;
+          const pageLabel = paged ? `${start + 1}-${end} / ${matched.length}` : `共 ${matched.length}`;
+          status.textContent = `第 ${page + 1}/${totalPages} 页 · ${pageLabel}`;
         }
       });
     };
