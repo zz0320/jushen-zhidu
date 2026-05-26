@@ -8232,6 +8232,7 @@ body .forest-filter-list-v2 {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0 0 2px;
+  scroll-padding-inline: 8px;
   scrollbar-width: thin;
 }
 
@@ -8245,14 +8246,22 @@ body .forest-shell-v2 .forest-filter {
   color: #315339;
   cursor: pointer;
   display: flex;
+  box-sizing: border-box;
   gap: 8px;
   justify-content: space-between;
-  flex: 0 0 auto;
+  flex: 0 1 clamp(112px, 12vw, 184px);
+  max-width: 184px;
   min-height: 30px;
   min-width: 102px;
   padding: 6px 8px;
   text-align: left;
-  width: auto;
+  width: clamp(112px, 12vw, 184px);
+}
+
+body .forest-shell-v2 .forest-filter[data-forest-filter="dataset"] {
+  flex-basis: clamp(154px, 16vw, 224px);
+  max-width: 224px;
+  width: clamp(154px, 16vw, 224px);
 }
 
 body .forest-shell-v2 .forest-filter span {
@@ -9332,11 +9341,18 @@ body .forest-empty-v2 {
   }
 
   body .forest-shell-v2 .forest-filter {
-    flex: 0 0 auto;
+    flex: 0 0 clamp(94px, 30vw, 150px);
+    max-width: 150px;
     min-height: 30px;
     min-width: 92px;
     padding: 6px 7px;
-    width: auto;
+    width: clamp(94px, 30vw, 150px);
+  }
+
+  body .forest-shell-v2 .forest-filter[data-forest-filter="dataset"] {
+    flex-basis: clamp(150px, 44vw, 196px);
+    max-width: 196px;
+    width: clamp(150px, 44vw, 196px);
   }
 
   body .forest-shell-v2 .forest-filter span {

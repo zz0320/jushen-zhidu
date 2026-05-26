@@ -924,6 +924,20 @@
       });
     };
 
+    const keepActiveFiltersInView = () => {
+      filters.forEach((button) => {
+        if (!button.classList.contains("is-active")) return;
+        const list = button.closest("[data-forest-filters]");
+        if (!list) return;
+        const buttonRect = button.getBoundingClientRect();
+        const listRect = list.getBoundingClientRect();
+        const outside = buttonRect.left < listRect.left || buttonRect.right > listRect.right;
+        if (outside) {
+          button.scrollIntoView({ behavior: "auto", block: "nearest", inline: "center" });
+        }
+      });
+    };
+
     const updateMoreButtons = () => {
       const statusIsFiltering = activeFilters.status !== "all";
       moreButtons.forEach((button) => {
@@ -1298,6 +1312,7 @@
         }
       });
       updateFilterButtons();
+      keepActiveFiltersInView();
       updateActiveFilterLabels();
       if (stage) {
         stage.dataset.activeTopic = activeFilters.topic;
