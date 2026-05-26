@@ -9094,16 +9094,15 @@ body .forest-detail-v2 .forest-inspector-meta span {
 body .forest-detail-v2 .forest-growth-diary {
   border-color: rgba(198, 169, 109, 0.26);
   border-radius: 7px;
+  gap: 14px;
   margin: 8px 0 0;
-  min-height: 74px;
+  min-height: 68px;
   overflow: visible;
-  padding: 16px 4px 8px;
+  padding: 12px 10px 9px;
 }
 
 body .forest-detail-v2 .forest-growth-rail {
-  left: 28px;
-  right: 28px;
-  top: 24px;
+  display: none;
 }
 
 body .forest-detail-v2 .forest-growth-step {
@@ -9426,7 +9425,9 @@ body .forest-empty-v2 {
   }
 
   body .forest-detail-v2 .forest-growth-diary {
-    min-height: 70px;
+    min-height: 66px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   body .forest-detail-v2 .forest-detail-grid {
