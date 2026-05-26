@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v27">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v28">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -20,7 +20,7 @@
         </div>
       </div>
 
-      <div class="forest-controls-v2">
+      <div class="forest-controls-v2 hero-controls">
         <form class="forest-datebar-v2 toolbar" method="get" action="/forest">
           <label class="visually-hidden" for="forest-date-picker">选择日期</label>
           <input id="forest-date-picker" type="date" name="date" value="{{ day }}">
@@ -28,8 +28,6 @@
         </form>
 
         <nav class="forest-route-v2 date-jump" aria-label="论文森林导航">
-          <a class="button secondary compact-button" href="/?day={{ day }}">总览</a>
-          <a class="button secondary compact-button" href="/papers?day={{ day }}">单篇论文</a>
           <a class="button secondary compact-button" href="/forest?date={{ previous_day }}">前一天</a>
           <a class="button secondary compact-button" href="/forest?date={{ next_day }}">后一天</a>
         </nav>

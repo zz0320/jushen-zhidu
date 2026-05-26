@@ -8043,13 +8043,12 @@ body .forest-command-v2::after {
 }
 
 body .forest-controls-v2 {
-  align-items: center;
+  align-items: flex-end;
   align-self: center;
-  display: flex;
+  display: grid;
   flex: 0 0 auto;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
+  gap: 10px;
+  justify-items: end;
   min-width: 0;
 }
 
