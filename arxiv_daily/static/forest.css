@@ -9796,3 +9796,44 @@ body .forest-detail-v2 .forest-abstract p {
     line-height: 1.24;
   }
 }
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-selected .forest-pixel-tree {
+  --asset-size: 50px;
+  bottom: 24px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .tree-shadow {
+  bottom: 21px !important;
+  height: 3px !important;
+  width: 18px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 15px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-detail-v2 .forest-growth-step.is-sapling-step .forest-growth-icon img {
+  height: 24px !important;
+  width: 24px !important;
+}
+
+@media (max-width: 900px) {
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:hover .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-selected .forest-pixel-tree {
+    --asset-size: 40px;
+    bottom: 21px !important;
+  }
+
+  body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+    bottom: 13px !important;
+    height: 38px !important;
+    width: 38px !important;
+  }
+}
