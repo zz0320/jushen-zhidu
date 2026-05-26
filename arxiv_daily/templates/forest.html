@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v5">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v6">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -185,7 +185,7 @@
               <span class="forest-inspector-plot"></span>
               <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-ref-sprites" alt="">
             </span>
-            <div>
+            <div class="forest-inspector-copy">
               <span class="forest-inspector-kicker" data-forest-detail-kind>{{ first_tile.kind_label }}</span>
               <h2 data-forest-detail-title>{{ first_tile.title|clean_latex }}</h2>
             </div>
