@@ -8999,6 +8999,13 @@ body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
   width: 52px !important;
 }
 
+body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant::after {
+  animation: none !important;
+  box-shadow: none !important;
+  content: none !important;
+  display: none !important;
+}
+
 body .forest-detail-v2 .forest-inspector-kicker,
 body .forest-detail-v2 .forest-detail-label {
   color: #3f7147;

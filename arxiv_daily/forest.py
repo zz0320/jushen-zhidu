@@ -71,9 +71,12 @@ FOREST_GROWTH: Dict[str, ForestGrowth] = {
 
 GROWTH_STEP_DETAILS: Dict[str, Dict[str, object]] = {
     "metadata": {"detail": "元数据", "plant_stage": "sapling"},
-    "translation": {"detail": "摘要翻译", "plant_stage": "sapling"},
-    "summary": {"detail": "单篇总结", "plant_stage": "tree"},
-    "full_text": {"detail": "全文总结", "plant_stage": "tree"},
+    "grown": {"label": "已成长", "plant_stage": "tree"},
+}
+
+GROWN_STEP_DETAILS = {
+    "summary": "单篇总结",
+    "full_text": "全文总结",
 }
 
 LAND_VARIANTS = [
@@ -179,25 +182,26 @@ def forest_growth_steps(
     summaries_by_paper: Dict[str, PaperSummary],
     full_text_summaries_by_paper: Dict[str, PaperFullTextSummary],
 ) -> List[Dict[str, object]]:
-    keys = ["metadata"]
-    if arxiv_id in translations_by_paper:
-        keys.append("translation")
-    if arxiv_id in summaries_by_paper:
-        keys.append("summary")
-    if arxiv_id in full_text_summaries_by_paper:
-        keys.append("full_text")
-
-    steps: List[Dict[str, object]] = []
-    for key in keys:
-        growth = FOREST_GROWTH[key]
-        step = GROWTH_STEP_DETAILS[key]
+    growth = classify_growth(arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper)
+    metadata_step = GROWTH_STEP_DETAILS["metadata"]
+    steps: List[Dict[str, object]] = [
+        {
+            "key": "metadata",
+            "label": FOREST_GROWTH["metadata"].label,
+            "detail": str(metadata_step["detail"]),
+            "rank": 0,
+            "plant_stage": str(metadata_step["plant_stage"]),
+        }
+    ]
+    if growth.key in GROWN_STEP_DETAILS:
+        grown_step = GROWTH_STEP_DETAILS["grown"]
         steps.append(
             {
-                "key": key,
-                "label": growth.label,
-                "detail": str(step["detail"]),
-                "rank": growth.rank,
-                "plant_stage": str(step["plant_stage"]),
+                "key": "grown",
+                "label": str(grown_step["label"]),
+                "detail": GROWN_STEP_DETAILS[growth.key],
+                "rank": 1,
+                "plant_stage": str(grown_step["plant_stage"]),
             }
         )
     return steps

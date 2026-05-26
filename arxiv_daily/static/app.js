@@ -988,20 +988,40 @@
       return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-ref-sprites`;
     };
 
+    const growthStateLabel = (tile) => (tile?.summarized ? "已成长" : "树苗");
+
+    const grownStepDetail = (tile) => {
+      if (tile?.growth === "full_text") return "全文总结";
+      if (tile?.growth === "summary") return "单篇总结";
+      return "已生成总结";
+    };
+
     const growthSpritePath = (tile, step) => {
       const prefix = step.plant_stage === "tree" ? "tree-" : "sapling-";
       return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-ref-sprites`;
     };
 
-    const fallbackGrowthSteps = (tile) => [
-      {
-        key: tile.growth || "metadata",
-        label: tile.growth_label || "树苗",
-        detail: tile.summary_status || "元数据",
-        rank: Number(tile.growth_rank || 0),
-        plant_stage: tile.plant_stage || "sapling",
-      },
-    ];
+    const fallbackGrowthSteps = (tile) => {
+      const steps = [
+        {
+          key: "metadata",
+          label: "树苗",
+          detail: "元数据",
+          rank: 0,
+          plant_stage: "sapling",
+        },
+      ];
+      if (tile.summarized) {
+        steps.push({
+          key: "grown",
+          label: "已成长",
+          detail: grownStepDetail(tile),
+          rank: 1,
+          plant_stage: "tree",
+        });
+      }
+      return steps;
+    };
 
     const normalizedGrowthSteps = (tile) => {
       const steps =
@@ -1024,7 +1044,7 @@
       nodes.growthDiary.style.setProperty("--forest-growth-step-count", String(steps.length));
       nodes.growthDiary.style.setProperty("--forest-growth-progress", steps.length > 1 ? "100%" : "0%");
       nodes.growthDiary.classList.toggle("is-single-step", steps.length === 1);
-      nodes.growthDiary.setAttribute("aria-label", `论文成长进度：${tile.growth_label || "树苗"}`);
+      nodes.growthDiary.setAttribute("aria-label", `论文成长进度：${growthStateLabel(tile)}`);
 
       const rail = document.createElement("span");
       rail.className = "forest-growth-rail";
@@ -1072,7 +1092,7 @@
       if (nodes.paper) nodes.paper.href = tile.detail_url || "#";
       if (nodes.score) nodes.score.textContent = `相关性 ${tile.score_display || tile.score || 0}`;
       if (nodes.rarity) nodes.rarity.textContent = tile.rarity_label || "";
-      if (nodes.growth) nodes.growth.textContent = tile.growth_label || "";
+      if (nodes.growth) nodes.growth.textContent = growthStateLabel(tile);
       if (nodes.category) nodes.category.textContent = tile.primary_category || "";
       if (nodes.authors) nodes.authors.textContent = text(tile.authors_display || tile.authors, "作者未记录");
       if (nodes.arxiv) {
