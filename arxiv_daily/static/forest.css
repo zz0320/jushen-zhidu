@@ -8441,7 +8441,7 @@ body .forest-grove-v2 {
   display: grid;
   gap: 6px;
   grid-template-rows: auto auto auto;
-  min-height: 154px;
+  min-height: var(--grove-min-height, 154px);
   overflow: hidden;
   padding: 7px;
 }
@@ -8453,7 +8453,7 @@ body .forest-grove-v2.is-medium-grove {
 
 body .forest-grove-v2.is-canopy-grove {
   grid-column: 1 / -1;
-  min-height: 184px;
+  min-height: var(--grove-min-height, 184px);
 }
 
 body .forest-grove-v2[hidden] {
@@ -8466,6 +8466,7 @@ body .forest-shell-v2 .forest-grove-label {
   gap: 5px;
   grid-row: 1;
   left: auto;
+  min-height: 28px;
   min-width: 0;
   position: relative;
   top: auto;
@@ -8883,6 +8884,7 @@ body .forest-shell-v2 .forest-grove-more {
   height: 84px;
   justify-items: center;
   line-height: 1;
+  order: -1;
   padding: 7px;
   text-align: center;
 }
@@ -9359,7 +9361,7 @@ body .forest-empty-v2 {
   body .forest-grove-v2,
   body .forest-grove-v2.is-canopy-grove {
     grid-column: auto;
-    min-height: 142px;
+    min-height: var(--grove-min-height, 142px);
   }
 
   body .forest-shell-v2 .forest-grove-trees,

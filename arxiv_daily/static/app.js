@@ -775,11 +775,44 @@
       return Math.max(columns, Math.ceil(basePageSize() / columns) * columns);
     };
 
+    const isExpandedGroveLayout = () => Boolean(focusedGrove) || activeFilters.topic !== "all" || activeFilters.status !== "all";
+
+    const updateOverviewPreviewLimits = () => {
+      if (isExpandedGroveLayout()) return;
+      groves.forEach((grove) => {
+        const moreButton = grove.querySelector(".forest-grove-more");
+        if (!moreButton || moreButton.hidden) return;
+        const previewCapacity = Math.max(1, groveColumnCount(grove) * 2 - 1);
+        let visiblePreviewCount = 0;
+        let matchedPreviewCount = 0;
+        groveTiles(grove).forEach((button) => {
+          if (button.dataset.filterMatched !== "true") return;
+          matchedPreviewCount += 1;
+          const visibleInPreview = visiblePreviewCount < previewCapacity;
+          button.hidden = !visibleInPreview;
+          button.dataset.pageHidden = visibleInPreview ? "false" : "true";
+          if (visibleInPreview) {
+            visiblePreviewCount += 1;
+          }
+        });
+        const hiddenPreviewCount = Math.max(0, matchedPreviewCount - visiblePreviewCount);
+        const templateOverflowCount = Number.parseInt(moreButton.dataset.groveMoreCount || "0", 10) || 0;
+        const remainingCount = templateOverflowCount + hiddenPreviewCount;
+        moreButton.dataset.groveMoreCount = String(remainingCount);
+        const countNode = moreButton.querySelector("strong");
+        if (countNode) {
+          countNode.textContent = `余 ${remainingCount}`;
+        }
+      });
+    };
+
     const updateGroveTreeHeights = () => {
+      const expandedLayout = isExpandedGroveLayout();
       groves.forEach((grove) => {
         const trees = grove.querySelector(".forest-grove-trees");
         if (!trees || grove.hidden) {
           trees?.style.removeProperty("--grove-trees-min-height");
+          grove.style.removeProperty("--grove-min-height");
           return;
         }
         const visibleTiles = groveTiles(grove).filter(
@@ -802,7 +835,17 @@
         const moreHeight = moreButton ? Number.parseFloat(window.getComputedStyle(moreButton).height) || moreButton.getBoundingClientRect().height : 0;
         const itemHeight = Math.max(tileHeight, moreHeight, 1);
         const minHeight = rows * itemHeight + Math.max(0, rows - 1) * rowGap + paddingY;
+        const groveStyle = window.getComputedStyle(grove);
+        const label = grove.querySelector(".forest-grove-label");
+        const pager = grove.querySelector("[data-grove-pager]");
+        const labelHeight = Math.max(label?.getBoundingClientRect().height || 0, 28);
+        const pagerHeight = pager && !pager.hidden ? Math.max(pager.getBoundingClientRect().height || 0, 38) : 0;
+        const groveGap = Number.parseFloat(groveStyle.rowGap) || 0;
+        const grovePaddingY = (Number.parseFloat(groveStyle.paddingTop) || 0) + (Number.parseFloat(groveStyle.paddingBottom) || 0);
+        const visibleRows = 1 + (pagerHeight ? 1 : 0) + 1;
+        const groveMinHeight = minHeight + labelHeight + pagerHeight + Math.max(0, visibleRows - 1) * groveGap + grovePaddingY;
         trees.style.setProperty("--grove-trees-min-height", `${Math.ceil(minHeight)}px`);
+        grove.style.setProperty("--grove-min-height", `${Math.ceil(groveMinHeight)}px`);
       });
     };
 
@@ -1214,7 +1257,9 @@
         const totalButtonsForGrove = groveTiles(grove).filter((button) =>
           matchesActiveFilters(button, { ignoreOverflow: true })
         );
-        const previewButtonsForGrove = matchedGroveTiles(grove);
+        const previewButtonsForGrove = matchedGroveTiles(grove).filter(
+          (button) => button.dataset.pageHidden !== "true" && !button.hidden
+        );
         const total = totalButtonsForGrove.length;
         const visible = previewButtonsForGrove.length;
         const summarized = totalButtonsForGrove.filter((button) => button.dataset.summarized === "true").length;
@@ -1269,6 +1314,8 @@
       updateGrovePagination();
       firstVisible = firstVisibleTileInGrove("");
       updateMoreButtons();
+      updateOverviewPreviewLimits();
+      applyGroveLayout();
       updateGroveTreeHeights();
       if (empty) {
         empty.hidden = visible > 0;
