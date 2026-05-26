@@ -8009,33 +8009,40 @@ body .forest-shell-v2 {
 }
 
 body .forest-command-v2 {
-  align-items: stretch;
+  align-items: flex-start;
   background:
-    linear-gradient(180deg, rgba(255, 250, 224, 0.94), rgba(239, 246, 226, 0.94)),
-    linear-gradient(90deg, rgba(120, 171, 84, 0.18), transparent 48%);
-  border: 2px solid rgba(42, 83, 47, 0.28);
+    linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(247, 251, 244, 0.96)),
+    linear-gradient(90deg, rgba(57, 107, 66, 0.08), transparent 46%);
+  border: 1px solid var(--hierarchy-line, rgba(42, 83, 47, 0.2));
   border-radius: 8px;
-  box-shadow: 0 10px 24px rgba(28, 66, 37, 0.1);
+  box-shadow: var(--hierarchy-shadow, 0 14px 34px rgba(43, 40, 35, 0.065));
   display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  min-height: 82px;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 0;
   overflow: hidden;
-  padding: 10px 12px;
+  padding: 18px 20px;
   position: relative;
 }
 
 body .forest-command-v2::before {
-  background:
-    repeating-linear-gradient(90deg, rgba(43, 83, 47, 0.22) 0 2px, transparent 2px 18px),
-    linear-gradient(90deg, rgba(35, 88, 48, 0.18), transparent);
-  bottom: 0;
+  background: var(--forest-v2-accent, #c76047);
+  bottom: 18px;
   content: "";
-  height: 5px;
-  image-rendering: pixelated;
   left: 0;
   position: absolute;
-  right: 0;
+  top: 18px;
+  width: 3px;
+}
+
+body .forest-controls-v2 {
+  align-items: flex-end;
+  align-self: center;
+  display: grid;
+  flex: 0 0 auto;
+  gap: 10px;
+  justify-items: end;
+  min-width: 0;
 }
 
 body .forest-title-v2 {
@@ -8043,20 +8050,23 @@ body .forest-title-v2 {
 }
 
 body .forest-kicker-v2 {
-  color: #547058;
+  color: var(--accent-dark, #547058);
   display: block;
+  font-family: var(--font-ui, inherit);
   font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  line-height: 1;
+  font-weight: 680;
+  letter-spacing: 0;
+  line-height: 1.2;
   margin-bottom: 5px;
   text-transform: uppercase;
 }
 
 body .forest-title-v2 h1 {
-  color: #173526;
-  font-size: clamp(25px, 2.1vw, 34px);
-  line-height: 1.05;
+  color: var(--ink-strong, #173526);
+  font-family: var(--font-display, inherit);
+  font-size: clamp(30px, 2.6vw, 40px);
+  font-weight: 520;
+  line-height: 1.16;
   margin: 0;
 }
 
@@ -8064,18 +8074,19 @@ body .forest-statline-v2 {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 9px;
 }
 
 body .forest-statline-v2 span {
   align-items: baseline;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(61, 104, 52, 0.16);
+  background: var(--surface-panel, rgba(255, 255, 255, 0.74));
+  border: 1px solid var(--hierarchy-line, rgba(61, 104, 52, 0.16));
   border-radius: 4px;
-  color: #4d674e;
+  color: var(--ink-muted, #4d674e);
   display: inline-flex;
+  font-family: var(--font-ui, inherit);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 650;
   gap: 4px;
   line-height: 1;
   min-height: 24px;
@@ -8085,6 +8096,7 @@ body .forest-statline-v2 span {
 body .forest-statline-v2 strong {
   color: #a24631;
   font-size: 15px;
+  font-weight: 760;
 }
 
 body .forest-datebar-v2,
@@ -8093,7 +8105,7 @@ body .forest-route-v2 {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   justify-content: flex-end;
 }
 
@@ -8102,35 +8114,35 @@ body .forest-datebar-v2 button,
 body .forest-route-v2 a {
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 900;
-  min-height: 36px;
+  font-weight: 680;
+  min-height: 34px;
 }
 
 body .forest-datebar-v2 input {
-  background: #f7fff3;
-  border: 1px solid rgba(44, 87, 47, 0.22);
-  color: #233a2b;
-  padding: 8px 10px;
+  background: var(--surface-panel, #fffdf8);
+  border: 1px solid var(--hierarchy-line-strong, rgba(44, 87, 47, 0.22));
+  color: var(--ink-strong, #233a2b);
+  padding: 7px 10px;
 }
 
 body .forest-datebar-v2 button {
   -webkit-appearance: none;
   appearance: none;
-  background: var(--forest-v2-accent);
-  border: 1px solid rgba(120, 54, 38, 0.2);
-  color: #fff9ea;
+  background: var(--forest-v2-accent, var(--accent, #087ea4));
+  border: 1px solid rgba(120, 54, 38, 0.18);
+  color: #fffdf8;
   cursor: pointer;
-  padding: 8px 14px;
+  padding: 7px 13px;
 }
 
 body .forest-route-v2 a {
   align-items: center;
-  background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(61, 104, 52, 0.16);
-  color: #294331;
+  background: var(--surface-panel, rgba(255, 255, 255, 0.72));
+  border: 1px solid var(--hierarchy-line-strong, rgba(61, 104, 52, 0.16));
+  color: var(--ink-strong, #294331);
   display: inline-flex;
   justify-content: center;
-  padding: 8px 10px;
+  padding: 7px 10px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -9302,9 +9314,8 @@ body .forest-empty-v2 {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  body .forest-route-v2 {
-    grid-column: 1 / -1;
-    justify-content: flex-start;
+  body .forest-controls-v2 {
+    justify-items: end;
   }
 }
 
@@ -9322,7 +9333,19 @@ body .forest-empty-v2 {
     gap: 8px;
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
-    padding: 9px;
+    padding: 12px;
+  }
+
+  body .forest-command-v2::before {
+    bottom: 12px;
+    top: 12px;
+  }
+
+  body .forest-controls-v2 {
+    align-items: stretch;
+    gap: 8px;
+    justify-items: stretch;
+    width: 100%;
   }
 
   body .forest-kicker-v2 {

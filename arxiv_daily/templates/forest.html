@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v22">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v23">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -19,18 +19,20 @@
         </div>
       </div>
 
-      <form class="forest-datebar-v2" method="get" action="/forest">
-        <label class="visually-hidden" for="forest-date-picker">选择日期</label>
-        <input id="forest-date-picker" type="date" name="date" value="{{ day }}">
-        <button type="submit">查看</button>
-      </form>
+      <div class="forest-controls-v2">
+        <form class="forest-datebar-v2" method="get" action="/forest">
+          <label class="visually-hidden" for="forest-date-picker">选择日期</label>
+          <input id="forest-date-picker" type="date" name="date" value="{{ day }}">
+          <button type="submit">查看</button>
+        </form>
 
-      <nav class="forest-route-v2" aria-label="论文森林导航">
-        <a href="/?day={{ day }}">总览</a>
-        <a href="/papers?day={{ day }}">单篇论文</a>
-        <a href="/forest?date={{ previous_day }}">前一天</a>
-        <a href="/forest?date={{ next_day }}">后一天</a>
-      </nav>
+        <nav class="forest-route-v2" aria-label="论文森林导航">
+          <a href="/?day={{ day }}">总览</a>
+          <a href="/papers?day={{ day }}">单篇论文</a>
+          <a href="/forest?date={{ previous_day }}">前一天</a>
+          <a href="/forest?date={{ next_day }}">后一天</a>
+        </nav>
+      </div>
     </header>
 
     {% if tiles %}
