@@ -7982,10 +7982,10 @@ body:has(.forest-shell-v2) .shell {
   display: block;
   height: calc(100dvh - 72px);
   margin: 0 auto;
-  max-width: 1320px;
+  max-width: 1280px;
   min-height: 0;
   overflow: hidden;
-  padding: 22px 28px 24px;
+  padding: 28px 28px 56px;
   width: 100%;
 }
 
@@ -8012,163 +8012,8 @@ body .forest-shell-v2 {
   width: 100%;
 }
 
-body .forest-command-v2 {
-  align-items: center;
-  background: var(--surface-panel, rgba(255, 253, 248, 0.98));
-  border: 1px solid var(--hierarchy-line, rgba(42, 83, 47, 0.2));
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(43, 40, 35, 0.045);
-  display: grid;
-  gap: 20px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  min-height: 132px;
-  overflow: hidden;
-  padding: 20px 24px;
-  position: relative;
-}
-
-body .forest-command-v2::before {
-  background: var(--forest-v2-accent, #c76047);
-  bottom: 22px;
-  content: "";
-  left: 0;
-  position: absolute;
-  top: 22px;
-  width: 3px;
-}
-
-body .forest-command-v2::after {
-  content: none;
-  display: none;
-}
-
-body .forest-controls-v2 {
-  align-items: flex-end;
-  align-self: center;
-  display: grid;
-  flex: 0 0 auto;
-  gap: 10px;
-  justify-items: end;
-  min-width: 0;
-}
-
-body .forest-title-v2 {
-  min-width: 0;
-}
-
-body .forest-kicker-v2 {
-  color: var(--accent-dark, #547058);
-  display: block;
-  font-family: var(--font-ui, inherit);
-  font-size: 12px;
-  font-weight: 680;
-  letter-spacing: 0;
-  line-height: 1.2;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-}
-
-body .forest-title-v2 h1 {
-  color: var(--ink-strong, #173526);
-  font-family: var(--font-display, inherit);
-  font-size: clamp(30px, 2.4vw, 40px);
-  font-weight: 520;
-  line-height: 1.16;
-  margin: 0;
-}
-
 body .forest-command-copy {
-  color: var(--ink-muted, #6b6358);
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 8px 0 0;
-  max-width: 760px;
-}
-
-body .forest-statline-v2 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-top: 8px;
-}
-
-body .forest-statline-v2 span {
-  align-items: baseline;
-  background: var(--surface-panel, rgba(255, 255, 255, 0.74));
-  border: 1px solid var(--hierarchy-line, rgba(61, 104, 52, 0.16));
-  border-radius: 4px;
-  color: var(--ink-muted, #4d674e);
-  display: inline-flex;
-  font-family: var(--font-ui, inherit);
-  font-size: 12px;
-  font-weight: 650;
-  gap: 4px;
-  line-height: 1;
-  min-height: 24px;
-  padding: 5px 7px;
-}
-
-body .forest-statline-v2 strong {
-  color: #a24631;
-  font-size: 15px;
-  font-weight: 760;
-}
-
-body .forest-datebar-v2,
-body .forest-route-v2 {
-  align-content: center;
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: flex-end;
-}
-
-body .forest-datebar-v2 input,
-body .forest-datebar-v2 button,
-body .forest-route-v2 a {
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 680;
-  min-height: 34px;
-}
-
-body .forest-datebar-v2 input {
-  background: var(--surface-panel, #fffdf8);
-  border: 1px solid var(--hierarchy-line-strong, rgba(44, 87, 47, 0.22));
-  color: var(--ink-strong, #233a2b);
-  padding: 7px 11px;
-}
-
-body .forest-datebar-v2 button {
-  -webkit-appearance: none;
-  appearance: none;
-  background: var(--forest-v2-accent, var(--accent, #087ea4));
-  border: 1px solid rgba(120, 54, 38, 0.18);
-  color: #fffdf8;
-  cursor: pointer;
-  padding: 7px 13px;
-}
-
-body .forest-route-v2 a {
-  align-items: center;
-  background: var(--surface-panel, rgba(255, 255, 255, 0.72));
-  border: 1px solid var(--hierarchy-line-strong, rgba(61, 104, 52, 0.16));
-  color: var(--ink-strong, #294331);
-  display: inline-flex;
-  justify-content: center;
-  padding: 7px 11px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-body .forest-route-v2 a:hover,
-body .forest-route-v2 a:focus-visible,
-body .forest-datebar-v2 button:hover,
-body .forest-datebar-v2 button:focus-visible {
-  filter: brightness(0.96);
-  outline: 2px solid rgba(191, 95, 65, 0.32);
-  outline-offset: 2px;
+  max-width: 680px;
 }
 
 body .forest-board-v2 {
@@ -9349,14 +9194,6 @@ body .forest-empty-v2 {
     grid-template-columns: minmax(0, 1fr) 320px;
     grid-template-rows: auto minmax(0, 1fr);
   }
-
-  body .forest-command-v2 {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  body .forest-controls-v2 {
-    justify-items: end;
-  }
 }
 
 @media (max-width: 900px) {
@@ -9378,61 +9215,6 @@ body .forest-empty-v2 {
     overflow: visible;
     padding: 0;
     width: 100%;
-  }
-
-  body .forest-command-v2 {
-    gap: 7px;
-    grid-template-columns: minmax(0, 1fr);
-    min-height: 0;
-    padding: 14px;
-  }
-
-  body .forest-command-v2::before {
-    bottom: 14px;
-    top: 14px;
-  }
-
-  body .forest-controls-v2 {
-    align-items: stretch;
-    gap: 8px;
-    justify-items: stretch;
-    width: 100%;
-  }
-
-  body .forest-kicker-v2 {
-    display: none;
-  }
-
-  body .forest-title-v2 h1 {
-    font-size: 22px;
-  }
-
-  body .forest-statline-v2 {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: thin;
-  }
-
-  body .forest-statline-v2 span {
-    flex: 0 0 auto;
-    min-height: 22px;
-  }
-
-  body .forest-datebar-v2,
-  body .forest-route-v2 {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    scrollbar-width: thin;
-  }
-
-  body .forest-datebar-v2 input,
-  body .forest-datebar-v2 button,
-  body .forest-route-v2 a {
-    flex: 0 0 auto;
-    font-size: 12px;
-    min-height: 32px;
-    padding: 7px 9px;
   }
 
   body .forest-board-v2 {

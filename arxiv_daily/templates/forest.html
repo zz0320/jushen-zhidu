@@ -1,36 +1,31 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v30">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v32">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
   {% set scene_classes = 'season-' ~ scene.season_key ~ ' mood-' ~ scene.mood_key %}
   <section class="forest-shell-v2 {{ scene_classes }}" aria-label="{{ day }} 论文森林">
-    <header class="forest-command-v2 page-head workspace-head">
-      <div class="forest-title-v2">
-        <span class="forest-kicker-v2">Paper Forest</span>
+    <header class="page-head workspace-head forest-command-v2">
+      <div>
+        <div class="eyebrow">Paper Forest</div>
         <h1>{{ day }} 论文森林</h1>
         <p class="forest-command-copy">{{ tiles|length }} 篇论文按主题、相关性和成长状态映射成森林地图，可点击树木查看论文详情。</p>
-        <div class="forest-statline-v2" aria-label="森林统计">
-          <span><strong>{{ counts.total }}</strong> 论文树</span>
-          <span><strong>{{ counts.summarized }}</strong> 已成长</span>
-          <span><strong>{{ counts.high_relevance }}</strong> 高相关</span>
-          <span><strong>{{ counts.unsummarized }}</strong> 树苗</span>
-        </div>
       </div>
 
-      <div class="forest-controls-v2 hero-controls">
-        <form class="forest-datebar-v2 toolbar" method="get" action="/forest">
+      <div class="hero-controls">
+        <form class="toolbar" method="get" action="/forest">
           <label class="visually-hidden" for="forest-date-picker">选择日期</label>
           <input id="forest-date-picker" type="date" name="date" value="{{ day }}">
           <button type="submit">查看</button>
         </form>
 
-        <nav class="forest-route-v2 date-jump" aria-label="论文森林导航">
+        <div class="date-jump" aria-label="论文森林导航">
           <a class="button secondary compact-button" href="/forest?date={{ previous_day }}">前一天</a>
           <a class="button secondary compact-button" href="/forest?date={{ next_day }}">后一天</a>
-        </nav>
+          <a class="button secondary compact-button" href="/papers?day={{ day }}">单篇论文</a>
+        </div>
       </div>
     </header>
 
