@@ -246,7 +246,7 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "古树" in response.text
 
 
-def test_forest_page_aggregates_large_groves_with_focus_action(tmp_path):
+def test_forest_page_renders_large_groves_without_preview_overflow(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
@@ -265,11 +265,12 @@ def test_forest_page_aggregates_large_groves_with_focus_action(tmp_path):
     response = TestClient(app).get("/forest?date=2026-05-23")
 
     assert response.status_code == 200
-    assert 'data-grove-overflow="true"' in response.text
-    assert 'data-forest-focus-grove="dataset"' in response.text
-    assert "forest-grove-more" in response.text
-    assert "余 14" in response.text
-    assert "分页查看" in response.text
+    assert response.text.count("data-forest-tile") == 26
+    assert 'data-grove-overflow="true"' not in response.text
+    assert 'data-grove-overflow="false"' in response.text
+    assert 'data-forest-focus-grove="dataset"' not in response.text
+    assert "forest-grove-more" not in response.text
+    assert "分页查看" not in response.text
 
 
 def test_forest_page_marks_saplings_and_grown_trees(tmp_path):

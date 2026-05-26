@@ -959,12 +959,7 @@
       });
     };
 
-    const shouldPageGrove = (grove, total) => {
-      if (!grove || total <= pageSizeForGrove(grove)) return false;
-      const key = grove.dataset.groveKey || "";
-      const topicIsPaging = activeFilters.topic !== "all" && activeFilters.topic === key;
-      return Boolean((focusedGrove && focusedGrove === key) || topicIsPaging || (!focusedGrove && activeFilters.status !== "all"));
-    };
+    const shouldPageGrove = () => false;
 
     const updateGrovePagination = () => {
       groves.forEach((grove) => {

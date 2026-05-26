@@ -7979,13 +7979,16 @@ body:has(.forest-shell-v2) .app-footer {
 }
 
 body:has(.forest-shell-v2) .shell {
+  align-items: stretch;
   box-sizing: border-box;
+  display: flex;
   height: 100dvh;
+  justify-content: center;
   margin: 0;
   max-width: none;
   min-height: 0;
   overflow: hidden;
-  padding: 0;
+  padding: 12px 0;
   width: 100vw;
 }
 
@@ -8002,46 +8005,51 @@ body .forest-shell-v2 {
   display: grid;
   gap: 10px;
   grid-template-rows: auto minmax(0, 1fr);
-  height: 100dvh;
+  height: calc(100dvh - 24px);
+  margin: 0 auto;
+  max-width: 1320px;
   min-height: 0;
+  min-width: 0;
   overflow: hidden;
-  padding: 12px;
+  padding: 10px;
+  width: min(1320px, calc(100vw - 48px));
 }
 
 body .forest-command-v2 {
-  align-items: flex-start;
+  align-items: center;
   background:
     linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(247, 251, 244, 0.96)),
     linear-gradient(90deg, rgba(57, 107, 66, 0.08), transparent 46%);
   border: 1px solid var(--hierarchy-line, rgba(42, 83, 47, 0.2));
   border-radius: 8px;
-  box-shadow: var(--hierarchy-shadow, 0 14px 34px rgba(43, 40, 35, 0.065));
+  box-shadow: var(--hierarchy-shadow-soft, 0 8px 22px rgba(43, 40, 35, 0.045));
   display: grid;
-  gap: 20px;
+  gap: 16px;
   grid-template-columns: minmax(0, 1fr) auto;
   min-height: 0;
   overflow: hidden;
-  padding: 18px 20px;
+  padding: 14px 18px;
   position: relative;
 }
 
 body .forest-command-v2::before {
   background: var(--forest-v2-accent, #c76047);
-  bottom: 18px;
+  bottom: 14px;
   content: "";
   left: 0;
   position: absolute;
-  top: 18px;
+  top: 14px;
   width: 3px;
 }
 
 body .forest-controls-v2 {
-  align-items: flex-end;
+  align-items: center;
   align-self: center;
-  display: grid;
+  display: flex;
   flex: 0 0 auto;
-  gap: 10px;
-  justify-items: end;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
   min-width: 0;
 }
 
@@ -8053,18 +8061,18 @@ body .forest-kicker-v2 {
   color: var(--accent-dark, #547058);
   display: block;
   font-family: var(--font-ui, inherit);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 680;
   letter-spacing: 0;
   line-height: 1.2;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   text-transform: uppercase;
 }
 
 body .forest-title-v2 h1 {
   color: var(--ink-strong, #173526);
   font-family: var(--font-display, inherit);
-  font-size: clamp(30px, 2.6vw, 40px);
+  font-size: clamp(30px, 2.4vw, 40px);
   font-weight: 520;
   line-height: 1.16;
   margin: 0;
@@ -8073,8 +8081,8 @@ body .forest-title-v2 h1 {
 body .forest-statline-v2 {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 9px;
+  gap: 7px;
+  margin-top: 8px;
 }
 
 body .forest-statline-v2 span {
@@ -8105,7 +8113,7 @@ body .forest-route-v2 {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   justify-content: flex-end;
 }
 
@@ -8122,7 +8130,7 @@ body .forest-datebar-v2 input {
   background: var(--surface-panel, #fffdf8);
   border: 1px solid var(--hierarchy-line-strong, rgba(44, 87, 47, 0.22));
   color: var(--ink-strong, #233a2b);
-  padding: 7px 10px;
+  padding: 7px 11px;
 }
 
 body .forest-datebar-v2 button {
@@ -8142,7 +8150,7 @@ body .forest-route-v2 a {
   color: var(--ink-strong, #294331);
   display: inline-flex;
   justify-content: center;
-  padding: 7px 10px;
+  padding: 7px 11px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -8159,7 +8167,7 @@ body .forest-datebar-v2 button:focus-visible {
 body .forest-board-v2 {
   display: grid;
   gap: 10px;
-  grid-template-columns: minmax(0, 1fr) clamp(318px, 27vw, 372px);
+  grid-template-columns: minmax(0, 1fr) clamp(330px, 24vw, 390px);
   grid-template-rows: auto minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
@@ -8176,7 +8184,7 @@ body .forest-sidebar-v2 {
   gap: 8px;
   grid-column: 1 / -1;
   grid-row: 1;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(620px, 0.9fr);
   min-height: 0;
   overflow: hidden;
 }
@@ -8194,8 +8202,8 @@ body .forest-detail-v2 {
 body .forest-panel-v2,
 body .forest-detail-v2 {
   background: var(--forest-v2-panel);
-  border: 2px solid rgba(64, 112, 54, 0.24);
-  border-radius: 8px;
+  border: 1px solid rgba(64, 112, 54, 0.24);
+  border-radius: 7px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
@@ -8229,7 +8237,7 @@ body .forest-panel-head-v2 strong {
   color: #35593a;
   font-size: 12px;
   line-height: 1.2;
-  max-width: 132px;
+  max-width: 172px;
   overflow: hidden;
   text-align: right;
   text-overflow: ellipsis;
@@ -8240,7 +8248,7 @@ body .forest-filter-list-v2 {
   align-content: start;
   align-items: center;
   display: flex;
-  gap: 6px;
+  gap: 7px;
   min-height: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -8262,19 +8270,32 @@ body .forest-shell-v2 .forest-filter {
   box-sizing: border-box;
   gap: 7px;
   justify-content: space-between;
-  flex: 0 0 clamp(106px, 11vw, 164px);
-  max-width: 164px;
-  min-height: 30px;
-  min-width: 96px;
-  padding: 6px 8px;
+  flex: 0 0 clamp(112px, 10vw, 158px);
+  max-width: 158px;
+  min-height: 34px;
+  min-width: 112px;
+  padding: 7px 9px;
   text-align: left;
-  width: clamp(106px, 11vw, 164px);
+  width: clamp(112px, 10vw, 158px);
 }
 
 body .forest-shell-v2 .forest-filter[data-forest-filter="dataset"] {
-  flex-basis: clamp(142px, 14vw, 188px);
-  max-width: 188px;
-  width: clamp(142px, 14vw, 188px);
+  flex-basis: clamp(176px, 14vw, 220px);
+  max-width: 220px;
+  width: clamp(176px, 14vw, 220px);
+}
+
+body .forest-filter-list-v2[data-filter-group="status"] .forest-filter {
+  flex-basis: clamp(104px, 7vw, 112px);
+  max-width: 112px;
+  min-width: 100px;
+  width: clamp(104px, 7vw, 112px);
+}
+
+body .forest-filter-list-v2[data-filter-group="status"] .forest-filter[data-forest-filter="all"] {
+  flex-basis: 122px;
+  max-width: 122px;
+  width: 122px;
 }
 
 body .forest-shell-v2 .forest-filter span {
@@ -8296,7 +8317,7 @@ body .forest-shell-v2 .forest-filter small {
   font-weight: 900;
   line-height: 1;
   min-width: 24px;
-  padding: 4px 5px;
+  padding: 4px 6px;
   text-align: center;
 }
 
@@ -8316,16 +8337,16 @@ body .forest-map-v2 {
     radial-gradient(circle at 14% 16%, rgba(245, 255, 189, 0.26) 0 11%, transparent 12%),
     radial-gradient(circle at 88% 10%, rgba(79, 136, 72, 0.2) 0 14%, transparent 15%),
     linear-gradient(180deg, #abc978 0%, #83b862 54%, #668f4f 100%);
-  border: 3px solid #214a30;
-  border-radius: 9px;
+  border: 2px solid #214a30;
+  border-radius: 7px;
   box-shadow:
-    inset 0 0 0 4px rgba(255, 255, 255, 0.18),
-    inset 0 -14px 0 rgba(38, 77, 41, 0.16),
-    0 12px 24px rgba(31, 68, 38, 0.15);
+    inset 0 0 0 2px rgba(255, 255, 255, 0.16),
+    inset 0 -10px 0 rgba(38, 77, 41, 0.12),
+    0 8px 16px rgba(31, 68, 38, 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 10px;
+  padding: 8px;
   position: relative;
 }
 
@@ -8345,15 +8366,15 @@ body .forest-map-v2 .forest-season-speck {
 body .forest-map-bar-v2 {
   align-items: center;
   background: rgba(255, 248, 207, 0.9);
-  border: 2px solid rgba(61, 78, 35, 0.28);
-  border-radius: 7px;
-  box-shadow: 0 3px 0 rgba(42, 72, 38, 0.16);
+  border: 1px solid rgba(61, 78, 35, 0.28);
+  border-radius: 6px;
+  box-shadow: 0 2px 0 rgba(42, 72, 38, 0.12);
   display: flex;
   flex: 0 0 auto;
   gap: 7px;
   justify-content: flex-start;
-  margin-bottom: 8px;
-  min-height: 38px;
+  margin-bottom: 6px;
+  min-height: 36px;
   overflow-x: auto;
   padding: 6px;
   position: relative;
@@ -8406,14 +8427,14 @@ body .forest-shell-v2 .forest-focus-clear {
 body .forest-shell-v2 .forest-growth-status-badge {
   align-items: center;
   background: #f6ffd9;
-  border: 2px solid rgba(74, 116, 48, 0.42);
+  border: 1px solid rgba(74, 116, 48, 0.42);
   border-radius: 5px;
   color: #2b4d32;
   display: inline-flex;
   gap: 5px;
   min-height: 28px;
   overflow: hidden;
-  padding: 4px 6px;
+  padding: 4px 7px;
   position: relative;
 }
 
@@ -8439,16 +8460,16 @@ body .forest-grid-v2 {
   background:
     radial-gradient(circle at 18% 18%, rgba(241, 255, 206, 0.22) 0 12%, transparent 13%),
     linear-gradient(180deg, #91bd6d, #73a954 70%, #66974d);
-  border: 3px solid rgba(30, 70, 38, 0.68);
-  border-radius: 7px;
-  box-shadow: inset 0 0 0 3px rgba(247, 255, 232, 0.16);
+  border: 2px solid rgba(30, 70, 38, 0.62);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px rgba(247, 255, 232, 0.14);
   display: grid;
   flex: 1 1 auto;
   gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   min-height: 0;
   overflow: auto;
-  padding: 10px;
+  padding: 9px;
   position: relative;
   scrollbar-width: thin;
   z-index: 2;
@@ -8456,15 +8477,15 @@ body .forest-grid-v2 {
 
 body .forest-grove-v2 {
   background: rgba(216, 231, 194, 0.44);
-  border: 2px solid rgba(42, 86, 39, 0.42);
-  border-radius: 7px;
+  border: 1px solid rgba(42, 86, 39, 0.42);
+  border-radius: 6px;
   box-shadow:
-    inset 0 0 0 2px rgba(215, 245, 155, 0.18),
-    inset 0 -7px 0 rgba(47, 92, 40, 0.14);
+    inset 0 0 0 1px rgba(215, 245, 155, 0.16),
+    inset 0 -5px 0 rgba(47, 92, 40, 0.1);
   display: grid;
   gap: 6px;
   grid-template-rows: auto auto auto;
-  min-height: var(--grove-min-height, 154px);
+  min-height: var(--grove-min-height, 144px);
   overflow: hidden;
   padding: 7px;
 }
@@ -8476,7 +8497,7 @@ body .forest-grove-v2.is-medium-grove {
 
 body .forest-grove-v2.is-canopy-grove {
   grid-column: 1 / -1;
-  min-height: var(--grove-min-height, 184px);
+  min-height: var(--grove-min-height, 170px);
 }
 
 body .forest-grove-v2[hidden] {
@@ -8489,7 +8510,7 @@ body .forest-shell-v2 .forest-grove-label {
   gap: 5px;
   grid-row: 1;
   left: auto;
-  min-height: 28px;
+  min-height: 27px;
   min-width: 0;
   position: relative;
   top: auto;
@@ -8499,13 +8520,13 @@ body .forest-shell-v2 .forest-grove-label {
 
 body .forest-shell-v2 .forest-grove-label span {
   background: #26432d;
-  border: 2px solid rgba(125, 64, 40, 0.64);
+  border: 1px solid rgba(125, 64, 40, 0.64);
   border-radius: 3px;
   box-shadow: 0 2px 0 rgba(56, 44, 29, 0.22);
   color: #fff7c6;
   display: grid;
   gap: 1px;
-  max-width: 168px;
+  max-width: 184px;
   min-width: 0;
   padding: 5px 7px;
 }
@@ -8529,7 +8550,7 @@ body .forest-shell-v2 .forest-grove-label em {
 
 body .forest-shell-v2 .forest-grove-label strong {
   background: #e4c56e;
-  border: 2px solid rgba(97, 63, 38, 0.68);
+  border: 1px solid rgba(97, 63, 38, 0.68);
   border-radius: 2px;
   color: #294331;
   font-size: 12px;
@@ -8543,7 +8564,7 @@ body .forest-shell-v2 .forest-grove-label em {
   border-radius: 4px;
   color: #f9f1bd;
   display: none;
-  padding: 5px 7px;
+  padding: 4px 6px;
 }
 
 body .forest-shell-v2 .forest-grove-v2.is-focused-grove .forest-grove-label em {
@@ -8551,31 +8572,31 @@ body .forest-shell-v2 .forest-grove-v2.is-focused-grove .forest-grove-label em {
 }
 
 body .forest-shell-v2 .forest-grove-trees {
-  --grove-tile-width: 88px;
+  --grove-tile-width: 82px;
   align-content: start;
   background:
     radial-gradient(circle at 20% 24%, rgba(231, 251, 176, 0.22) 0 16%, transparent 17%),
     linear-gradient(180deg, #8dbd65, #74a954 68%, #638e49);
-  border: 2px solid rgba(45, 88, 38, 0.32);
+  border: 1px solid rgba(45, 88, 38, 0.32);
   border-radius: 5px;
   column-gap: 6px !important;
   display: grid !important;
   grid-row: 3;
   grid-template-columns: repeat(auto-fill, minmax(var(--grove-tile-width), var(--grove-tile-width)));
   justify-content: center;
-  min-height: var(--grove-trees-min-height, 106px) !important;
+  min-height: var(--grove-trees-min-height, 98px) !important;
   overflow: hidden !important;
-  padding: 14px 7px 9px;
-  row-gap: 10px !important;
+  padding: 11px 7px 8px;
+  row-gap: 9px !important;
 }
 
 body .forest-shell-v2 .forest-grove-v2.is-canopy-grove .forest-grove-trees {
-  min-height: var(--grove-trees-min-height, 116px) !important;
+  min-height: var(--grove-trees-min-height, 106px) !important;
 }
 
 body .forest-shell-v2 .forest-tile,
 body .forest-shell-v2 .forest-grove-trees .forest-tile {
-  --asset-size: 72px;
+  --asset-size: 68px;
   --terrain-sprite: url("/static/forest/terrain/land-grass.png");
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -8585,8 +8606,8 @@ body .forest-shell-v2 .forest-grove-trees .forest-tile {
   cursor: pointer;
   display: block !important;
   flex: none !important;
-  height: 88px;
-  min-height: 88px !important;
+  height: 82px;
+  min-height: 82px !important;
   min-width: 0 !important;
   padding: 0 !important;
   position: relative;
@@ -8633,7 +8654,7 @@ body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-grove-v2 {
 body .forest-shell-v2 .forest-map-v2.is-focused-forest .forest-grove-v2.is-focused-grove .forest-grove-trees,
 body .forest-shell-v2 .forest-map-v2.has-topic-filter .forest-grove-trees,
 body .forest-shell-v2 .forest-map-v2.has-status-filter .forest-grove-trees {
-  --grove-tile-width: 84px;
+  --grove-tile-width: 80px;
   overflow: visible !important;
 }
 
@@ -8664,7 +8685,7 @@ body .forest-shell-v2 .forest-tile-ground::before {
   background: rgba(36, 67, 42, 0.18) !important;
   border: 0 !important;
   border-radius: 999px;
-  bottom: 12px !important;
+  bottom: 10px !important;
   content: "";
   height: 5px !important;
   image-rendering: pixelated;
@@ -8674,7 +8695,7 @@ body .forest-shell-v2 .forest-tile-ground::before {
   right: auto !important;
   top: auto !important;
   transform: translateX(-50%);
-  width: 34px !important;
+  width: 30px !important;
   z-index: 2;
 }
 
@@ -8729,19 +8750,19 @@ body .forest-shell-v2 .forest-tile-caption {
 body .forest-shell-v2 .tree-shadow {
   background: rgba(24, 51, 37, 0.2);
   border-radius: 999px;
-  bottom: 15px;
+  bottom: 13px;
   display: block;
   height: 5px;
   left: 50%;
   position: absolute;
   transform: translateX(-50%) !important;
-  width: 30px;
+  width: 26px;
   z-index: 3;
 }
 
 body .forest-shell-v2 .forest-pixel-tree {
   animation: none !important;
-  bottom: 15px !important;
+  bottom: 13px !important;
   height: var(--asset-size) !important;
   left: 50%;
   position: absolute;
@@ -8752,8 +8773,8 @@ body .forest-shell-v2 .forest-pixel-tree {
 }
 
 body .forest-shell-v2 .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
-  --asset-size: 62px;
-  bottom: 15px !important;
+  --asset-size: 58px;
+  bottom: 13px !important;
 }
 
 body .forest-shell-v2 .is-flipped .forest-pixel-tree {
@@ -8898,17 +8919,17 @@ body .forest-shell-v2 .forest-grove-more {
   background:
     linear-gradient(180deg, rgba(255, 249, 202, 0.94), rgba(218, 235, 160, 0.9)),
     repeating-linear-gradient(90deg, rgba(58, 93, 40, 0.12) 0 1px, transparent 1px 8px);
-  border: 2px dashed rgba(45, 82, 40, 0.5);
+  border: 1px dashed rgba(45, 82, 40, 0.5);
   border-radius: 5px;
   color: #284332;
   cursor: pointer;
   display: grid;
-  flex: 0 0 102px;
-  height: 84px;
+  flex: 0 0 92px;
+  height: 78px;
   justify-items: center;
   line-height: 1;
   order: -1;
-  padding: 7px;
+  padding: 6px;
   text-align: center;
 }
 
@@ -8938,8 +8959,8 @@ body .forest-shell-v2 .forest-grove-pager {
   gap: 7px;
   grid-row: 2;
   grid-template-columns: minmax(74px, auto) minmax(0, 1fr) minmax(74px, auto);
-  min-height: 40px;
-  padding: 5px;
+  min-height: 44px;
+  padding: 6px;
 }
 
 body .forest-shell-v2 .forest-grove-pager[hidden] {
@@ -8961,14 +8982,14 @@ body .forest-shell-v2 .forest-page-button {
   color: #fff5bc;
   cursor: pointer;
   display: inline-flex;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   gap: 5px;
   justify-content: center;
   line-height: 1;
-  min-height: 30px;
-  min-width: 74px;
-  padding: 6px 9px;
+  min-height: 32px;
+  min-width: 80px;
+  padding: 7px 10px;
   text-shadow: 0 1px 0 rgba(12, 35, 22, 0.42);
 }
 
@@ -9014,14 +9035,14 @@ body .forest-shell-v2 .forest-page-status {
     inset 0 1px 0 rgba(255, 255, 255, 0.54);
   color: #274b32;
   display: inline-flex;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
   justify-content: center;
   justify-self: center;
-  min-height: 28px;
+  min-height: 30px;
   min-width: min(260px, 100%);
   overflow: hidden;
-  padding: 5px 10px;
+  padding: 6px 12px;
   text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -9047,7 +9068,7 @@ body .forest-detail-v2 {
   flex-direction: column;
   gap: 8px;
   overflow: auto;
-  padding: 8px;
+  padding: 9px;
   scrollbar-width: thin;
 }
 
@@ -9056,13 +9077,13 @@ body .forest-detail-v2 .forest-inspector-head {
   background:
     linear-gradient(180deg, rgba(255, 249, 221, 0.86), rgba(239, 247, 219, 0.82)),
     repeating-linear-gradient(90deg, rgba(49, 86, 44, 0.08) 0 2px, transparent 2px 12px);
-  border: 2px solid rgba(64, 112, 54, 0.18);
+  border: 1px solid rgba(64, 112, 54, 0.18);
   border-radius: 7px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 244, 0.68);
   display: grid;
-  gap: 7px;
-  grid-template-columns: 64px minmax(0, 1fr) 52px;
-  padding: 7px;
+  gap: 9px;
+  grid-template-columns: 64px minmax(0, 1fr) 58px;
+  padding: 8px;
 }
 
 body .forest-detail-v2 .forest-inspector-copy {
@@ -9071,7 +9092,7 @@ body .forest-detail-v2 .forest-inspector-copy {
 
 body .forest-detail-v2 .forest-inspector-plant {
   background: #fbfff4;
-  border: 2px solid rgba(94, 137, 62, 0.4);
+  border: 1px solid rgba(94, 137, 62, 0.4);
   border-radius: 6px;
   box-sizing: border-box;
   height: 62px !important;
@@ -9081,8 +9102,8 @@ body .forest-detail-v2 .forest-inspector-plant {
 
 body .forest-detail-v2 .forest-inspector-plot {
   bottom: 6px !important;
-  height: 11px !important;
-  left: 8px !important;
+  height: 12px !important;
+  left: 9px !important;
   width: 38px !important;
 }
 
@@ -9097,8 +9118,8 @@ body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
 
 body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
   bottom: 7px !important;
-  height: 45px !important;
-  width: 45px !important;
+  height: 44px !important;
+  width: 44px !important;
 }
 
 body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant::after {
@@ -9111,7 +9132,7 @@ body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant::after {
 body .forest-detail-v2 .forest-inspector-kicker,
 body .forest-detail-v2 .forest-detail-label {
   color: #3f7147;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -9132,8 +9153,8 @@ body .forest-detail-v2 .forest-inspector-kicker {
 body .forest-detail-v2 .forest-inspector-head h2 {
   color: #193524;
   display: -webkit-box;
-  font-size: 14px;
-  line-height: 1.16;
+  font-size: 15px;
+  line-height: 1.2;
   margin: 5px 0 0;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -9152,11 +9173,11 @@ body .forest-detail-v2 .forest-inspector-close {
   align-items: center;
   border-radius: 5px;
   display: inline-flex;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 900;
   justify-content: center;
-  min-height: 29px;
-  padding: 6px 7px;
+  min-height: 31px;
+  padding: 6px 8px;
   text-align: center;
   white-space: nowrap;
 }
@@ -9178,7 +9199,7 @@ body .forest-detail-v2 .forest-inspector-meta {
   border-radius: 7px;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
+  gap: 6px;
   margin-top: 0;
   padding: 6px;
 }
@@ -9191,7 +9212,7 @@ body .forest-detail-v2 .forest-inspector-meta span {
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
-  padding: 5px 6px;
+  padding: 5px 7px;
   white-space: nowrap;
 }
 
@@ -9202,12 +9223,12 @@ body .forest-detail-v2 .forest-growth-diary {
   margin: 0;
   min-height: 58px;
   overflow: visible;
-  padding: 9px 8px 8px;
+  padding: 8px 9px;
 }
 
 body .forest-detail-v2 .forest-growth-diary.is-single-step {
   justify-content: center;
-  min-height: 52px;
+  min-height: 54px;
 }
 
 body .forest-detail-v2 .forest-growth-rail {
@@ -9228,33 +9249,33 @@ body .forest-detail-v2 .forest-growth-step[data-growth-step="metadata"] i:not(.f
 }
 
 body .forest-detail-v2 .forest-growth-step .forest-growth-icon {
-  height: 30px !important;
-  width: 40px !important;
+  height: 34px !important;
+  width: 44px !important;
 }
 
 body .forest-detail-v2 .forest-growth-step.is-sapling-step .forest-growth-icon img {
-  height: 27px;
-  width: 27px;
+  height: 30px;
+  width: 30px;
 }
 
 body .forest-detail-v2 .forest-growth-step.is-tree-step .forest-growth-icon img {
-  height: 34px;
-  width: 34px;
+  height: 38px;
+  width: 38px;
 }
 
 body .forest-detail-v2 .forest-growth-step b {
-  font-size: 10px;
-  line-height: 1.08;
+  font-size: 11px;
+  line-height: 1.1;
 }
 
 body .forest-detail-v2 .forest-growth-step small {
-  font-size: 9px;
-  line-height: 1.08;
+  font-size: 10px;
+  line-height: 1.1;
 }
 
 body .forest-detail-v2 .forest-detail-grid {
   display: grid;
-  gap: 6px;
+  gap: 7px;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   margin-top: 0;
 }
@@ -9276,8 +9297,8 @@ body .forest-detail-v2 .forest-abstract {
 body .forest-detail-v2 .forest-detail-grid p,
 body .forest-detail-v2 .forest-abstract p {
   color: #2f4637;
-  font-size: 11.5px;
-  line-height: 1.42;
+  font-size: 12px;
+  line-height: 1.5;
   margin: 4px 0 0;
   overflow-wrap: anywhere;
 }
@@ -9306,7 +9327,7 @@ body .forest-empty-v2 {
 
 @media (max-width: 1180px) {
   body .forest-board-v2 {
-    grid-template-columns: minmax(0, 1fr) 318px;
+    grid-template-columns: minmax(0, 1fr) 320px;
     grid-template-rows: auto minmax(0, 1fr);
   }
 
@@ -9324,21 +9345,27 @@ body .forest-empty-v2 {
     overflow: hidden;
   }
 
+  body:has(.forest-shell-v2) .shell {
+    padding: 6px 0;
+  }
+
   body .forest-shell-v2 {
-    gap: 8px;
-    padding: 8px;
+    gap: 7px;
+    height: calc(100dvh - 12px);
+    padding: 6px;
+    width: calc(100vw - 12px);
   }
 
   body .forest-command-v2 {
-    gap: 8px;
+    gap: 7px;
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
-    padding: 12px;
+    padding: 10px;
   }
 
   body .forest-command-v2::before {
-    bottom: 12px;
-    top: 12px;
+    bottom: 10px;
+    top: 10px;
   }
 
   body .forest-controls-v2 {
@@ -9434,35 +9461,35 @@ body .forest-empty-v2 {
   }
 
   body .forest-shell-v2 .forest-filter span {
-    font-size: 11px;
+    font-size: 12px;
     max-width: 118px;
   }
 
   body .forest-map-v2 {
-    padding: 8px;
+    padding: 6px;
   }
 
   body .forest-map-bar-v2 {
-    min-height: 34px;
+    min-height: 31px;
   }
 
   body .forest-grid-v2 {
-    gap: 7px;
+    gap: 6px;
     grid-template-columns: 1fr;
-    padding: 7px;
+    padding: 6px;
   }
 
   body .forest-grove-v2,
   body .forest-grove-v2.is-canopy-grove {
     grid-column: auto;
-    min-height: var(--grove-min-height, 142px);
+    min-height: var(--grove-min-height, 128px);
   }
 
   body .forest-shell-v2 .forest-grove-trees,
   body .forest-shell-v2 .forest-grove-v2.is-canopy-grove .forest-grove-trees {
     --grove-tile-width: 64px;
-    min-height: 92px;
-    padding: 12px 5px 7px;
+    min-height: 88px;
+    padding: 9px 5px 6px;
   }
 
   body .forest-shell-v2 .forest-tile,
@@ -9483,14 +9510,14 @@ body .forest-empty-v2 {
   }
 
   body .forest-shell-v2 .forest-page-button {
-    font-size: 11px;
-    min-height: 28px;
-    min-width: 62px;
-    padding: 5px 7px;
+    font-size: 12px;
+    min-height: 30px;
+    min-width: 68px;
+    padding: 6px 8px;
   }
 
   body .forest-shell-v2 .forest-page-status {
-    font-size: 11px;
+    font-size: 12px;
     min-width: 0;
     padding-inline: 7px;
   }

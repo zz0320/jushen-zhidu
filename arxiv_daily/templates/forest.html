@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v23">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v26">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -37,7 +37,6 @@
 
     {% if tiles %}
       {% set forest_density = 'canopy' if tiles|length >= 28 else 'dense' if tiles|length >= 16 else 'open' %}
-      {% set grove_preview_limit = 12 %}
       <div class="forest-board-v2 forest-density-{{ forest_density }}" data-forest-experience>
         <aside class="forest-sidebar-v2" aria-label="森林筛选">
           <section class="forest-panel-v2">
@@ -117,9 +116,8 @@
                 </div>
                 <div class="forest-grove-trees">
                   {% for tile in grove.tiles %}
-                    {% set is_grove_overflow = loop.index > grove_preview_limit %}
                     <button
-                      class="forest-tile land-{{ tile.land }} tree-{{ tile.kind }} rarity-{{ tile.rarity }} growth-{{ tile.growth }} accent-{{ tile.accent }} {{ 'is-selected' if tile.index == 1 else '' }} {{ 'is-grove-overflow' if is_grove_overflow else '' }}"
+                      class="forest-tile land-{{ tile.land }} tree-{{ tile.kind }} rarity-{{ tile.rarity }} growth-{{ tile.growth }} accent-{{ tile.accent }} {{ 'is-selected' if tile.index == 1 else '' }}"
                       type="button"
                       style="--sway-delay: {{ tile.sway_delay }}ms; --plant-delay: {{ tile.plant_delay }}ms;"
                       data-forest-tile
@@ -127,7 +125,7 @@
                       data-filter-key="{{ tile.filter_key }}"
                       data-grove-key="{{ grove.key }}"
                       data-grove-rank="{{ loop.index }}"
-                      data-grove-overflow="{{ 'true' if is_grove_overflow else 'false' }}"
+                      data-grove-overflow="false"
                       data-plant-stage="{{ tile.plant_stage }}"
                       data-summarized="{{ 'true' if tile.summarized else 'false' }}"
                       data-high-relevance="{{ 'true' if tile.high_relevance else 'false' }}"
@@ -155,12 +153,6 @@
                       </span>
                     </button>
                   {% endfor %}
-                  {% if grove.count > grove_preview_limit %}
-                    <button class="forest-grove-more" type="button" data-forest-focus-grove="{{ grove.key }}" data-grove-more-count="{{ grove.count - grove_preview_limit }}">
-                      <strong>余 {{ grove.count - grove_preview_limit }}</strong>
-                      <span>分页查看</span>
-                    </button>
-                  {% endif %}
                 </div>
                 <div class="forest-grove-pager" data-grove-pager hidden>
                   <button class="forest-page-button is-prev" type="button" data-grove-page-prev aria-label="{{ grove.label }} 上一页">
