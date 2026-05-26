@@ -736,7 +736,6 @@
       plant: document.querySelector("[data-forest-detail-plant]"),
       sprite: document.querySelector("[data-forest-detail-sprite]"),
       growthDiary: document.querySelector("[data-forest-growth-diary]"),
-      growthSteps: Array.from(document.querySelectorAll("[data-growth-step]")),
       growthStatusBadge: document.querySelector("[data-forest-growth-status]"),
       growthStatusFill: document.querySelector("[data-forest-growth-fill]"),
       grownVisible: document.querySelector("[data-forest-grown-visible]"),
@@ -989,6 +988,73 @@
       return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-ref-sprites`;
     };
 
+    const growthSpritePath = (tile, step) => {
+      const prefix = step.plant_stage === "tree" ? "tree-" : "sapling-";
+      return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-ref-sprites`;
+    };
+
+    const fallbackGrowthSteps = (tile) => [
+      {
+        key: tile.growth || "metadata",
+        label: tile.growth_label || "树苗",
+        detail: tile.summary_status || "元数据",
+        rank: Number(tile.growth_rank || 0),
+        plant_stage: tile.plant_stage || "sapling",
+      },
+    ];
+
+    const normalizedGrowthSteps = (tile) => {
+      const steps =
+        Array.isArray(tile.growth_steps) && tile.growth_steps.length ? tile.growth_steps : fallbackGrowthSteps(tile);
+      return steps.map((step) => ({
+        key: step.key || "metadata",
+        label: step.label || "树苗",
+        detail: step.detail || "元数据",
+        rank: Number(step.rank || 0),
+        plant_stage: step.plant_stage === "tree" ? "tree" : "sapling",
+      }));
+    };
+
+    const renderGrowthDiary = (tile) => {
+      if (!nodes.growthDiary || !tile) return;
+      const steps = normalizedGrowthSteps(tile);
+      nodes.growthDiary.replaceChildren();
+      nodes.growthDiary.dataset.currentGrowth = tile.growth || "metadata";
+      nodes.growthDiary.dataset.stepCount = String(steps.length);
+      nodes.growthDiary.style.setProperty("--forest-growth-step-count", String(steps.length));
+      nodes.growthDiary.style.setProperty("--forest-growth-progress", steps.length > 1 ? "100%" : "0%");
+      nodes.growthDiary.classList.toggle("is-single-step", steps.length === 1);
+      nodes.growthDiary.setAttribute("aria-label", `论文成长进度：${tile.growth_label || "树苗"}`);
+
+      const rail = document.createElement("span");
+      rail.className = "forest-growth-rail";
+      rail.setAttribute("aria-hidden", "true");
+      nodes.growthDiary.append(rail);
+
+      steps.forEach((step, index) => {
+        const item = document.createElement("span");
+        item.className = `forest-growth-step is-complete ${index === steps.length - 1 ? "is-current" : ""} is-${step.plant_stage}-step`;
+        item.dataset.growthStep = step.key;
+        item.dataset.growthRank = String(step.rank);
+
+        const icon = document.createElement("i");
+        icon.className = "forest-growth-icon";
+        icon.setAttribute("aria-hidden", "true");
+        const image = document.createElement("img");
+        image.src = growthSpritePath(tile, step);
+        image.alt = "";
+        icon.append(image);
+
+        const label = document.createElement("b");
+        label.textContent = step.label;
+        const detail = document.createElement("small");
+        detail.textContent = step.detail;
+
+        item.append(icon, label, detail);
+        nodes.growthDiary.append(item);
+      });
+    };
+
     const renderDetails = (tile) => {
       if (!tile) {
         return;
@@ -1017,20 +1083,7 @@
       if (nodes.categories) nodes.categories.textContent = text(tile.categories_display || tile.categories, tile.primary_category || "-");
       if (nodes.status) nodes.status.textContent = tile.summary_status || "只有元数据";
       if (nodes.abstract) nodes.abstract.textContent = tile.abstract || "";
-      const growthRank = Number(tile.growth_rank || 0);
-      const clampedGrowthRank = Number.isFinite(growthRank) ? Math.max(0, Math.min(3, growthRank)) : 0;
-      if (nodes.growthDiary) {
-        nodes.growthDiary.dataset.currentGrowth = tile.growth || "metadata";
-        nodes.growthDiary.style.setProperty("--forest-growth-progress", `${(clampedGrowthRank / 3) * 100}%`);
-        nodes.growthDiary.setAttribute("aria-label", `论文成长进度：${tile.growth_label || "树苗"}`);
-      }
-      if (nodes.growthSteps.length) {
-        nodes.growthSteps.forEach((step) => {
-          const stepRank = Number(step.dataset.growthRank || 0);
-          step.classList.toggle("is-complete", stepRank <= clampedGrowthRank);
-          step.classList.toggle("is-current", step.dataset.growthStep === (tile.growth || "metadata"));
-        });
-      }
+      renderGrowthDiary(tile);
       if (nodes.sprite && tile.asset) {
         nodes.sprite.src = spritePath(tile);
       }

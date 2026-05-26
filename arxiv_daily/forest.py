@@ -69,6 +69,13 @@ FOREST_GROWTH: Dict[str, ForestGrowth] = {
     "full_text": ForestGrowth("full_text", "古树", 3),
 }
 
+GROWTH_STEP_DETAILS: Dict[str, Dict[str, object]] = {
+    "metadata": {"detail": "元数据", "plant_stage": "sapling"},
+    "translation": {"detail": "摘要翻译", "plant_stage": "sapling"},
+    "summary": {"detail": "单篇总结", "plant_stage": "tree"},
+    "full_text": {"detail": "全文总结", "plant_stage": "tree"},
+}
+
 LAND_VARIANTS = [
     "grass",
     "moss",
@@ -166,6 +173,36 @@ def classify_growth(
     return FOREST_GROWTH["metadata"]
 
 
+def forest_growth_steps(
+    arxiv_id: str,
+    translations_by_paper: Dict[str, PaperAbstractTranslation],
+    summaries_by_paper: Dict[str, PaperSummary],
+    full_text_summaries_by_paper: Dict[str, PaperFullTextSummary],
+) -> List[Dict[str, object]]:
+    keys = ["metadata"]
+    if arxiv_id in translations_by_paper:
+        keys.append("translation")
+    if arxiv_id in summaries_by_paper:
+        keys.append("summary")
+    if arxiv_id in full_text_summaries_by_paper:
+        keys.append("full_text")
+
+    steps: List[Dict[str, object]] = []
+    for key in keys:
+        growth = FOREST_GROWTH[key]
+        step = GROWTH_STEP_DETAILS[key]
+        steps.append(
+            {
+                "key": key,
+                "label": growth.label,
+                "detail": str(step["detail"]),
+                "rank": growth.rank,
+                "plant_stage": str(step["plant_stage"]),
+            }
+        )
+    return steps
+
+
 def build_forest_tile(
     paper: Paper,
     target_day: date,
@@ -178,6 +215,9 @@ def build_forest_tile(
     kind = classify_forest_kind(paper)
     rarity = classify_rarity(paper.relevance_score)
     growth = classify_growth(paper.arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper)
+    growth_steps = forest_growth_steps(
+        paper.arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper
+    )
     matched_keywords = [str(match.get("keyword")) for match in paper.matched_keywords if match.get("keyword")]
     status_parts = []
     if paper.arxiv_id in translations_by_paper:
@@ -213,6 +253,7 @@ def build_forest_tile(
         "growth": growth.key,
         "growth_label": growth.label,
         "growth_rank": growth.rank,
+        "growth_steps": growth_steps,
         "has_ai_summary": has_ai_summary,
         "plant_stage": "tree" if has_ai_summary else "sapling",
         "land": LAND_VARIANTS[seed % len(LAND_VARIANTS)],

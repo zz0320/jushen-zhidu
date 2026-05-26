@@ -4441,16 +4441,21 @@ body .forest-inspector-plant.is-full-text-plant::after {
 /* Growth diary pass: make the Forest-style processing stages visible per paper. */
 body .forest-growth-diary {
   --forest-growth-progress: 0%;
+  --forest-growth-step-count: 1;
   align-items: start;
   border-bottom: 2px solid rgba(198, 169, 109, 0.32);
   border-top: 2px solid rgba(198, 169, 109, 0.32);
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--forest-growth-step-count), minmax(0, 1fr));
   margin: 12px 0 14px;
   overflow: hidden;
   padding: 14px 4px 10px;
   position: relative;
+}
+
+body .forest-growth-diary.is-single-step .forest-growth-rail {
+  display: none;
 }
 
 body .forest-growth-diary::before {
@@ -4561,6 +4566,42 @@ body .forest-growth-step[data-growth-step="full_text"] i {
   height: 15px;
   margin-top: 11px;
   width: 6px;
+}
+
+body .forest-growth-step[data-growth-step] .forest-growth-icon {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: block;
+  height: 34px !important;
+  image-rendering: pixelated;
+  margin: 0 !important;
+  overflow: visible;
+  position: relative;
+  transform: none !important;
+  width: 44px !important;
+}
+
+body .forest-growth-step .forest-growth-icon img {
+  bottom: -2px;
+  filter: drop-shadow(0 3px 0 rgba(50, 69, 38, 0.18));
+  height: 36px;
+  image-rendering: pixelated;
+  left: 50%;
+  object-fit: contain;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 36px;
+}
+
+body .forest-growth-step.is-sapling-step .forest-growth-icon img {
+  height: 30px;
+  width: 30px;
+}
+
+body .forest-growth-step.is-tree-step .forest-growth-icon img {
+  height: 38px;
+  width: 38px;
 }
 
 body .forest-growth-step.is-complete {
@@ -9062,13 +9103,28 @@ body .forest-detail-v2 .forest-growth-step {
   gap: 3px;
 }
 
-body .forest-detail-v2 .forest-growth-step i {
+body .forest-detail-v2 .forest-growth-step i:not(.forest-growth-icon) {
   transform: scale(0.82);
   transform-origin: center bottom;
 }
 
-body .forest-detail-v2 .forest-growth-step[data-growth-step="metadata"] i {
+body .forest-detail-v2 .forest-growth-step[data-growth-step="metadata"] i:not(.forest-growth-icon) {
   transform: scale(0.72);
+}
+
+body .forest-detail-v2 .forest-growth-step .forest-growth-icon {
+  height: 34px !important;
+  width: 46px !important;
+}
+
+body .forest-detail-v2 .forest-growth-step.is-sapling-step .forest-growth-icon img {
+  height: 31px;
+  width: 31px;
+}
+
+body .forest-detail-v2 .forest-growth-step.is-tree-step .forest-growth-icon img {
+  height: 39px;
+  width: 39px;
 }
 
 body .forest-detail-v2 .forest-growth-step b {

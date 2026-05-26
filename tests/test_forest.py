@@ -127,8 +127,10 @@ def test_forest_tile_only_grows_after_ai_summary():
     assert translated["growth"] == "translation"
     assert translated["summarized"] is False
     assert translated["plant_stage"] == "sapling"
+    assert [step["key"] for step in translated["growth_steps"]] == ["metadata", "translation"]
     assert summarized["summarized"] is True
     assert summarized["plant_stage"] == "tree"
+    assert [step["key"] for step in summarized["growth_steps"]] == ["metadata", "summary"]
 
 
 def test_forest_scene_context_is_stable_for_calendar_day():
@@ -171,6 +173,7 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
     assert payload["filters"][0]["count"] == 2
     assert payload["tiles"][0]["tree_label"] == "果树"
     assert payload["tiles"][0]["growth_label"] == "大树"
+    assert [step["key"] for step in payload["tiles"][0]["growth_steps"]] == ["metadata", "summary"]
     assert len(vla_payload["tiles"]) == 1
     assert len(summarized_payload["tiles"]) == 1
     assert summarized_payload["tiles"][0]["arxiv_id"] == "2605.00001v1"
@@ -230,6 +233,7 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert 'data-forest-season="spring"' in response.text
     assert "春林" in response.text
     assert 'data-growth-step="full_text"' in response.text
+    assert "forest-growth-icon" in response.text
     assert "论文成长进度" in response.text
     assert "is-full-text-plant" in response.text
     assert "已成长" in response.text
