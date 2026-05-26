@@ -261,8 +261,8 @@
 
     forms.forEach((form) => {
       const button = form.querySelector("button[type='submit']");
-      const jobUrl = form.dataset.summaryJobUrl;
-      if (!button || !jobUrl) {
+      const initialJobUrl = form.dataset.summaryJobUrl;
+      if (!button || !initialJobUrl) {
         return;
       }
 
@@ -288,7 +288,7 @@
         });
       };
 
-      const poll = async (jobId) => {
+      const poll = async (jobId, trackedJobUrl = form.dataset.summaryJobUrl || initialJobUrl) => {
         const response = await fetch(`/summary-jobs/${jobId}`, { headers: { Accept: "application/json" } });
         if (!response.ok) {
           throw new Error("无法读取生成进度。");
@@ -297,7 +297,7 @@
         applySummaryProgress(job);
 
         if (job.status === "completed") {
-          clearStoredSummaryJob(jobUrl, jobId);
+          clearStoredSummaryJob(trackedJobUrl, jobId);
           activeSummaryJobId = "";
           window.setTimeout(() => {
             navigateWithMessage(window.location.href, "");
@@ -306,7 +306,7 @@
         }
 
         if (job.status === "failed" || job.status === "not_found") {
-          clearStoredSummaryJob(jobUrl, jobId);
+          clearStoredSummaryJob(trackedJobUrl, jobId);
           activeSummaryJobId = "";
           applySummaryProgress({
             ...job,
@@ -316,8 +316,8 @@
           return;
         }
 
-        storeSummaryJob(jobUrl, jobId, job);
-        window.setTimeout(() => poll(jobId).catch(handleError), 850);
+        storeSummaryJob(trackedJobUrl, jobId, job);
+        window.setTimeout(() => poll(jobId, trackedJobUrl).catch(handleError), 850);
       };
 
       form.addEventListener("submit", async (event) => {
@@ -331,6 +331,7 @@
         });
 
         try {
+          const jobUrl = form.dataset.summaryJobUrl || initialJobUrl;
           const response = await fetch(jobUrl, {
             method: "POST",
             body: data,
@@ -352,7 +353,7 @@
         }
       });
 
-      const storedJob = readStoredSummaryJob(jobUrl);
+      const storedJob = readStoredSummaryJob(initialJobUrl);
       if (storedJob && storedJob.jobId) {
         activeSummaryJobId = storedJob.jobId;
         applySummaryProgress({
@@ -361,7 +362,7 @@
           message: "页面已重新打开，正在恢复智能生成进度。",
           percent: storedJob.percent || 2,
         });
-        poll(activeSummaryJobId).catch(handleError);
+        poll(activeSummaryJobId, initialJobUrl).catch(handleError);
       }
     });
   };
@@ -735,6 +736,13 @@
       abstract: document.querySelector("[data-forest-detail-abstract]"),
       plant: document.querySelector("[data-forest-detail-plant]"),
       sprite: document.querySelector("[data-forest-detail-sprite]"),
+      aiForm: document.querySelector("[data-forest-detail-ai-form]"),
+      aiForce: document.querySelector("[data-forest-detail-ai-force]"),
+      aiSubmit: document.querySelector("[data-forest-detail-ai-submit]"),
+      aiStatus: document.querySelector("[data-forest-detail-ai-status]"),
+      translationLink: document.querySelector("[data-forest-detail-translation-link]"),
+      summaryLink: document.querySelector("[data-forest-detail-summary-link]"),
+      fullLink: document.querySelector("[data-forest-detail-full-link]"),
       growthDiary: document.querySelector("[data-forest-growth-diary]"),
       growthStatusBadge: document.querySelector("[data-forest-growth-status]"),
       growthStatusFill: document.querySelector("[data-forest-growth-fill]"),
@@ -1114,6 +1122,31 @@
       return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-plot-saplings`;
     };
 
+    const paperPath = (tile, hash = "") => `${tile.detail_url || `/papers/${tile.arxiv_id}`}${hash}`;
+
+    const hasInsight = (tile, key) => {
+      const status = tile?.summary_status || "";
+      if (key === "translation") {
+        return status.includes("摘要翻译") || ["translation", "summary", "full_text"].includes(tile?.growth);
+      }
+      if (key === "summary") {
+        return status.includes("单篇总结") || ["summary", "full_text"].includes(tile?.growth);
+      }
+      if (key === "full_text") {
+        return status.includes("全文总结") || tile?.growth === "full_text";
+      }
+      return false;
+    };
+
+    const updateInsightLink = (link, tile, key, hash) => {
+      if (!link) return;
+      const ready = hasInsight(tile, key);
+      link.href = paperPath(tile, hash);
+      link.classList.toggle("is-ready", ready);
+      link.classList.toggle("is-pending", !ready);
+      link.setAttribute("aria-label", `${link.textContent.trim()}${ready ? "已生成" : "待生成"}`);
+    };
+
     const fallbackGrowthSteps = (tile) => {
       const steps = [
         {
@@ -1220,6 +1253,19 @@
       if (nodes.sprite && tile.asset) {
         nodes.sprite.src = spritePath(tile);
       }
+      if (nodes.aiStatus) nodes.aiStatus.textContent = tile.summary_status || "只有元数据";
+      if (nodes.aiForm && tile.arxiv_id) {
+        const refresh = tile.growth === "full_text";
+        nodes.aiForm.action = `/papers/${tile.arxiv_id}/summarize-all`;
+        nodes.aiForm.dataset.summaryJobUrl = `/summary-jobs/papers/${tile.arxiv_id}/all`;
+        nodes.aiForm.dataset.runningLabel = refresh ? "刷新中" : "生成中";
+        nodes.aiForm.dataset.completedLabel = refresh ? "已刷新" : "已生成";
+        if (nodes.aiForce) nodes.aiForce.value = refresh ? "true" : "false";
+        if (nodes.aiSubmit) nodes.aiSubmit.textContent = refresh ? "刷新三项" : "生成三项";
+      }
+      updateInsightLink(nodes.translationLink, tile, "translation", "#abstract-translation");
+      updateInsightLink(nodes.summaryLink, tile, "summary", "#abstract-summary");
+      updateInsightLink(nodes.fullLink, tile, "full_text", "#full-text-summary");
       if (nodes.plant) {
         const plantClasses = [
           "forest-inspector-plant",

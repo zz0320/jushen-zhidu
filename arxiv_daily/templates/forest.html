@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v33">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260526-forest-v34">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -178,12 +178,27 @@
             <div class="forest-inspector-copy">
               <span class="forest-inspector-kicker" data-forest-detail-kind>{{ first_tile.kind_label }}</span>
               <h2 data-forest-detail-title>{{ first_tile.title|clean_latex }}</h2>
-            </div>
-            <div class="forest-inspector-actions">
-              <a class="button compact-button" data-forest-detail-paper href="{{ first_tile.detail_url }}">阅读</a>
               <button class="forest-inspector-close" type="button" data-forest-detail-close aria-label="收起论文详情">收起</button>
             </div>
           </div>
+          <section class="forest-inspector-actions" aria-label="论文操作">
+            <a class="button compact-button forest-read-action" data-forest-detail-paper href="{{ first_tile.detail_url }}">阅读论文</a>
+            <div class="forest-inspector-ai" aria-label="智能功能">
+              <div class="forest-ai-head">
+                <span>智能阅读包</span>
+                <small data-forest-detail-ai-status>{{ first_tile.summary_status }}</small>
+              </div>
+              <form method="post" action="/papers/{{ first_tile.arxiv_id }}/summarize-all" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ first_tile.arxiv_id }}/all" data-running-label="{{ '刷新中' if first_tile.growth == 'full_text' else '生成中' }}" data-completed-label="{{ '已刷新' if first_tile.growth == 'full_text' else '已生成' }}" data-forest-detail-ai-form>
+                <input type="hidden" name="force" value="{{ 'true' if first_tile.growth == 'full_text' else 'false' }}" data-forest-detail-ai-force>
+                <button class="forest-ai-submit" type="submit" data-forest-detail-ai-submit>{{ "刷新三项" if first_tile.growth == "full_text" else "生成三项" }}</button>
+              </form>
+              <div class="forest-ai-links" aria-label="智能结果">
+                <a class="forest-ai-chip {{ 'is-ready' if first_tile.growth in ['translation', 'summary', 'full_text'] else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#abstract-translation" data-forest-detail-translation-link>译文</a>
+                <a class="forest-ai-chip {{ 'is-ready' if first_tile.growth in ['summary', 'full_text'] else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#abstract-summary" data-forest-detail-summary-link>摘要</a>
+                <a class="forest-ai-chip {{ 'is-ready' if first_tile.growth == 'full_text' else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#full-text-summary" data-forest-detail-full-link>全文</a>
+              </div>
+            </div>
+          </section>
           <div class="forest-inspector-meta">
             <span data-forest-detail-score>相关性 {{ first_tile.score_display }}</span>
             <span data-forest-detail-rarity>{{ first_tile.rarity_label }}</span>
