@@ -9837,3 +9837,62 @@ body .forest-detail-v2 .forest-growth-step.is-sapling-step .forest-growth-icon i
     width: 38px !important;
   }
 }
+
+/* Mature trees should read as a grown version of the same plot, not as a full-card sticker. */
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"].is-selected .forest-pixel-tree {
+  --asset-size: 58px;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"].is-selected .forest-pixel-tree {
+  filter:
+    drop-shadow(0 2px 0 rgba(27, 57, 33, 0.28))
+    brightness(1.04) !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-tile-ground::before {
+  height: 56px !important;
+  width: 82px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .tree-shadow {
+  bottom: 20px !important;
+  height: 4px !important;
+  opacity: 0.58 !important;
+  width: 24px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 14px !important;
+  height: 48px !important;
+  width: 48px !important;
+}
+
+body .forest-detail-v2 .forest-growth-step.is-tree-step .forest-growth-icon img {
+  height: 30px !important;
+  width: 30px !important;
+}
+
+@media (max-width: 900px) {
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:hover .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:focus-visible .forest-pixel-tree,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"].is-selected .forest-pixel-tree {
+    --asset-size: 46px;
+    bottom: 20px !important;
+  }
+
+  body .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+  body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+    bottom: 13px !important;
+    height: 40px !important;
+    width: 40px !important;
+  }
+}
