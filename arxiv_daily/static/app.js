@@ -1192,6 +1192,11 @@
       nodes.growthDiary.classList.toggle("is-single-step", steps.length === 1);
       nodes.growthDiary.setAttribute("aria-label", `论文成长进度：${growthStateLabel(tile)}`);
 
+      const label = document.createElement("span");
+      label.className = "forest-growth-label";
+      label.textContent = "成长";
+      nodes.growthDiary.append(label);
+
       const rail = document.createElement("span");
       rail.className = "forest-growth-rail";
       rail.setAttribute("aria-hidden", "true");
@@ -1211,12 +1216,12 @@
         image.alt = "";
         icon.append(image);
 
-        const label = document.createElement("b");
-        label.textContent = step.label;
+        const stepLabel = document.createElement("b");
+        stepLabel.textContent = step.label;
         const detail = document.createElement("small");
         detail.textContent = step.detail;
 
-        item.append(icon, label, detail);
+        item.append(icon, stepLabel, detail);
         nodes.growthDiary.append(item);
       });
     };

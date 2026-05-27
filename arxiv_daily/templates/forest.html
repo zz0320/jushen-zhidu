@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260527-forest-v38">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260527-forest-v40">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -199,25 +199,26 @@
               </div>
             </div>
           </section>
+          {% set first_growth_steps = first_tile.growth_steps %}
           <div class="forest-inspector-meta">
             <span data-forest-detail-score>相关性 {{ first_tile.score_display }}</span>
             <span data-forest-detail-rarity>{{ first_tile.rarity_label }}</span>
             <span data-forest-detail-growth>{{ "已成长" if first_tile.summarized else "树苗" }}</span>
             <span data-forest-detail-category>{{ first_tile.primary_category }}</span>
-          </div>
-          {% set first_growth_steps = first_tile.growth_steps %}
-          <div class="forest-growth-diary {{ 'is-single-step' if first_growth_steps|length == 1 else '' }}" data-forest-growth-diary data-current-growth="{{ first_tile.growth }}" data-step-count="{{ first_growth_steps|length }}" style="--forest-growth-step-count: {{ first_growth_steps|length }}; --forest-growth-progress: {{ 100 if first_growth_steps|length > 1 else 0 }}%;" aria-label="论文成长进度：{{ '已成长' if first_tile.summarized else '树苗' }}">
-            <span class="forest-growth-rail" aria-hidden="true"></span>
-            {% for step in first_growth_steps %}
-              <span class="forest-growth-step is-complete {{ 'is-current' if loop.last else '' }} is-{{ step.plant_stage }}-step" data-growth-step="{{ step.key }}" data-growth-rank="{{ step.rank }}">
-                <i class="forest-growth-icon" aria-hidden="true">
-                  {% set step_sprite_prefix = 'sapling-' if step.plant_stage == 'sapling' else 'tree-' %}
-                  <img src="{{ url_for('static', path='/forest/generated/' ~ step_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-plot-saplings" alt="">
-                </i>
-                <b>{{ step.label }}</b>
-                <small>{{ step.detail }}</small>
-              </span>
-            {% endfor %}
+            <span class="forest-growth-diary {{ 'is-single-step' if first_growth_steps|length == 1 else '' }}" data-forest-growth-diary data-current-growth="{{ first_tile.growth }}" data-step-count="{{ first_growth_steps|length }}" style="--forest-growth-step-count: {{ first_growth_steps|length }}; --forest-growth-progress: {{ 100 if first_growth_steps|length > 1 else 0 }}%;" aria-label="论文成长进度：{{ '已成长' if first_tile.summarized else '树苗' }}">
+              <span class="forest-growth-label">成长</span>
+              <span class="forest-growth-rail" aria-hidden="true"></span>
+              {% for step in first_growth_steps %}
+                <span class="forest-growth-step is-complete {{ 'is-current' if loop.last else '' }} is-{{ step.plant_stage }}-step" data-growth-step="{{ step.key }}" data-growth-rank="{{ step.rank }}">
+                  <i class="forest-growth-icon" aria-hidden="true">
+                    {% set step_sprite_prefix = 'sapling-' if step.plant_stage == 'sapling' else 'tree-' %}
+                    <img src="{{ url_for('static', path='/forest/generated/' ~ step_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260526-plot-saplings" alt="">
+                  </i>
+                  <b>{{ step.label }}</b>
+                  <small>{{ step.detail }}</small>
+                </span>
+              {% endfor %}
+            </span>
           </div>
           <div class="forest-detail-grid">
             <section>
