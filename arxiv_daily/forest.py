@@ -7,14 +7,17 @@ from datetime import date
 from typing import Dict, Iterable, List, Optional, Sequence
 
 from .models import Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary
+from .taxonomy import EMBODIED_TOPICS
 
 
 @dataclass(frozen=True)
 class ForestKind:
     key: str
     label: str
+    label_zh: str
     tree_label: str
     filter_key: str
+    asset_key: str
 
 
 @dataclass(frozen=True)
@@ -31,29 +34,35 @@ class ForestGrowth:
 
 
 FOREST_KINDS: Dict[str, ForestKind] = {
-    "vla": ForestKind("vla", "VLA", "果树", "vla"),
-    "world_model": ForestKind("world_model", "World Model", "水晶树", "world_model"),
-    "dataset": ForestKind("dataset", "Dataset / Benchmark", "石碑树", "dataset"),
-    "robotics": ForestKind("robotics", "Robotics", "机械松树", "robotics"),
-    "embodied_ai": ForestKind("embodied_ai", "Embodied AI", "银杏树", "embodied_ai"),
-    "manipulation": ForestKind("manipulation", "Manipulation", "工具树", "manipulation"),
-    "navigation": ForestKind("navigation", "Navigation", "路标树", "navigation"),
-    "simulation": ForestKind("simulation", "Simulation", "仙人掌树", "simulation"),
-    "other": ForestKind("other", "Other", "普通树", "other"),
+    topic.key: ForestKind(topic.key, topic.label, topic.label_zh, topic.tree_label, topic.key, topic.asset_key)
+    for topic in EMBODIED_TOPICS
 }
+FOREST_KINDS["other"] = ForestKind("other", "Other", "其他", "普通树", "other", "other")
 
-DATASET_NEEDLES = ["dataset", "benchmark", "benchmarks", "evaluation suite"]
+KIND_RULES = [(topic.key, list(topic.include)) for topic in EMBODIED_TOPICS]
+KIND_RULE_MAP = {key: needles for key, needles in KIND_RULES}
 
-KIND_RULES = [
-    ("vla", ["vision-language-action", "vision language action", "vla"]),
-    ("world_model", ["world model", "world models"]),
-    ("manipulation", ["manipulation", "manipulate", "manipulator", "dexterous", "grasping"]),
-    ("navigation", ["navigation", "navigate", "nav", "vln", "path planning"]),
-    ("simulation", ["simulation", "sim-to-real", "simulator", "synthetic data", "digital twin"]),
-    ("embodied_ai", ["embodied ai", "embodied intelligence", "embodied agent", "embodiment"]),
-    ("robotics", ["robotics", "robotic", "robot", "robots"]),
-    ("dataset", DATASET_NEEDLES),
+CLASSIFICATION_ORDER = [
+    "world_model",
+    "foundation",
+    "manipulation",
+    "navigation_mobility",
+    "simulation_data_loop",
+    "reasoning_planning",
+    "learning_control",
+    "perception_spatial",
+    "hardware_teleop",
+    "evaluation_benchmark",
 ]
+
+FILTER_ALIASES = {
+    "vla": "foundation",
+    "dataset": "evaluation_benchmark",
+    "robotics": "learning_control",
+    "embodied_ai": "perception_spatial",
+    "navigation": "navigation_mobility",
+    "simulation": "simulation_data_loop",
+}
 
 FOREST_RARITIES: Dict[str, ForestRarity] = {
     "common": ForestRarity("common", "普通"),
@@ -93,15 +102,16 @@ LAND_VARIANTS = [
 ]
 
 ASSET_VARIANT_COUNTS = {
-    "vla": 3,
-    "world_model": 3,
-    "dataset": 3,
-    "robotics": 3,
-    "embodied_ai": 3,
-    "manipulation": 3,
-    "navigation": 3,
-    "simulation": 3,
-    "other": 3,
+    "vla": 6,
+    "world_model": 6,
+    "dataset": 6,
+    "robotics": 6,
+    "embodied_ai": 6,
+    "manipulation": 6,
+    "navigation": 6,
+    "simulation": 6,
+    "hardware": 6,
+    "other": 6,
 }
 
 
@@ -125,16 +135,10 @@ def _paper_signal_text(paper: Paper) -> str:
 
 def classify_forest_kind(paper: Paper) -> ForestKind:
     text = _paper_text(paper)
-    signal_text = _paper_signal_text(paper)
-    if any(_matches_topic(signal_text, needle) for needle in DATASET_NEEDLES):
-        return FOREST_KINDS["dataset"]
-    for key, needles in KIND_RULES:
-        if key == "dataset":
-            continue
+    for key in CLASSIFICATION_ORDER:
+        needles = KIND_RULE_MAP.get(key, [])
         if any(_matches_topic(text, needle) for needle in needles):
             return FOREST_KINDS[key]
-    if any(_matches_topic(text, needle) for needle in DATASET_NEEDLES):
-        return FOREST_KINDS["dataset"]
     return FOREST_KINDS["other"]
 
 
@@ -248,8 +252,10 @@ def build_forest_tile(
         "categories": paper.categories,
         "categories_display": ", ".join(paper.categories),
         "kind": kind.key,
-        "asset": forest_asset_key(kind.key, seed),
+        "asset": forest_asset_key(kind.asset_key, seed),
+        "visual_kind": kind.asset_key,
         "kind_label": kind.label,
+        "kind_label_zh": kind.label_zh,
         "tree_label": kind.tree_label,
         "filter_key": kind.filter_key,
         "rarity": rarity.key,
@@ -359,6 +365,7 @@ def forest_groves(tiles: Sequence[Dict[str, object]]) -> List[Dict[str, object]]
         {
             "key": kind.key,
             "label": kind.label,
+            "label_zh": kind.label_zh,
             "tree_label": kind.tree_label,
             "tiles": grouped[kind.key],
             "count": len(grouped[kind.key]),
@@ -382,8 +389,8 @@ def _filter_count(tiles: Optional[Sequence[Dict[str, object]]], key: str) -> Opt
 
 
 def forest_topic_filters(tiles: Optional[Sequence[Dict[str, object]]] = None) -> List[Dict[str, object]]:
-    items = [{"key": "all", "label": "全部主题"}]
-    items.extend({"key": kind.filter_key, "label": kind.label} for kind in FOREST_KINDS.values())
+    items = [{"key": "all", "label": "全部主题", "label_zh": ""}]
+    items.extend({"key": kind.filter_key, "label": kind.label, "label_zh": kind.label_zh} for kind in FOREST_KINDS.values())
     return [
         {
             **item,
@@ -417,7 +424,7 @@ def forest_filters(tiles: Optional[Sequence[Dict[str, object]]] = None) -> List[
 
 
 def filter_tile(tile: Dict[str, object], filter_key: Optional[str]) -> bool:
-    key = filter_key or "all"
+    key = FILTER_ALIASES.get(filter_key or "all", filter_key or "all")
     if key == "all":
         return True
     if key == "summarized":

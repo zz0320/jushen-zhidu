@@ -16,6 +16,7 @@ KINDS = [
     "manipulation",
     "navigation",
     "simulation",
+    "hardware",
     "other",
 ]
 
@@ -32,7 +33,7 @@ def _alpha_bbox(image: Image.Image) -> tuple[int, int, int, int]:
 def test_forest_tree_sprites_are_animated_high_pixel_assets():
     for kind in KINDS:
         for stage in ["tree", "sapling"]:
-            for variant in [0, 1, 2]:
+            for variant in range(6):
                 path = SPRITE_DIR / f"{stage}-{kind}-{variant}.png"
                 with Image.open(path) as image:
                     assert image.size == (288, 288)
@@ -48,7 +49,8 @@ def test_forest_tree_sprites_are_animated_high_pixel_assets():
                     assert top >= 3
 
                     if stage == "tree":
-                        assert right - left >= 150
+                        min_tree_width = 120 if kind == "hardware" else 150
+                        assert right - left >= min_tree_width
                         assert bottom - top >= 190
                     else:
                         assert right - left >= 135

@@ -5,11 +5,12 @@ import math
 import random
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageEnhance
+from PIL import Image, ImageDraw, ImageEnhance, ImageOps
 
 
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE_PATH = ROOT / "arxiv_daily" / "static" / "forest" / "reference" / "forest-sprite-reference-v2.png"
+REFERENCE_V3_PATH = ROOT / "arxiv_daily" / "static" / "forest" / "reference" / "forest-sprite-reference-v3.png"
 GENERATED_DIR = ROOT / "arxiv_daily" / "static" / "forest" / "generated"
 TERRAIN_DIR = ROOT / "arxiv_daily" / "static" / "forest" / "terrain"
 
@@ -19,6 +20,7 @@ TERRAIN_SCALE = 3
 SPRITE_FRAMES = 4
 SPRITE_DURATIONS = [180, 220, 180, 240]
 REFERENCE_BG = (246, 235, 218)
+ASSET_VARIANTS = 6
 
 KIND_ORDER = [
     "vla",
@@ -29,6 +31,7 @@ KIND_ORDER = [
     "manipulation",
     "navigation",
     "simulation",
+    "hardware",
     "other",
 ]
 
@@ -74,6 +77,26 @@ REFERENCE_BOXES = {
         "tree": (1020, 685, 296, 315),
         "sapling": [(1376, 708, 103, 113), (1376, 831, 104, 112), (1020, 685, 296, 315)],
     },
+}
+
+
+def sheet_cell(col: int, row: int) -> tuple[int, int, int, int]:
+    return (col * 256, row * 341, 256, 341 if row < 2 else 342)
+
+
+# The v3 reference is an image_gen sheet with two fresh adult silhouettes per
+# topic. These crops are deliberately cell-based so future reference sheets can
+# keep the same readable 3x6 layout without recalibrating every sprite by hand.
+REFERENCE_V3_BOXES = {
+    "vla": [sheet_cell(0, 0), sheet_cell(1, 0)],
+    "world_model": [sheet_cell(2, 0), sheet_cell(3, 0)],
+    "dataset": [sheet_cell(4, 0), sheet_cell(5, 0)],
+    "robotics": [sheet_cell(0, 1), sheet_cell(1, 1)],
+    "embodied_ai": [sheet_cell(2, 1), sheet_cell(3, 1)],
+    "manipulation": [sheet_cell(4, 1), sheet_cell(5, 1)],
+    "navigation": [sheet_cell(0, 2), sheet_cell(1, 2)],
+    "simulation": [sheet_cell(2, 2), sheet_cell(3, 2)],
+    "hardware": [sheet_cell(4, 2), sheet_cell(5, 2)],
 }
 
 TERRAIN_BASES = {
@@ -129,11 +152,14 @@ def distance_to_bg(red: int, green: int, blue: int) -> float:
     )
 
 
-def remove_reference_background(image: Image.Image) -> Image.Image:
+def remove_reference_background(
+    image: Image.Image,
+    low: int = 24,
+    high: int = 58,
+    remove_edge_components: bool = False,
+) -> Image.Image:
     rgba = image.convert("RGBA")
     pixels = rgba.load()
-    low = 24
-    high = 58
     for y in range(rgba.height):
         for x in range(rgba.width):
             red, green, blue, alpha = pixels[x, y]
@@ -143,19 +169,27 @@ def remove_reference_background(image: Image.Image) -> Image.Image:
             elif distance < high:
                 next_alpha = int(alpha * ((distance - low) / (high - low)))
                 pixels[x, y] = (red, green, blue, next_alpha)
+    if remove_edge_components:
+        rgba = drop_tiny_alpha_components(rgba, remove_edge_components=True)
+
     bbox = rgba.getchannel("A").getbbox()
     if bbox is None:
         return rgba
     return drop_tiny_alpha_components(rgba.crop(bbox))
 
 
-def drop_tiny_alpha_components(image: Image.Image, min_area: int = 520) -> Image.Image:
+def drop_tiny_alpha_components(
+    image: Image.Image,
+    min_area: int = 520,
+    remove_edge_components: bool = False,
+    edge_margin: int = 7,
+) -> Image.Image:
     """Remove thin detached motion marks left by the reference sheet crop."""
     alpha = image.getchannel("A")
     alpha_pixels = alpha.load()
     width, height = image.size
     visited: set[tuple[int, int]] = set()
-    remove: list[tuple[int, int]] = []
+    components: list[tuple[list[tuple[int, int]], int, bool]] = []
 
     for y in range(height):
         for x in range(width):
@@ -174,8 +208,28 @@ def drop_tiny_alpha_components(image: Image.Image, min_area: int = 520) -> Image
                         if alpha_pixels[nx, ny] > 24:
                             visited.add((nx, ny))
                             stack.append((nx, ny))
-            if len(component) < min_area:
-                remove.extend(component)
+            xs = [point[0] for point in component]
+            ys = [point[1] for point in component]
+            touches_edge = (
+                min(xs) <= edge_margin
+                or max(xs) >= width - edge_margin - 1
+                or min(ys) <= edge_margin
+                or max(ys) >= height - edge_margin - 1
+            )
+            components.append((component, len(component), touches_edge))
+
+    if not components:
+        return image
+
+    largest_area = max(area for _, area, _ in components)
+    edge_area_limit = max(min_area * 4, int(largest_area * 0.38))
+    remove: list[tuple[int, int]] = []
+    for component, area, touches_edge in components:
+        if area < min_area:
+            remove.extend(component)
+            continue
+        if remove_edge_components and touches_edge and area < edge_area_limit:
+            remove.extend(component)
 
     if not remove:
         return image
@@ -206,6 +260,49 @@ def build_reference_sprite(sheet: Image.Image, box: tuple[int, int, int, int], s
     crop = sheet.crop(expanded_box(box, 12, sheet))
     transparent = remove_reference_background(crop)
     return fit_sprite(transparent, stage)
+
+
+def build_v3_sprite(sheet: Image.Image, box: tuple[int, int, int, int], stage: str) -> Image.Image:
+    x, y, width, height = box
+    crop = sheet.crop((x, y, x + width, y + height))
+    transparent = remove_reference_background(crop, low=30, high=92, remove_edge_components=True)
+    return fit_sprite(transparent, stage)
+
+
+def refit_sprite(source: Image.Image, stage: str) -> Image.Image:
+    bbox = source.getchannel("A").getbbox()
+    if bbox is None:
+        return source
+    return fit_sprite(source.crop(bbox), stage)
+
+
+def mutate_tree_variant(base: Image.Image, variant: int, kind: str) -> Image.Image:
+    if variant == 0:
+        return base
+
+    image = base
+    bbox = image.getchannel("A").getbbox()
+    if bbox is None:
+        return image
+
+    sprite = image.crop(bbox)
+    if variant in {3, 5}:
+        sprite = ImageOps.mirror(sprite)
+
+    scale_x = {1: 1.0, 2: 1.0, 3: 0.93, 4: 1.07, 5: 0.98}.get(variant, 1.0)
+    scale_y = {3: 1.04, 4: 0.96, 5: 1.02}.get(variant, 1.0)
+    width = max(1, round(sprite.width * scale_x))
+    height = max(1, round(sprite.height * scale_y))
+    sprite = sprite.resize((width, height), Image.Resampling.NEAREST)
+
+    alpha = sprite.getchannel("A")
+    rgb = sprite.convert("RGB")
+    color_boost = 1.0 + (0.03 if variant in {2, 4} else -0.02 if variant == 5 else 0)
+    bright_boost = 1.0 + (0.04 if variant in {1, 4} else -0.03 if variant == 3 else 0)
+    rgb = ImageEnhance.Color(rgb).enhance(color_boost)
+    rgb = ImageEnhance.Brightness(rgb).enhance(bright_boost)
+    sprite = Image.merge("RGBA", (*rgb.split(), alpha))
+    return refit_sprite(sprite, "tree")
 
 
 def shift_frame(image: Image.Image, frame: int, stage: str) -> Image.Image:
@@ -278,7 +375,8 @@ def draw_sapling_sprite(kind: str, variant: int) -> Image.Image:
     rng = random.Random(f"sapling-v4-{kind}-{variant}")
     canvas = Image.new("RGBA", (96, 96), (0, 0, 0, 0))
     draw = ImageDraw.Draw(canvas)
-    lean = variant - 1
+    lean = (variant % 3) - 1
+    style = variant // 3
     base_x = 48 + lean
     rect(draw, 29, 84, 38, 3, "#263b28")
     rect(draw, 34, 82, 28, 3, "#6d4a2f")
@@ -349,11 +447,27 @@ def draw_sapling_sprite(kind: str, variant: int) -> Image.Image:
             rect(draw, x, y, 3, 3, "#75e7ff")
         rect(draw, 68, 36, 7, 7, "#153d49")
         rect(draw, 70, 38, 3, 3, "#8ef7ff")
+    elif kind == "hardware":
+        draw_stem(draw, [(base_x, 84), (base_x, 64), (base_x - 2, 45), (base_x, 27)], 5)
+        rect(draw, base_x - 9, 31, 18, 14, "#24393a")
+        rect(draw, base_x - 6, 34, 12, 7, "#5ed4ff")
+        draw.line((base_x - 4, 47, 26, 58), fill="#3c3f38", width=3)
+        draw.line((base_x + 4, 48, 70, 58), fill="#3c3f38", width=3)
+        for x, y in [(21, 55), (68, 55), (35, 25), (61, 24)]:
+            draw.ellipse((x - 4, y - 4, x + 5, y + 5), fill="#26323b")
+            draw.ellipse((x - 2, y - 2, x + 3, y + 3), fill="#b9edf5")
+        if style:
+            draw.line((base_x, 29, base_x - 12, 16), fill="#313b36", width=2)
+            draw.line((base_x, 29, base_x + 12, 15), fill="#313b36", width=2)
+            rect(draw, base_x - 14, 13, 5, 5, "#8df4ff")
+            rect(draw, base_x + 10, 12, 5, 5, "#8df4ff")
     else:
         draw_stem(draw, [(base_x, 84), (base_x - 1, 65), (base_x + 1, 46), (base_x, 30)], 5)
         for x, y, w in [(27, 33, 24), (48, 28, 24), (39, 45, 26), (56, 47, 20), (30, 53, 20)]:
             draw.ellipse((x - 2, y - 2, x + w + 2, y + w + 2), fill="#203b25")
             draw.ellipse((x, y, x + w, y + w), fill=rng.choice(["#6eaf49", "#83c85b", "#5f9a3f"]))
+    if style:
+        draw_leaf(draw, 20 + (variant % 4) * 5, 63, 14, 9, rng.choice(["#7fc65c", "#8ed86a", "#68a84b"]))
     return upscale(canvas, 3)
 
 
@@ -421,18 +535,29 @@ def save_assets() -> int:
     if not REFERENCE_PATH.exists():
         raise FileNotFoundError(f"Missing image_gen reference sheet: {REFERENCE_PATH}")
     sheet = Image.open(REFERENCE_PATH).convert("RGBA")
+    v3_sheet = Image.open(REFERENCE_V3_PATH).convert("RGBA") if REFERENCE_V3_PATH.exists() else None
     GENERATED_DIR.mkdir(parents=True, exist_ok=True)
     TERRAIN_DIR.mkdir(parents=True, exist_ok=True)
     count = 0
 
     for kind in KIND_ORDER:
-        tree_base = build_reference_sprite(sheet, REFERENCE_BOXES[kind]["tree"], "tree")
-        for variant in range(3):
+        if kind == "hardware":
+            if v3_sheet is None:
+                raise FileNotFoundError(f"Missing image_gen reference sheet: {REFERENCE_V3_PATH}")
+            tree_sources = [build_v3_sprite(v3_sheet, box, "tree") for box in REFERENCE_V3_BOXES[kind]]
+        else:
+            tree_sources = [build_reference_sprite(sheet, REFERENCE_BOXES[kind]["tree"], "tree")]
+            if v3_sheet is not None and kind in REFERENCE_V3_BOXES:
+                tree_sources.extend(build_v3_sprite(v3_sheet, box, "tree") for box in REFERENCE_V3_BOXES[kind])
+
+        for variant in range(ASSET_VARIANTS):
+            source = tree_sources[min(variant, len(tree_sources) - 1) if variant < 3 else variant % len(tree_sources)]
+            tree_base = mutate_tree_variant(source, variant, kind)
             save_sprite(tree_base, GENERATED_DIR / f"tree-{kind}-{variant}.png", "tree")
             sapling_base = draw_sapling_sprite(kind, variant)
             save_sprite(sapling_base, GENERATED_DIR / f"sapling-{kind}-{variant}.png", "sapling")
             count += 2
-        save_sprite(tree_base, GENERATED_DIR / f"tree-{kind}.png", "tree")
+        save_sprite(tree_sources[0], GENERATED_DIR / f"tree-{kind}.png", "tree")
         default_sapling = draw_sapling_sprite(kind, 1)
         save_sprite(default_sapling, GENERATED_DIR / f"sapling-{kind}.png", "sapling")
         count += 2

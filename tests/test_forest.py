@@ -37,7 +37,14 @@ def test_forest_kind_classification_rules():
         _paper(title="World Models for Robot Planning", matched_keywords_json='[{"keyword":"world model"}]')
     ).tree_label == "水晶树"
     assert classify_forest_kind(
-        _paper(title="A Robotics Dataset Benchmark", matched_keywords_json='[{"keyword":"benchmark"}]')
+        _paper(title="World Action Models for Vision-Language-Action Control", matched_keywords_json='[{"keyword":"world action model"},{"keyword":"vla"}]')
+    ).label == "World Model / WAM"
+    assert classify_forest_kind(
+        _paper(
+            title="A Robotics Dataset Benchmark",
+            abstract="A diagnostic benchmark and dataset for embodied agents.",
+            matched_keywords_json='[{"keyword":"benchmark"}]',
+        )
     ).tree_label == "石碑树"
     assert classify_forest_kind(
         _paper(
@@ -52,14 +59,14 @@ def test_forest_kind_classification_rules():
             abstract="We report a benchmark after deployment, but the method is a robot planner.",
             matched_keywords_json='[{"keyword":"robotics"}]',
         )
-    ).tree_label == "机械松树"
+    ).label == "Reasoning / Planning"
     assert classify_forest_kind(
         _paper(
             title="Vision-Language Navigation with Self Awareness",
             abstract="An agent follows routes in indoor scenes.",
             matched_keywords_json='[{"keyword":"navigation"},{"keyword":"data engine","group":"World Models and Data Loop"}]',
         )
-    ).tree_label == "路标树"
+    ).label == "Navigation / Mobility"
     assert classify_forest_kind(
         _paper(
             title="Unrelated Language Model",
@@ -172,9 +179,13 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
     assert payload["counts"]["total"] == 2
     assert payload["filters"][0]["count"] == 2
     assert payload["tiles"][0]["tree_label"] == "果树"
+    assert payload["tiles"][0]["kind"] == "foundation"
+    assert payload["tiles"][0]["visual_kind"] == "vla"
     assert payload["tiles"][0]["growth_label"] == "大树"
     assert [step["key"] for step in payload["tiles"][0]["growth_steps"]] == ["metadata", "grown"]
+    foundation_payload = client.get("/api/forest?date=2026-05-23&filter=foundation").json()
     assert len(vla_payload["tiles"]) == 1
+    assert len(foundation_payload["tiles"]) == 1
     assert len(summarized_payload["tiles"]) == 1
     assert summarized_payload["tiles"][0]["arxiv_id"] == "2605.00001v1"
     assert len(unsummarized_payload["tiles"]) == 1
@@ -203,6 +214,7 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "forest-detail-v2" in response.text
     assert "data-forest-grove" in response.text
     assert "data-forest-tile" in response.text
+    assert 'data-forest-tooltip-title="World Models for Robot Control"' in response.text
     assert "forest-mote" in response.text
     assert "forest-inspector-plant" in response.text
     assert "data-forest-detail-sprite" in response.text
@@ -238,10 +250,16 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "is-full-text-plant" in response.text
     assert "已成长" in response.text
     assert "树苗" in response.text
-    assert "Embodied AI" in response.text
+    assert "VLA / Foundation" in response.text
+    assert "Perception / Spatial" in response.text
+    assert "World Model / WAM" in response.text
+    assert "Reasoning / Planning" in response.text
+    assert "Learning / Control" in response.text
     assert "Manipulation" in response.text
-    assert "Navigation" in response.text
-    assert "Simulation" in response.text
+    assert "Navigation / Mobility" in response.text
+    assert "Simulation / Data Loop" in response.text
+    assert "Evaluation / Benchmark" in response.text
+    assert "Hardware / Teleop" in response.text
     assert "Other" in response.text
     assert "古树" in response.text
 
@@ -268,7 +286,7 @@ def test_forest_page_renders_large_groves_without_preview_overflow(tmp_path):
     assert response.text.count("data-forest-tile") == 26
     assert 'data-grove-overflow="true"' not in response.text
     assert 'data-grove-overflow="false"' in response.text
-    assert 'data-forest-focus-grove="dataset"' not in response.text
+    assert 'data-forest-focus-grove="evaluation_benchmark"' not in response.text
     assert "forest-grove-more" not in response.text
     assert "分页查看" not in response.text
 

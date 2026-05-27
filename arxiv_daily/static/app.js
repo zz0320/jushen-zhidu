@@ -722,6 +722,8 @@
 
     const nodes = {
       kind: document.querySelector("[data-forest-detail-kind]"),
+      kindEn: document.querySelector("[data-forest-detail-kind-en]"),
+      kindZh: document.querySelector("[data-forest-detail-kind-zh]"),
       title: document.querySelector("[data-forest-detail-title]"),
       paper: document.querySelector("[data-forest-detail-paper]"),
       score: document.querySelector("[data-forest-detail-score]"),
@@ -770,6 +772,10 @@
     const groveColumnCount = (grove) => {
       const trees = grove?.querySelector(".forest-grove-trees");
       if (!trees) return 1;
+      const declaredColumns = Number.parseInt(trees.dataset.groveColumns || "", 10);
+      if (Number.isFinite(declaredColumns) && declaredColumns > 0) {
+        return declaredColumns;
+      }
       const style = window.getComputedStyle(trees);
       const tileWidth = Number.parseFloat(style.getPropertyValue("--grove-tile-width")) || 84;
       const columnGap = Number.parseFloat(style.columnGap) || 0;
@@ -1238,7 +1244,12 @@
         inspector.classList.add("is-updating");
         window.setTimeout(() => inspector.classList.remove("is-updating"), 380);
       }
-      if (nodes.kind) nodes.kind.textContent = tile.kind_label || tile.primary_category || "";
+      if (nodes.kindEn) {
+        nodes.kindEn.textContent = tile.kind_label || tile.primary_category || "";
+      } else if (nodes.kind) {
+        nodes.kind.textContent = tile.kind_label || tile.primary_category || "";
+      }
+      if (nodes.kindZh) nodes.kindZh.textContent = tile.kind_label_zh || "";
       if (nodes.title) nodes.title.textContent = tile.title || "";
       if (nodes.paper) nodes.paper.href = tile.detail_url || "#";
       if (nodes.score) nodes.score.textContent = `相关性 ${tile.score_display || tile.score || 0}`;
@@ -1274,7 +1285,7 @@
       if (nodes.plant) {
         const plantClasses = [
           "forest-inspector-plant",
-          `tree-${tile.kind || "other"}`,
+          `tree-${tile.visual_kind || tile.kind || "other"}`,
           `land-${tile.land || "grass"}`,
           `is-${tile.plant_stage || "sapling"}-plant`,
         ];
@@ -1289,6 +1300,57 @@
       }
     };
 
+    const titleTooltip = document.createElement("div");
+    titleTooltip.className = "forest-hover-title";
+    titleTooltip.setAttribute("role", "tooltip");
+    titleTooltip.hidden = true;
+    const titleTooltipMeta = document.createElement("span");
+    const titleTooltipText = document.createElement("strong");
+    titleTooltip.append(titleTooltipMeta, titleTooltipText);
+    document.body.append(titleTooltip);
+
+    const positionTitleTooltip = (button) => {
+      if (!button || titleTooltip.hidden) return;
+      const rect = button.getBoundingClientRect();
+      const gap = 14;
+      const margin = 10;
+      const width = titleTooltip.offsetWidth || 280;
+      const height = titleTooltip.offsetHeight || 58;
+      let placement = "right";
+      let left = rect.right + gap;
+      if (left + width > window.innerWidth - margin) {
+        placement = "left";
+        left = rect.left - gap - width;
+      }
+      if (left < margin) {
+        placement = "bottom";
+        const centerX = rect.left + rect.width / 2;
+        left = Math.max(margin, Math.min(window.innerWidth - margin - width, centerX - width / 2));
+      }
+      const midY = rect.top + rect.height / 2 - height / 2;
+      const top = Math.max(margin, Math.min(window.innerHeight - margin - height, midY));
+      titleTooltip.dataset.placement = placement;
+      titleTooltip.style.left = `${Math.round(left)}px`;
+      titleTooltip.style.top = `${Math.round(top)}px`;
+    };
+
+    const showTitleTooltip = (button) => {
+      const tile = tileById.get(button.dataset.arxivId);
+      const paperTitle = tile?.title || button.dataset.forestTooltipTitle || button.getAttribute("aria-label") || "";
+      if (!paperTitle) return;
+      const topicLabel = [tile?.kind_label, tile?.kind_label_zh].filter(Boolean).join(" / ");
+      titleTooltipMeta.textContent = [topicLabel, growthStateLabel(tile)].filter(Boolean).join(" · ");
+      titleTooltipText.textContent = paperTitle;
+      titleTooltip.hidden = false;
+      titleTooltip.classList.add("is-visible");
+      positionTitleTooltip(button);
+    };
+
+    const hideTitleTooltip = () => {
+      titleTooltip.classList.remove("is-visible");
+      titleTooltip.hidden = true;
+    };
+
     const densityForCount = (count) => {
       if (count >= 28) return "canopy";
       if (count >= 16) return "dense";
@@ -1300,6 +1362,77 @@
       if (count >= 18) return "large";
       if (count >= 7) return "medium";
       return "small";
+    };
+
+    const groveLayoutTierForCount = (count) => {
+      if (count <= 1) return "single";
+      if (count <= 6) return "compact";
+      if (count < 28 && !isExpandedGroveLayout()) return "wide";
+      return "field";
+    };
+
+    const clampNumber = (value, min, max) => Math.max(min, Math.min(max, value));
+
+    const targetRowsForGrove = (count, tier) => {
+      if (tier === "single") return 1;
+      if (tier === "compact") return count <= 3 ? 1 : 2;
+      if (tier === "wide") return count <= 10 ? 2 : 3;
+      if (count >= 30) return 3;
+      return 3;
+    };
+
+    const tileWidthForGrove = (count, tier) => {
+      if (tier === "field") return count >= 30 ? 74 : 78;
+      if (tier === "wide") return count >= 16 ? 78 : 82;
+      if (tier === "compact") return count <= 3 ? 92 : 86;
+      return 96;
+    };
+
+    const updateGroveArrangements = () => {
+      groves.forEach((grove) => {
+        const trees = grove.querySelector(".forest-grove-trees");
+        if (!trees || grove.hidden) {
+          if (trees) {
+            delete trees.dataset.groveColumns;
+            trees.style.removeProperty("--grove-tile-width");
+            trees.style.removeProperty("grid-template-columns");
+          }
+          return;
+        }
+
+        const count =
+          Number.parseInt(grove.dataset.layoutCount || "", 10) ||
+          matchedGroveTiles(grove).filter((button) => button.dataset.pageHidden !== "true" && !button.hidden).length ||
+          0;
+        if (!count) return;
+
+        const tier = grove.dataset.layoutTier || groveLayoutTierForCount(count);
+        const tileWidth = tileWidthForGrove(count, tier);
+        trees.style.setProperty("--grove-tile-width", `${tileWidth}px`);
+
+        const style = window.getComputedStyle(trees);
+        const columnGap = Number.parseFloat(style.columnGap) || 0;
+        const paddingX = (Number.parseFloat(style.paddingLeft) || 0) + (Number.parseFloat(style.paddingRight) || 0);
+        const availableWidth = Math.max(tileWidth, trees.clientWidth - paddingX);
+        const maxColumns = Math.max(1, Math.floor((availableWidth + columnGap) / (tileWidth + columnGap)));
+        const rows = targetRowsForGrove(count, tier);
+        let columns = Math.ceil(count / rows);
+
+        if (tier === "field" && count >= 28 && maxColumns >= 8) {
+          columns = Math.max(columns, Math.ceil(count / 3));
+        }
+        if (tier === "compact") {
+          columns = count <= 3 ? count : Math.ceil(count / 2);
+        }
+        if (tier === "single") {
+          columns = 1;
+        }
+
+        columns = clampNumber(columns, 1, Math.min(maxColumns, count));
+        trees.dataset.groveColumns = String(columns);
+        trees.style.gridTemplateColumns = `repeat(${columns}, minmax(var(--grove-tile-width), var(--grove-tile-width)))`;
+        grove.style.setProperty("--grove-arranged-columns", String(columns));
+      });
     };
 
     const applyDensity = (count) => {
@@ -1328,12 +1461,27 @@
         const visible = previewButtonsForGrove.length;
         const summarized = totalButtonsForGrove.filter((button) => button.dataset.summarized === "true").length;
         const size = groveSizeForCount(total);
+        const tier = groveLayoutTierForCount(total);
         const countLabel = grove.querySelector("[data-grove-count-label]");
         const growthLabel = grove.querySelector("[data-grove-growth-label]");
 
         grove.hidden = total === 0;
-        grove.classList.remove("is-canopy-grove", "is-large-grove", "is-medium-grove", "is-small-grove", "is-major", "is-minor");
+        grove.classList.remove(
+          "is-canopy-grove",
+          "is-large-grove",
+          "is-medium-grove",
+          "is-small-grove",
+          "is-major",
+          "is-minor",
+          "is-field-grove",
+          "is-wide-grove",
+          "is-compact-grove",
+          "is-single-grove"
+        );
         grove.classList.add(`is-${size}-grove`, total >= 48 ? "is-major" : "is-minor");
+        grove.classList.add(`is-${tier}-grove`);
+        grove.dataset.layoutTier = tier;
+        grove.dataset.layoutCount = String(total);
         if (countLabel) {
           countLabel.textContent = visible < total ? `${visible}/${total}` : String(total);
         }
@@ -1375,12 +1523,14 @@
         window.setTimeout(() => stage.classList.remove("is-filtering"), 520);
       }
       applyGroveLayout();
+      updateGroveArrangements();
       applyDensity(visible);
       updateGrovePagination();
       firstVisible = firstVisibleTileInGrove("");
       updateMoreButtons();
       updateOverviewPreviewLimits();
       applyGroveLayout();
+      updateGroveArrangements();
       updateGroveTreeHeights();
       if (empty) {
         empty.hidden = visible > 0;
@@ -1395,7 +1545,12 @@
     };
 
     buttons.forEach((button) => {
+      button.addEventListener("mouseenter", () => showTitleTooltip(button));
+      button.addEventListener("focus", () => showTitleTooltip(button));
+      button.addEventListener("mouseleave", hideTitleTooltip);
+      button.addEventListener("blur", hideTitleTooltip);
       button.addEventListener("click", () => {
+        hideTitleTooltip();
         setSelected(button);
         renderDetails(tileById.get(button.dataset.arxivId));
         openDetailDrawer();
@@ -1455,9 +1610,12 @@
     });
 
     window.addEventListener("resize", () => {
+      hideTitleTooltip();
       window.clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(() => applyFilterState(false), 120);
     });
+
+    grid.addEventListener("scroll", hideTitleTooltip, { passive: true });
 
     const initialButton = buttons.find((button) => button.classList.contains("is-selected")) || buttons[0];
     if (initialButton) {

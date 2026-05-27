@@ -3,119 +3,22 @@ from __future__ import annotations
 from sqlmodel import Session, select
 
 from .models import Category, Keyword, KeywordGroup
-
-DEFAULT_CATEGORIES = ["cs.RO", "cs.CV", "cs.LG", "cs.AI", "eess.SY"]
+from .taxonomy import DEFAULT_CATEGORIES, EMBODIED_TOPICS, LEGACY_KEYWORD_GROUP_NAMES
 
 DEFAULT_KEYWORD_GROUPS = [
     {
-        "name": "Embodied Intelligence",
-        "weight": 3.0,
-        "include": [
-            "embodied intelligence",
-            "embodied ai",
-            "embodied agent",
-            "embodied agents",
-            "embodied learning",
-            "embodiment",
-        ],
-        "exclude": ["disembodied"],
-    },
-    {
-        "name": "Robotics Core",
-        "weight": 2.5,
-        "include": [
-            "robotics",
-            "robot",
-            "robotic",
-            "robot learning",
-            "manipulation",
-            "mobile manipulation",
-            "dexterous",
-            "humanoid",
-            "locomotion",
-            "navigation",
-        ],
-        "exclude": ["chatbot", "botnet", "web robot", "software robot"],
-    },
-    {
-        "name": "VLA and Robot Foundation Models",
-        "weight": 3.5,
-        "include": [
-            "vision-language-action",
-            "vision language action",
-            "vla",
-            "robot foundation model",
-            "robot policy",
-            "action model",
-            "generalist robot",
-            "multimodal policy",
-        ],
-        "exclude": [],
-    },
-    {
-        "name": "Datasets and Benchmarks",
-        "weight": 2.2,
-        "include": [
-            "robot dataset",
-            "robotics dataset",
-            "embodied dataset",
-            "benchmark",
-            "evaluation suite",
-            "simulation benchmark",
-            "real-world dataset",
-        ],
-        "exclude": [],
-    },
-    {
-        "name": "World Models and Data Loop",
-        "weight": 2.8,
-        "include": [
-            "world model",
-            "world models",
-            "data engine",
-            "data closed loop",
-            "closed-loop data",
-            "data flywheel",
-            "synthetic data",
-            "sim-to-real",
-            "digital twin",
-        ],
-        "exclude": [],
-    },
-    {
-        "name": "First Person and UMI",
-        "weight": 3.0,
-        "include": [
-            "umi",
-            "universal manipulation interface",
-            "egocentric",
-            "first-person",
-            "first person",
-            "wearable",
-            "teleoperation",
-            "imitation learning",
-        ],
-        "exclude": [],
-    },
-    {
-        "name": "Robot Body and Hardware",
-        "weight": 2.4,
-        "include": [
-            "robot body",
-            "morphology",
-            "gripper",
-            "dexterous hand",
-            "whole-body",
-            "whole body",
-            "bimanual",
-            "end-effector",
-        ],
-        "exclude": [],
-    },
+        "name": topic.label,
+        "weight": topic.weight,
+        "include": list(topic.include),
+        "exclude": list(topic.exclude),
+    }
+    for topic in EMBODIED_TOPICS
 ]
 
 
 def init_default_config(session: Session) -> None:
+    default_group_names = {group_data["name"] for group_data in DEFAULT_KEYWORD_GROUPS}
+
     for code in DEFAULT_CATEGORIES:
         existing = session.exec(select(Category).where(Category.code == code)).first()
         if existing is None:
@@ -139,5 +42,10 @@ def init_default_config(session: Session) -> None:
                 if existing is None:
                     session.add(Keyword(group_id=group.id, kind=kind, value=value, enabled=True))
 
-    session.commit()
+    for legacy_name in LEGACY_KEYWORD_GROUP_NAMES - default_group_names:
+        legacy_group = session.exec(select(KeywordGroup).where(KeywordGroup.name == legacy_name)).first()
+        if legacy_group is not None and legacy_group.enabled:
+            legacy_group.enabled = False
+            session.add(legacy_group)
 
+    session.commit()
