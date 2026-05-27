@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}登录 · 具身智读{% endblock %}
+{% block content %}
+  <section class="auth-layout">
+    <article class="auth-card">
+      <div class="auth-copy">
+        <div class="eyebrow">Account access</div>
+        <h1>登录具身智读</h1>
+        <p>请使用已分配的账号进入系统。抓取、清理、模型设置和用户管理会按账号角色授权。</p>
+      </div>
+      <form class="stack-form auth-form" method="post" action="/login">
+        <input type="hidden" name="next" value="{{ next }}">
+        <label>
+          用户名
+          <input name="username" autocomplete="username" required autofocus>
+        </label>
+        <label>
+          密码
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">登录</button>
+      </form>
+    </article>
+  </section>
+{% endblock %}

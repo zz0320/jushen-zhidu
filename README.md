@@ -9,6 +9,7 @@
 - SQLite 持久化论文、命中关键词、相关性分数、摘要翻译、单篇总结和全文总结。
 - 智能模型通过兼容 Chat Completions 的接口调用，支持在 Web 的“智能设置”页面配置 Base URL、模型 ID、temperature、输出 token 和长文本输入上限。
 - Web 页面支持手动抓取、查看论文、生成摘要翻译、单篇总结和全文总结。
+- Web 端内置账号体系：首次启动创建管理员，之后按管理员、编辑者、阅读者三类角色控制用户管理、系统设置、抓取生成和只读浏览权限。
 - 抓取结果会按 arXiv 查询页缓存；重复抓取同一天会优先使用本地缓存重算关键词，减少触发 arXiv 限流。
 - CLI 支持 `serve`、`fetch`、`summarize-paper`，便于接入自动化流程。
 
@@ -38,6 +39,8 @@ export ARXIV_USER_AGENT="jushen-zhidu/0.1 (arXiv API client)"
 export ARXIV_RETRY_BASE_DELAY_SECONDS="30"
 export ARXIV_DAILY_NETWORK_FETCH_LIMIT="5"
 export ARXIV_CACHE_ENABLED="true"
+export AUTH_SESSION_DAYS="14"
+export AUTH_COOKIE_SECURE="false"
 ```
 
 ## 使用
@@ -49,6 +52,14 @@ arxiv-daily serve --port 8000
 ```
 
 然后打开 `http://127.0.0.1:8000`。
+
+首次打开 Web 界面时，如果数据库里还没有账号，系统会自动进入“创建管理员账号”页面。管理员创建完成后即可在“用户管理”里新增账号：
+
+- 管理员：管理账号、检索规则、智能设置、缓存清理，以及编辑者的全部操作。
+- 编辑者：抓取论文、生成智能结果、查看所有论文内容。
+- 阅读者：只读浏览总览、单篇论文和论文森林。
+
+管理员创建或重置的账号首次登录后必须修改密码。密码使用 PBKDF2-SHA256 加盐哈希保存，登录状态使用 HttpOnly + SameSite=Lax cookie 记录；如部署到 HTTPS，请设置 `AUTH_COOKIE_SECURE=true`。
 
 智能模型 API 也可以在 Web 界面的“智能设置”中保存；API Key 只显示配置状态，不会回显明文。
 

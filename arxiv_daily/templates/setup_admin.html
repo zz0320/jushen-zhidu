@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}初始化管理员 · 具身智读{% endblock %}
+{% block content %}
+  <section class="auth-layout">
+    <article class="auth-card setup-card">
+      <div class="auth-copy">
+        <div class="eyebrow">First administrator</div>
+        <h1>创建管理员账号</h1>
+        <p>系统还没有任何账号。请先创建第一个管理员；之后所有用户、权限和系统设置都由管理员维护。</p>
+      </div>
+      <form class="stack-form auth-form" method="post" action="/setup-admin">
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="form-grid">
+          <label>
+            用户名
+            <input name="username" autocomplete="username" placeholder="admin" required autofocus>
+          </label>
+          <label>
+            显示名称
+            <input name="display_name" autocomplete="name" placeholder="系统管理员">
+          </label>
+        </div>
+        <label>
+          密码
+          <input name="password" type="password" autocomplete="new-password" required>
+          <small>至少 10 个字符；短密码需要包含大小写、数字、符号中的三类。</small>
+        </label>
+        <label>
+          确认密码
+          <input name="password_confirm" type="password" autocomplete="new-password" required>
+        </label>
+        <button type="submit">创建并登录</button>
+      </form>
+    </article>
+  </section>
+{% endblock %}

@@ -6,7 +6,7 @@
     <title>{% block title %}具身智读{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/logo.svg') }}?v=20260520-resume-summary-jobs">
     <link rel="shortcut icon" href="{{ url_for('static', path='/logo.svg') }}?v=20260520-resume-summary-jobs">
-    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260527-clear-cache-button">
+    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260527-auth-users">
     {% block extra_head %}{% endblock %}
     <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
     <script src="{{ url_for('static', path='/app.js') }}?v=20260527-bilingual-categories" defer></script>
@@ -25,7 +25,23 @@
         <a class="{{ 'is-active' if current_path.startswith('/forest') else '' }}" href="/forest">论文森林</a>
         <a class="{{ 'is-active' if current_path.startswith('/keywords') else '' }}" href="/keywords">扫描规则</a>
         <a class="{{ 'is-active' if current_path.startswith('/settings') else '' }}" href="/settings">智能设置</a>
+        {% if request.state.current_user and request.state.current_user.role == "admin" %}
+          <a class="{{ 'is-active' if current_path.startswith('/users') else '' }}" href="/users">用户管理</a>
+        {% endif %}
       </nav>
+      <div class="account-menu" aria-label="账号状态">
+        {% if request.state.current_user %}
+          <a class="account-chip" href="/account/password">
+            <span>{{ request.state.current_user.display_name or request.state.current_user.username }}</span>
+            <strong>{{ request.state.role_labels.get(request.state.current_user.role, request.state.current_user.role) }}</strong>
+          </a>
+          <form method="post" action="/logout">
+            <button class="secondary" type="submit">退出</button>
+          </form>
+        {% elif request.state.has_users %}
+          <a class="button secondary" href="/login">登录</a>
+        {% endif %}
+      </div>
     </header>
     <main class="shell" id="main-content">
       {% if message %}

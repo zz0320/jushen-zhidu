@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}用户管理 · 具身智读{% endblock %}
+{% block content %}
+  <section class="page-head workspace-head">
+    <div>
+      <div class="eyebrow">User administration</div>
+      <h1>用户管理</h1>
+      <p>管理员负责创建账号、分配角色、停用异常账号和重置临时密码。</p>
+    </div>
+  </section>
+
+  <section class="user-admin-layout">
+    <aside class="panel user-create-panel">
+      <div class="section-head compact-head">
+        <div>
+          <div class="eyebrow">Create user</div>
+          <h2>新建账号</h2>
+        </div>
+      </div>
+      <form class="stack-form settings-form" method="post" action="/users">
+        <label>
+          用户名
+          <input name="username" placeholder="researcher.li" autocomplete="off" required>
+        </label>
+        <label>
+          显示名称
+          <input name="display_name" placeholder="李研究员">
+        </label>
+        <label>
+          角色
+          <select name="role">
+            <option value="viewer">阅读者：只读浏览</option>
+            <option value="editor">编辑者：抓取与生成</option>
+            <option value="admin">管理员：全部权限</option>
+          </select>
+        </label>
+        <label>
+          初始密码
+          <input name="password" type="password" autocomplete="new-password" required>
+        </label>
+        <label>
+          确认初始密码
+          <input name="password_confirm" type="password" autocomplete="new-password" required>
+          <small>新账号首次登录后必须修改密码。</small>
+        </label>
+        <button type="submit">创建账号</button>
+      </form>
+    </aside>
+
+    <section class="user-list-panel">
+      <div class="section-head compact-head">
+        <div>
+          <div class="eyebrow">Directory</div>
+          <h2>账号列表</h2>
+        </div>
+        <span class="summary-badge">{{ users|length }} 个账号</span>
+      </div>
+
+      <div class="user-card-list">
+        {% for user in users %}
+          <article class="panel user-card {{ '' if user.enabled else 'is-disabled' }}">
+            <div class="user-card-main">
+              <div>
+                <div class="user-title-row">
+                  <h3>{{ user.display_name or user.username }}</h3>
+                  <span class="status-pill {{ '' if user.enabled else 'disabled' }}">{{ "启用中" if user.enabled else "已停用" }}</span>
+                  {% if user.must_change_password %}
+                    <span class="status-pill warn">需改密</span>
+                  {% endif %}
+                </div>
+                <p>{{ user.username }} · {{ role_labels.get(user.role, user.role) }}</p>
+              </div>
+              <dl class="user-meta-grid">
+                <div><dt>会话</dt><dd>{{ active_session_counts.get(user.id, 0) }}</dd></div>
+                <div><dt>创建</dt><dd>{{ user.created_at|format_dt }}</dd></div>
+                <div><dt>最近登录</dt><dd>{{ user.last_login_at|format_dt if user.last_login_at else "暂无" }}</dd></div>
+              </dl>
+            </div>
+
+            <div class="user-actions-grid">
+              <form class="inline-form compact-form" method="post" action="/users/{{ user.id }}/role">
+                <label>角色</label>
+                <select name="role">
+                  {% for role, label in role_labels.items() %}
+                    <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <button class="secondary" type="submit">保存</button>
+              </form>
+
+              <form class="inline-form compact-form" method="post" action="/users/{{ user.id }}/password">
+                <label>重置密码</label>
+                <input name="password" type="password" placeholder="新临时密码" autocomplete="new-password" required>
+                <input name="password_confirm" type="password" placeholder="确认" autocomplete="new-password" required>
+                <button class="secondary" type="submit">重置</button>
+              </form>
+
+              <div class="row-actions user-danger-actions">
+                <form method="post" action="/users/{{ user.id }}/status">
+                  <button class="secondary" type="submit">{{ "停用" if user.enabled else "启用" }}</button>
+                </form>
+                <form method="post" action="/users/{{ user.id }}/delete" onsubmit="return confirm('确认删除账号 {{ user.username }}？')">
+                  <button class="danger" type="submit">删除</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  </section>
+{% endblock %}

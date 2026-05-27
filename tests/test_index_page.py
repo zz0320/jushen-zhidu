@@ -1,6 +1,5 @@
 from datetime import date, datetime, timezone
 
-from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
 
@@ -16,6 +15,7 @@ from arxiv_daily.models import (
     PaperFullTextSummary,
     PaperSummary,
 )
+from auth_helpers import authenticated_client
 
 
 def test_index_paper_card_exposes_ai_actions(tmp_path):
@@ -46,7 +46,7 @@ def test_index_paper_card_exposes_ai_actions(tmp_path):
         )
         session.commit()
 
-    html = TestClient(app).get("/?day=2026-05-19").text
+    html = authenticated_client(app, engine).get("/?day=2026-05-19").text
 
     assert "Robotics Institute" in html
     assert "data-summary-job-url=\"/summary-jobs/papers/2605.18722v1/all\"" in html
@@ -94,7 +94,7 @@ def test_index_paper_card_shows_summary_previews(tmp_path):
         )
         session.commit()
 
-    html = TestClient(app).get("/?day=2026-05-19").text
+    html = authenticated_client(app, engine).get("/?day=2026-05-19").text
 
     assert "摘要总结" in html
     assert "全文总结" in html
@@ -136,7 +136,7 @@ def test_index_paper_card_renders_full_insight_blocks(tmp_path):
         session.add(PaperFullTextSummary(arxiv_id="2605.18728v1", content=long_body, model="fake-qwen"))
         session.commit()
 
-    html = TestClient(app).get("/?day=2026-05-19").text
+    html = authenticated_client(app, engine).get("/?day=2026-05-19").text
 
     assert "paper-card-insights-expanded" in html
     assert "paper-insight-disclosure" in html
@@ -193,7 +193,7 @@ def test_paper_detail_uses_combined_insight_action(tmp_path):
         )
         session.commit()
 
-    html = TestClient(app).get("/papers/2605.18725v1").text
+    html = authenticated_client(app, engine).get("/papers/2605.18725v1").text
 
     assert "当日总览" in html
     assert "action=\"/papers/2605.18725v1/summarize-all\"" in html
@@ -233,7 +233,7 @@ def test_papers_workspace_lists_day_papers(tmp_path):
         )
         session.commit()
 
-    html = TestClient(app).get("/papers?day=2026-05-19").text
+    html = authenticated_client(app, engine).get("/papers?day=2026-05-19").text
 
     assert "单篇论文" in html
     assert "Paper Workspace Entry" in html
@@ -309,7 +309,7 @@ def test_clear_day_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
         session.add(ArxivFetchRun(target_date=day, run_date=day, status="completed", network_requests=1))
         session.commit()
 
-    response = TestClient(app).post(f"/day-cache/{day}/clear", follow_redirects=False)
+    response = authenticated_client(app, engine).post(f"/day-cache/{day}/clear", follow_redirects=False)
 
     assert response.status_code == 303
     assert response.headers["location"].startswith(f"/?day={day}&message=")
@@ -379,7 +379,7 @@ def test_clear_all_cache_removes_all_content_data_but_preserves_limit_runs(tmp_p
         session.add(ArxivFetchRun(target_date="2026-05-19", run_date="2026-05-19", status="completed"))
         session.commit()
 
-    client = TestClient(app)
+    client = authenticated_client(app, engine)
     html = client.get("/?day=2026-05-19").text
     assert "清理全部" in html
 

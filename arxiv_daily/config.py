@@ -37,6 +37,9 @@ class Settings:
     full_text_max_chars: int = 90_000
     full_text_figure_limit: int = 6
     full_text_pdf_upload_enabled: bool = True
+    auth_cookie_name: str = "jushen_session"
+    auth_session_days: int = 14
+    auth_cookie_secure: bool = False
 
     @property
     def database_url(self) -> str:
@@ -91,4 +94,7 @@ def get_settings() -> Settings:
         full_text_max_chars=int(os.getenv("FULL_TEXT_MAX_CHARS", "90000")),
         full_text_figure_limit=int(os.getenv("FULL_TEXT_FIGURE_LIMIT", "6")),
         full_text_pdf_upload_enabled=_bool_from_env("FULL_TEXT_PDF_UPLOAD_ENABLED", True),
+        auth_cookie_name=os.getenv("AUTH_COOKIE_NAME", "jushen_session"),
+        auth_session_days=int(os.getenv("AUTH_SESSION_DAYS", "14")),
+        auth_cookie_secure=_bool_from_env("AUTH_COOKIE_SECURE", False),
     )

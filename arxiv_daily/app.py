@@ -10,13 +10,36 @@ from typing import Dict, Generator, Optional
 
 from fastapi import Depends, FastAPI, Form, Query, Request
 import httpx
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, select
 
 from .arxiv import FetchQuotaExceeded, FetchResult, fetch_papers_for_date, fetch_quota_status
+from .auth import (
+    ROLE_LABELS,
+    active_admin_count,
+    clear_login_cookie,
+    create_user,
+    create_user_session,
+    find_user_by_username,
+    hash_password,
+    normalize_role,
+    normalize_username,
+    read_current_user,
+    request_next_url,
+    revoke_session,
+    revoke_user_sessions,
+    role_allows,
+    role_label,
+    safe_next_url,
+    set_login_cookie,
+    user_count,
+    validate_password,
+    validate_username,
+    verify_password,
+)
 from .app_settings import qwen_settings_view, resolve_runtime_settings, save_qwen_form
 from .config import Settings, get_settings
 from .database import build_engine, create_db_and_tables
@@ -43,6 +66,8 @@ from .models import (
     ArxivPageCache,
     PaperFullTextSummary,
     PaperSummary,
+    User,
+    UserSession,
     utc_now,
 )
 from .pdf_text import DEFAULT_FIGURE_OUTPUT_DIR, download_paper_pdf, extract_paper_pdf_text
@@ -108,6 +133,81 @@ def _redirect(path: str, **query: object) -> RedirectResponse:
     filtered = {key: value for key, value in query.items() if value not in (None, "")}
     suffix = f"?{urllib.parse.urlencode(filtered)}" if filtered else ""
     return RedirectResponse(f"{path}{suffix}", status_code=303)
+
+
+def _redirect_to_safe_url(next_url: str, **query: object) -> RedirectResponse:
+    target = safe_next_url(next_url)
+    parts = urllib.parse.urlsplit(target)
+    merged_query = dict(urllib.parse.parse_qsl(parts.query, keep_blank_values=True))
+    merged_query.update({key: str(value) for key, value in query.items() if value not in (None, "")})
+    rebuilt = urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, urllib.parse.urlencode(merged_query), parts.fragment))
+    return RedirectResponse(rebuilt, status_code=303)
+
+
+def _is_public_path(path: str) -> bool:
+    return path in {"/login", "/setup-admin", "/favicon.ico"} or path.startswith("/static/")
+
+
+def _is_json_request(path: str, request: Request) -> bool:
+    accept = request.headers.get("accept", "")
+    return (
+        path.startswith("/api/")
+        or path.startswith("/fetch-jobs")
+        or path.startswith("/summary-jobs")
+        or "application/json" in accept
+    )
+
+
+def _required_role_for_request(request: Request) -> str:
+    path = request.url.path
+    method = request.method.upper()
+    if path.startswith("/users") or path.startswith("/settings") or path.startswith("/keywords"):
+        return "admin"
+    if method == "POST" and (
+        path.startswith("/cache")
+        or path.startswith("/day-cache")
+        or path == "/fetch"
+        or path == "/fetch-jobs"
+        or path.startswith("/summary-jobs")
+        or path.startswith("/paper-abstract")
+        or path.startswith("/paper-full-text")
+        or (path.startswith("/papers/") and "summarize" in path)
+    ):
+        return "editor"
+    if path.startswith("/fetch-jobs") or path.startswith("/summary-jobs"):
+        return "editor"
+    return "viewer"
+
+
+def _auth_redirect_to_login(request: Request) -> RedirectResponse:
+    next_url = request_next_url(request) if request.method.upper() == "GET" else "/"
+    return _redirect("/login", next=next_url)
+
+
+def _auth_forbidden_response(request: Request) -> Response:
+    if _is_json_request(request.url.path, request):
+        return JSONResponse({"error": "权限不足。"}, status_code=403)
+    return _redirect("/", error="权限不足。请使用具备对应权限的账号。")
+
+
+def _is_same_origin_write(request: Request) -> bool:
+    if request.method.upper() not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return True
+    expected_origin = f"{request.url.scheme}://{request.url.netloc}"
+    origin = request.headers.get("origin")
+    if origin:
+        return origin == expected_origin
+    referer = request.headers.get("referer")
+    if not referer:
+        return True
+    parsed = urllib.parse.urlsplit(referer)
+    return f"{parsed.scheme}://{parsed.netloc}" == expected_origin
+
+
+def _csrf_forbidden_response(request: Request) -> Response:
+    if _is_json_request(request.url.path, request):
+        return JSONResponse({"error": "请求来源不可信。"}, status_code=403)
+    return _redirect("/", error="请求来源不可信，请从系统页面重新提交。")
 
 
 def _arxiv_policy_view(settings: Settings) -> Dict[str, object]:
@@ -400,6 +500,55 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
     summary_jobs: Dict[str, Dict[str, object]] = {}
     summary_jobs_lock = threading.Lock()
 
+    @app.middleware("http")
+    async def auth_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
+        path = request.url.path
+        request.state.current_user = None
+        request.state.auth_session = None
+        request.state.auth_session_token_hash = ""
+        request.state.role_labels = ROLE_LABELS
+        request.state.has_users = False
+
+        if path.startswith("/static/") or path == "/favicon.ico":
+            return await call_next(request)
+        if not _is_same_origin_write(request):
+            return _csrf_forbidden_response(request)
+
+        with Session(engine) as auth_session:
+            has_users = user_count(auth_session) > 0
+            request.state.has_users = has_users
+            if not has_users:
+                if path == "/setup-admin":
+                    return await call_next(request)
+                if _is_json_request(path, request):
+                    return JSONResponse({"error": "需要先创建管理员账号。"}, status_code=503)
+                return _redirect("/setup-admin", next=request_next_url(request))
+
+            token = request.cookies.get(settings.auth_cookie_name, "")
+            current_user, current_session = read_current_user(auth_session, token)
+            request.state.current_user = current_user
+            request.state.auth_session = current_session
+            request.state.auth_session_token_hash = current_session.token_hash if current_session is not None else ""
+
+            if _is_public_path(path):
+                return await call_next(request)
+
+            if current_user is None:
+                if _is_json_request(path, request):
+                    return JSONResponse({"error": "请先登录。"}, status_code=401)
+                return _auth_redirect_to_login(request)
+
+            if current_user.must_change_password and path not in {"/account/password", "/logout"}:
+                if _is_json_request(path, request):
+                    return JSONResponse({"error": "需要先更新密码。"}, status_code=403)
+                return _redirect("/account/password", message="首次登录或密码重置后，请先更新密码。")
+
+            required_role = _required_role_for_request(request)
+            if not role_allows(current_user.role, required_role):
+                return _auth_forbidden_response(request)
+
+        return await call_next(request)
+
     def get_session() -> Generator[Session, None, None]:
         with Session(engine) as session:
             yield session
@@ -415,6 +564,278 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             return None
         active_jobs.sort(key=lambda job: float(job.get("created_at") or 0.0))
         return active_jobs[-1]
+
+    @app.get("/setup-admin")
+    def setup_admin_page(
+        request: Request,
+        next: str = "/",
+        message: str = "",
+        error: str = "",
+        session: Session = Depends(get_session),
+    ) -> Response:
+        if user_count(session) > 0:
+            return _redirect("/login", next=safe_next_url(next))
+        return templates.TemplateResponse(
+            "setup_admin.html",
+            {
+                "request": request,
+                "next": safe_next_url(next),
+                "message": message,
+                "error": error,
+            },
+        )
+
+    @app.post("/setup-admin")
+    def setup_admin(
+        request: Request,
+        username: str = Form(...),
+        display_name: str = Form(""),
+        password: str = Form(...),
+        password_confirm: str = Form(...),
+        next: str = Form("/"),
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        if user_count(session) > 0:
+            return _redirect("/login", next=safe_next_url(next))
+        username = normalize_username(username)
+        username_error = validate_username(username)
+        password_error = validate_password(password, username)
+        if username_error:
+            return _redirect("/setup-admin", next=safe_next_url(next), error=username_error)
+        if password != password_confirm:
+            return _redirect("/setup-admin", next=safe_next_url(next), error="两次输入的密码不一致。")
+        if password_error:
+            return _redirect("/setup-admin", next=safe_next_url(next), error=password_error)
+        user = create_user(
+            session,
+            username=username,
+            display_name=display_name,
+            password=password,
+            role="admin",
+            must_change_password=False,
+        )
+        token = create_user_session(session, user, settings, request.headers.get("user-agent", ""))
+        response = _redirect_to_safe_url(next, message="管理员账号已创建。")
+        set_login_cookie(response, token, settings)
+        return response
+
+    @app.get("/login")
+    def login_page(
+        request: Request,
+        next: str = "/",
+        message: str = "",
+        error: str = "",
+        session: Session = Depends(get_session),
+    ) -> Response:
+        if user_count(session) == 0:
+            return _redirect("/setup-admin", next=safe_next_url(next))
+        if request.state.current_user is not None:
+            return _redirect(safe_next_url(next))
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "next": safe_next_url(next),
+                "message": message,
+                "error": error,
+            },
+        )
+
+    @app.post("/login")
+    def login(
+        request: Request,
+        username: str = Form(...),
+        password: str = Form(...),
+        next: str = Form("/"),
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        user = find_user_by_username(session, username)
+        if user is None or not user.enabled or not verify_password(password, user.password_hash):
+            return _redirect("/login", next=safe_next_url(next), error="用户名或密码不正确。")
+        token = create_user_session(session, user, settings, request.headers.get("user-agent", ""))
+        target = "/account/password" if user.must_change_password else safe_next_url(next)
+        response = _redirect_to_safe_url(target, message="已登录。")
+        set_login_cookie(response, token, settings)
+        return response
+
+    @app.post("/logout")
+    def logout(request: Request, session: Session = Depends(get_session)) -> RedirectResponse:
+        token = request.cookies.get(settings.auth_cookie_name, "")
+        revoke_session(session, token)
+        response = _redirect("/login", message="已退出登录。")
+        clear_login_cookie(response, settings)
+        return response
+
+    @app.get("/account/password")
+    def account_password_page(request: Request, message: str = "", error: str = "") -> Response:
+        return templates.TemplateResponse(
+            "account_password.html",
+            {"request": request, "message": message, "error": error},
+        )
+
+    @app.post("/account/password")
+    def update_account_password(
+        request: Request,
+        current_password: str = Form(...),
+        new_password: str = Form(...),
+        new_password_confirm: str = Form(...),
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        current_user = request.state.current_user
+        if current_user is None:
+            return _redirect("/login")
+        user = session.get(User, current_user.id)
+        if user is None:
+            return _redirect("/login", error="账号不存在，请重新登录。")
+        if not verify_password(current_password, user.password_hash):
+            return _redirect("/account/password", error="当前密码不正确。")
+        if new_password != new_password_confirm:
+            return _redirect("/account/password", error="两次输入的新密码不一致。")
+        password_error = validate_password(new_password, user.username)
+        if password_error:
+            return _redirect("/account/password", error=password_error)
+        user.password_hash = hash_password(new_password)
+        user.must_change_password = False
+        user.updated_at = utc_now()
+        session.add(user)
+        session.commit()
+        revoke_user_sessions(
+            session,
+            user.id or 0,
+            keep_token_hash=getattr(request.state, "auth_session_token_hash", ""),
+        )
+        return _redirect("/account/password", message="密码已更新。")
+
+    @app.get("/users")
+    def users_page(request: Request, message: str = "", error: str = "", session: Session = Depends(get_session)) -> Response:
+        users = session.exec(select(User).order_by(User.role, User.username)).all()
+        active_sessions = session.exec(select(UserSession).where(UserSession.revoked_at == None)).all()  # noqa: E711
+        active_session_counts: Dict[int, int] = {}
+        for auth_session in active_sessions:
+            active_session_counts[auth_session.user_id] = active_session_counts.get(auth_session.user_id, 0) + 1
+        return templates.TemplateResponse(
+            "users.html",
+            {
+                "request": request,
+                "users": users,
+                "role_labels": ROLE_LABELS,
+                "active_session_counts": active_session_counts,
+                "message": message,
+                "error": error,
+            },
+        )
+
+    @app.post("/users")
+    def add_user(
+        username: str = Form(...),
+        display_name: str = Form(""),
+        role: str = Form("viewer"),
+        password: str = Form(...),
+        password_confirm: str = Form(...),
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        username = normalize_username(username)
+        username_error = validate_username(username)
+        password_error = validate_password(password, username)
+        if username_error:
+            return _redirect("/users", error=username_error)
+        if find_user_by_username(session, username) is not None:
+            return _redirect("/users", error="该用户名已存在。")
+        if password != password_confirm:
+            return _redirect("/users", error="两次输入的密码不一致。")
+        if password_error:
+            return _redirect("/users", error=password_error)
+        user = create_user(
+            session,
+            username=username,
+            display_name=display_name,
+            password=password,
+            role=normalize_role(role),
+            must_change_password=True,
+        )
+        return _redirect("/users", message=f"账号 {user.username} 已创建。")
+
+    @app.post("/users/{user_id}/role")
+    def update_user_role(
+        request: Request,
+        user_id: int,
+        role: str = Form(...),
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        user = session.get(User, user_id)
+        if user is None:
+            return _redirect("/users", error="账号不存在。")
+        if request.state.current_user is not None and request.state.current_user.id == user_id:
+            return _redirect("/users", error="不能修改自己的角色。")
+        new_role = normalize_role(role)
+        if user.role == "admin" and new_role != "admin" and user.enabled and active_admin_count(session) <= 1:
+            return _redirect("/users", error="至少需要保留一个启用中的管理员。")
+        user.role = new_role
+        user.updated_at = utc_now()
+        session.add(user)
+        session.commit()
+        if new_role != "admin":
+            revoke_user_sessions(session, user.id or 0)
+        return _redirect("/users", message=f"{user.username} 的角色已更新为 {role_label(user.role)}。")
+
+    @app.post("/users/{user_id}/status")
+    def toggle_user_status(
+        request: Request,
+        user_id: int,
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        user = session.get(User, user_id)
+        if user is None:
+            return _redirect("/users", error="账号不存在。")
+        if request.state.current_user is not None and request.state.current_user.id == user_id:
+            return _redirect("/users", error="不能停用自己的账号。")
+        if user.role == "admin" and user.enabled and active_admin_count(session) <= 1:
+            return _redirect("/users", error="至少需要保留一个启用中的管理员。")
+        user.enabled = not user.enabled
+        user.updated_at = utc_now()
+        session.add(user)
+        session.commit()
+        if not user.enabled:
+            revoke_user_sessions(session, user.id or 0)
+        return _redirect("/users", message=f"{user.username} 已{'启用' if user.enabled else '停用'}。")
+
+    @app.post("/users/{user_id}/password")
+    def reset_user_password(
+        user_id: int,
+        password: str = Form(...),
+        password_confirm: str = Form(...),
+        session: Session = Depends(get_session),
+    ) -> RedirectResponse:
+        user = session.get(User, user_id)
+        if user is None:
+            return _redirect("/users", error="账号不存在。")
+        if password != password_confirm:
+            return _redirect("/users", error="两次输入的密码不一致。")
+        password_error = validate_password(password, user.username)
+        if password_error:
+            return _redirect("/users", error=password_error)
+        user.password_hash = hash_password(password)
+        user.must_change_password = True
+        user.updated_at = utc_now()
+        session.add(user)
+        session.commit()
+        revoke_user_sessions(session, user.id or 0)
+        return _redirect("/users", message=f"{user.username} 的密码已重置，下次登录需要改密。")
+
+    @app.post("/users/{user_id}/delete")
+    def delete_user(request: Request, user_id: int, session: Session = Depends(get_session)) -> RedirectResponse:
+        user = session.get(User, user_id)
+        if user is None:
+            return _redirect("/users", error="账号不存在。")
+        if request.state.current_user is not None and request.state.current_user.id == user_id:
+            return _redirect("/users", error="不能删除自己的账号。")
+        if user.role == "admin" and user.enabled and active_admin_count(session) <= 1:
+            return _redirect("/users", error="至少需要保留一个启用中的管理员。")
+        for auth_session in session.exec(select(UserSession).where(UserSession.user_id == user_id)).all():
+            session.delete(auth_session)
+        session.delete(user)
+        session.commit()
+        return _redirect("/users", message=f"账号 {user.username} 已删除。")
 
     @app.get("/")
     def index(

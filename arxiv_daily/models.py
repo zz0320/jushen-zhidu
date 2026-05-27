@@ -73,6 +73,29 @@ class ArxivFetchRun(SQLModel, table=True):
     finished_at: Optional[datetime] = None
 
 
+class User(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(index=True, unique=True)
+    display_name: str = ""
+    password_hash: str = Field(sa_column=Column(Text))
+    role: str = Field(default="viewer", index=True)
+    enabled: bool = Field(default=True, index=True)
+    must_change_password: bool = False
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+    last_login_at: Optional[datetime] = None
+
+
+class UserSession(SQLModel, table=True):
+    token_hash: str = Field(primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    created_at: datetime = Field(default_factory=utc_now)
+    expires_at: datetime = Field(index=True)
+    last_seen_at: datetime = Field(default_factory=utc_now)
+    revoked_at: Optional[datetime] = Field(default=None, index=True)
+    user_agent: str = Field(default="", sa_column=Column(Text))
+
+
 class Paper(SQLModel, table=True):
     arxiv_id: str = Field(primary_key=True)
     title: str

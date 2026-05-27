@@ -1,6 +1,5 @@
 from datetime import date
 
-from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, create_engine
 
@@ -8,6 +7,7 @@ from arxiv_daily.app import create_app
 from arxiv_daily.config import Settings
 from arxiv_daily.forest import build_forest_tile, classify_forest_kind, classify_growth, forest_scene_context
 from arxiv_daily.models import Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary
+from auth_helpers import authenticated_client
 
 
 def _paper(
@@ -168,7 +168,7 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
         session.add(PaperSummary(arxiv_id="2605.00001v1", content="摘要", model="fake"))
         session.commit()
 
-    client = TestClient(app)
+    client = authenticated_client(app, engine)
     payload = client.get("/api/forest?date=2026-05-23").json()
     vla_payload = client.get("/api/forest?date=2026-05-23&filter=vla").json()
     summarized_payload = client.get("/api/forest?date=2026-05-23&filter=summarized").json()
@@ -201,7 +201,7 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
         session.add(PaperFullTextSummary(arxiv_id="2605.00003v1", content="全文", model="fake"))
         session.commit()
 
-    response = TestClient(app).get("/forest?date=2026-05-23")
+    response = authenticated_client(app, engine).get("/forest?date=2026-05-23")
 
     assert response.status_code == 200
     assert "论文森林" in response.text
@@ -280,7 +280,7 @@ def test_forest_page_renders_large_groves_without_preview_overflow(tmp_path):
             )
         session.commit()
 
-    response = TestClient(app).get("/forest?date=2026-05-23")
+    response = authenticated_client(app, engine).get("/forest?date=2026-05-23")
 
     assert response.status_code == 200
     assert response.text.count("data-forest-tile") == 26
@@ -309,7 +309,7 @@ def test_forest_page_marks_saplings_and_grown_trees(tmp_path):
         session.add(PaperSummary(arxiv_id="2605.00004v1", content="摘要", model="fake"))
         session.commit()
 
-    response = TestClient(app).get("/forest?date=2026-05-23")
+    response = authenticated_client(app, engine).get("/forest?date=2026-05-23")
 
     assert response.status_code == 200
     assert 'data-plant-stage="tree"' in response.text
@@ -324,7 +324,7 @@ def test_forest_page_handles_empty_and_invalid_dates(tmp_path):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     settings = Settings(database_path=tmp_path / "test.sqlite3")
     app = create_app(settings=settings, engine=engine)
-    client = TestClient(app)
+    client = authenticated_client(app, engine)
 
     empty_response = client.get("/forest?date=2026-05-24")
     invalid_response = client.get("/forest?date=not-a-date")

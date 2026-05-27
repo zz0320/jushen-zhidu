@@ -112,3 +112,19 @@ def test_create_db_migrates_full_text_summary_figures_column():
     with engine.connect() as connection:
         columns = connection.execute(text("PRAGMA table_info(paperfulltextsummary)")).mappings().all()
     assert "figures_json" in {column["name"] for column in columns}
+
+
+def test_create_db_creates_auth_tables():
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+
+    create_db_and_tables(engine)
+
+    with engine.connect() as connection:
+        user_columns = connection.execute(text("PRAGMA table_info(user)")).mappings().all()
+        session_columns = connection.execute(text("PRAGMA table_info(usersession)")).mappings().all()
+    assert {"username", "password_hash", "role", "enabled", "must_change_password"}.issubset(
+        {column["name"] for column in user_columns}
+    )
+    assert {"token_hash", "user_id", "expires_at", "revoked_at"}.issubset(
+        {column["name"] for column in session_columns}
+    )
