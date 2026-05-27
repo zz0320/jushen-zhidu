@@ -9981,3 +9981,71 @@ body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
     bottom: 16px !important;
   }
 }
+
+/* Unified plot pass: saplings use the same low soil plinth language as mature trees. */
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:hover .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-tile-ground::before,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-selected .forest-tile-ground::before {
+  background:
+    linear-gradient(180deg, rgba(220, 246, 148, 0.74) 0 2px, transparent 2px),
+    linear-gradient(180deg, #acd876 0 34%, #82b85d 35% 62%, #608b47 63% 100%),
+    repeating-linear-gradient(90deg, rgba(41, 78, 39, 0.14) 0 2px, transparent 2px 9px) !important;
+  border: 1px solid rgba(55, 96, 43, 0.64) !important;
+  border-radius: 2px !important;
+  bottom: 13px !important;
+  box-shadow:
+    inset 0 -3px 0 rgba(51, 84, 39, 0.2),
+    0 2px 0 rgba(31, 59, 35, 0.18) !important;
+  clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 7px, calc(100% - 7px) 100%, 7px 100%, 0 7px);
+  height: 17px !important;
+  opacity: 1 !important;
+  width: 48px !important;
+  z-index: 2;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:hover .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-tile-ground::after,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-selected .forest-tile-ground::after {
+  background: rgba(22, 46, 29, 0.16) !important;
+  bottom: 12px !important;
+  height: 3px !important;
+  opacity: 0.64 !important;
+  width: 38px !important;
+  z-index: 1;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant .forest-inspector-plot {
+  background:
+    linear-gradient(180deg, rgba(220, 246, 148, 0.74) 0 2px, transparent 2px),
+    linear-gradient(180deg, #acd876 0 34%, #82b85d 35% 62%, #608b47 63% 100%) !important;
+  border: 1px solid rgba(55, 96, 43, 0.62) !important;
+  border-radius: 2px !important;
+  bottom: 8px !important;
+  box-shadow:
+    inset 0 -2px 0 rgba(51, 84, 39, 0.2),
+    0 2px 0 rgba(31, 59, 35, 0.16) !important;
+  clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 6px, calc(100% - 6px) 100%, 6px 100%, 0 6px);
+  height: 14px !important;
+  width: 38px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 17px !important;
+}
+
+@media (max-width: 900px) {
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:hover .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-tile-ground::before,
+  body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-selected .forest-tile-ground::before {
+    bottom: 12px !important;
+    height: 15px !important;
+    width: 40px !important;
+  }
+
+  body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+    bottom: 15px !important;
+  }
+}
