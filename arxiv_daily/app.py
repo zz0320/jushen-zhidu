@@ -45,7 +45,7 @@ from .models import (
     PaperSummary,
     utc_now,
 )
-from .pdf_text import download_paper_pdf, extract_paper_pdf_text
+from .pdf_text import DEFAULT_FIGURE_OUTPUT_DIR, download_paper_pdf, extract_paper_pdf_text
 from .summaries import (
     generate_abstract_translation,
     generate_paper_full_text_summary,
@@ -144,6 +144,15 @@ def _message_from_clear_day_cache(day_text: str, counts: Dict[str, int]) -> str:
     )
 
 
+def _message_from_clear_all_cache(counts: Dict[str, int]) -> str:
+    smart_count = counts["translations"] + counts["paper_summaries"] + counts["full_text_summaries"]
+    return (
+        f"已清理全部缓存：论文 {counts['papers']} 篇，智能结果 {smart_count} 条，"
+        f"arXiv 页面缓存 {counts['arxiv_pages']} 页，全文图片缓存 {counts['figure_files']} 个。"
+        "关键词、模型设置和限流记录已保留。"
+    )
+
+
 def _fetch_quota_view(target_day: date, session: Session, settings: Settings) -> Dict[str, object]:
     status = fetch_quota_status(session, target_day, settings)
     return {
@@ -199,6 +208,33 @@ def _clear_day_paper_cache(session: Session, target_day: date, settings: Setting
         session,
         session.exec(select(Paper).where(Paper.fetched_for_date == day_text)).all(),
     )
+    session.commit()
+    return counts
+
+
+def _clear_generated_figure_cache(output_dir: Optional[Path] = None) -> int:
+    output_dir = output_dir or DEFAULT_FIGURE_OUTPUT_DIR
+    if not output_dir.exists():
+        return 0
+    count = 0
+    for path in output_dir.iterdir():
+        if not path.is_file():
+            continue
+        path.unlink(missing_ok=True)
+        count += 1
+    return count
+
+
+def _clear_all_paper_cache(session: Session) -> Dict[str, int]:
+    counts = {
+        "papers": 0,
+        "translations": _delete_rows(session, session.exec(select(PaperAbstractTranslation)).all()),
+        "paper_summaries": _delete_rows(session, session.exec(select(PaperSummary)).all()),
+        "full_text_summaries": _delete_rows(session, session.exec(select(PaperFullTextSummary)).all()),
+        "arxiv_pages": _delete_rows(session, session.exec(select(ArxivPageCache)).all()),
+        "figure_files": _clear_generated_figure_cache(),
+    }
+    counts["papers"] = _delete_rows(session, session.exec(select(Paper)).all())
     session.commit()
     return counts
 
@@ -451,6 +487,13 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         with arxiv_fetch_lock:
             counts = _clear_day_paper_cache(session, target_day, settings)
         return _redirect("/", day=day, message=_message_from_clear_day_cache(day, counts))
+
+    @app.post("/cache/clear")
+    def clear_all_cache(day: str = Form(""), session: Session = Depends(get_session)) -> RedirectResponse:
+        target_day = parse_day(day or None, settings.timezone)
+        with arxiv_fetch_lock:
+            counts = _clear_all_paper_cache(session)
+        return _redirect("/", day=target_day.isoformat(), message=_message_from_clear_all_cache(counts))
 
     @app.post("/fetch-jobs")
     def start_fetch_job(day: str = Form(...), force_refresh: bool = Form(False)) -> Dict[str, object]:

@@ -7284,6 +7284,27 @@ button.is-complete {
   color: var(--danger);
 }
 
+.cache-clear-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: auto;
+}
+
+.action-card .cache-clear-actions form {
+  margin: 0 !important;
+  width: 100%;
+}
+
+.cache-clear-actions button {
+  width: 100%;
+}
+
+.cache-clear-all {
+  background: #fff7ef;
+  border-color: rgba(180, 35, 24, 0.34);
+}
+
 #fetch-form {
   align-items: end;
   display: grid !important;

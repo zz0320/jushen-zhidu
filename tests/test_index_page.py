@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
 
+import arxiv_daily.app as app_module
 from arxiv_daily.app import create_app
 from arxiv_daily.config import Settings
 from arxiv_daily.dates import arxiv_date_range, arxiv_submitted_date_query
@@ -322,6 +323,78 @@ def test_clear_day_cache_removes_day_data_but_preserves_limit_runs(tmp_path):
         assert session.get(ArxivPageCache, "target-cache-split") is None
         assert session.get(ArxivPageCache, "other-cache") is not None
         assert session.exec(select(ArxivFetchRun).where(ArxivFetchRun.target_date == day)).first() is not None
+
+
+def test_clear_all_cache_removes_all_content_data_but_preserves_limit_runs(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    figure_dir = tmp_path / "figures"
+    figure_dir.mkdir()
+    figure_path = figure_dir / "2605.18726v1-figure-1-p1.png"
+    figure_path.write_bytes(b"fake image")
+    monkeypatch.setattr(app_module, "DEFAULT_FIGURE_OUTPUT_DIR", figure_dir)
+
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18726v1",
+                title="Daily cache target",
+                abstract="A target day paper.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=18.0,
+            )
+        )
+        session.add(
+            Paper(
+                arxiv_id="2605.18727v1",
+                title="Other day paper",
+                abstract="An other day paper.",
+                authors_json='["Bob Lee"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-20",
+                relevance_score=10.0,
+            )
+        )
+        session.add(PaperAbstractTranslation(arxiv_id="2605.18726v1", title_content="目标", content="译文", model="fake"))
+        session.add(PaperSummary(arxiv_id="2605.18726v1", content="摘要", model="fake"))
+        session.add(PaperFullTextSummary(arxiv_id="2605.18726v1", content="全文", model="fake"))
+        session.add(
+            ArxivPageCache(
+                cache_key="target-cache",
+                query="cat:cs.RO",
+                start=0,
+                page_size=100,
+                response_text="<feed />",
+            )
+        )
+        session.add(ArxivFetchRun(target_date="2026-05-19", run_date="2026-05-19", status="completed"))
+        session.commit()
+
+    client = TestClient(app)
+    html = client.get("/?day=2026-05-19").text
+    assert "清理全部" in html
+
+    response = client.post("/cache/clear", data={"day": "2026-05-19"}, follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"].startswith("/?day=2026-05-19&message=")
+    assert not figure_path.exists()
+    with Session(engine) as session:
+        assert session.exec(select(Paper)).all() == []
+        assert session.exec(select(PaperSummary)).all() == []
+        assert session.exec(select(PaperFullTextSummary)).all() == []
+        assert session.exec(select(PaperAbstractTranslation)).all() == []
+        assert session.exec(select(ArxivPageCache)).all() == []
+        assert session.exec(select(ArxivFetchRun)).first() is not None
 
 
 def test_app_startup_marks_stale_fetch_runs_failed(tmp_path):
