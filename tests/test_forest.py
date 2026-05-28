@@ -5,7 +5,7 @@ from sqlmodel import Session, create_engine
 
 from arxiv_daily.app import create_app
 from arxiv_daily.config import Settings
-from arxiv_daily.forest import build_forest_tile, classify_forest_kind, classify_growth, forest_scene_context
+from arxiv_daily.forest import build_forest_tile, classify_forest_kind, classify_growth, forest_groves, forest_scene_context
 from arxiv_daily.models import Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary
 from auth_helpers import authenticated_client
 
@@ -112,13 +112,21 @@ def test_forest_tile_visual_seed_is_stable_for_same_day_and_paper():
     assert first["seed"] != other_day["seed"]
 
 
-def test_forest_tile_only_grows_after_ai_summary():
+def test_forest_tile_uses_visual_tier_for_generated_ai_count():
     paper = _paper()
+    fresh = build_forest_tile(paper, date(2026, 5, 23), 1, {}, {}, {})
     translated = build_forest_tile(
         paper,
         date(2026, 5, 23),
         1,
-        {paper.arxiv_id: PaperAbstractTranslation(arxiv_id=paper.arxiv_id, content="译文", model="fake")},
+        {
+            paper.arxiv_id: PaperAbstractTranslation(
+                arxiv_id=paper.arxiv_id,
+                title_content="视觉语言动作机器人策略",
+                content="这是一篇关于具身机器人操作和导航的基准论文。",
+                model="fake",
+            )
+        },
         {},
         {},
     )
@@ -130,14 +138,68 @@ def test_forest_tile_only_grows_after_ai_summary():
         {paper.arxiv_id: PaperSummary(arxiv_id=paper.arxiv_id, content="摘要", model="fake")},
         {},
     )
+    two_items = build_forest_tile(
+        paper,
+        date(2026, 5, 23),
+        1,
+        {
+            paper.arxiv_id: PaperAbstractTranslation(
+                arxiv_id=paper.arxiv_id,
+                title_content="视觉语言动作机器人策略",
+                content="这是一篇关于具身机器人操作和导航的基准论文。",
+                model="fake",
+            )
+        },
+        {paper.arxiv_id: PaperSummary(arxiv_id=paper.arxiv_id, content="摘要", model="fake")},
+        {},
+    )
+    full_package = build_forest_tile(
+        paper,
+        date(2026, 5, 23),
+        1,
+        {
+            paper.arxiv_id: PaperAbstractTranslation(
+                arxiv_id=paper.arxiv_id,
+                title_content="视觉语言动作机器人策略",
+                content="这是一篇关于具身机器人操作和导航的基准论文。",
+                model="fake",
+            )
+        },
+        {paper.arxiv_id: PaperSummary(arxiv_id=paper.arxiv_id, content="摘要", model="fake")},
+        {paper.arxiv_id: PaperFullTextSummary(arxiv_id=paper.arxiv_id, content="全文", model="fake")},
+    )
 
+    assert fresh["generated_ai_count"] == 0
+    assert fresh["summarized"] is False
+    assert fresh["plant_stage"] == "sapling"
+    assert fresh["plant_tier"] == "sapling"
+    assert fresh["growth_label"] == "树苗"
     assert translated["growth"] == "translation"
-    assert translated["summarized"] is False
-    assert translated["plant_stage"] == "sapling"
-    assert [step["key"] for step in translated["growth_steps"]] == ["metadata"]
+    assert translated["has_translation"] is True
+    assert translated["translated_title"] == "视觉语言动作机器人策略"
+    assert "具身机器人操作" in translated["translated_abstract"]
+    assert translated["generated_ai_count"] == 1
+    assert translated["summarized"] is True
+    assert translated["plant_stage"] == "tree"
+    assert translated["plant_tier"] == "young"
+    assert translated["growth_label"] == "幼树"
+    assert [step["key"] for step in translated["growth_steps"]] == ["metadata", "grown"]
     assert summarized["summarized"] is True
+    assert summarized["generated_ai_count"] == 1
     assert summarized["plant_stage"] == "tree"
+    assert summarized["plant_tier"] == "young"
     assert [step["key"] for step in summarized["growth_steps"]] == ["metadata", "grown"]
+    assert two_items["generated_ai_count"] == 2
+    assert two_items["plant_stage"] == "tree"
+    assert two_items["plant_tier"] == "mature"
+    assert two_items["growth_label"] == "大树"
+    assert full_package["growth"] == "full_text"
+    assert full_package["summarized"] is True
+    assert full_package["has_full_ai_package"] is True
+    assert full_package["generated_ai_count"] == 3
+    assert full_package["plant_stage"] == "tree"
+    assert full_package["plant_tier"] == "ancient"
+    assert full_package["growth_steps"][-1]["plant_tier"] == "ancient"
 
 
 def test_forest_scene_context_is_stable_for_calendar_day():
@@ -148,6 +210,21 @@ def test_forest_scene_context_is_stable_for_calendar_day():
     assert spring["season_label"] == "春林"
     assert " · " in spring["badge"]
     assert winter["season_key"] == "winter"
+
+
+def test_forest_groves_keep_taxonomy_order_instead_of_count_order():
+    tiles = [
+        {"filter_key": "evaluation_benchmark", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "evaluation_benchmark", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "evaluation_benchmark", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "foundation", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "reasoning_planning", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "reasoning_planning", "summarized": False, "high_relevance": False, "rarity": "common"},
+    ]
+
+    groves = forest_groves(tiles)
+
+    assert [grove["key"] for grove in groves] == ["foundation", "reasoning_planning", "evaluation_benchmark"]
 
 
 def test_forest_api_returns_tiles_and_filtering(tmp_path):
@@ -181,7 +258,9 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
     assert payload["tiles"][0]["tree_label"] == "果树"
     assert payload["tiles"][0]["kind"] == "foundation"
     assert payload["tiles"][0]["visual_kind"] == "vla"
-    assert payload["tiles"][0]["growth_label"] == "大树"
+    assert payload["tiles"][0]["growth_label"] == "幼树"
+    assert payload["tiles"][0]["generated_ai_count"] == 1
+    assert payload["tiles"][0]["plant_tier"] == "young"
     assert [step["key"] for step in payload["tiles"][0]["growth_steps"]] == ["metadata", "grown"]
     foundation_payload = client.get("/api/forest?date=2026-05-23&filter=foundation").json()
     assert len(vla_payload["tiles"]) == 1
@@ -198,6 +277,15 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     app = create_app(settings=settings, engine=engine)
     with Session(engine) as session:
         session.add(_paper(arxiv_id="2605.00003v1", title="World Models for Robot Control", score=24.0))
+        session.add(
+            PaperAbstractTranslation(
+                arxiv_id="2605.00003v1",
+                title_content="机器人控制的世界模型",
+                content="本文介绍用于机器人控制的世界模型方法。",
+                model="fake",
+            )
+        )
+        session.add(PaperSummary(arxiv_id="2605.00003v1", content="摘要", model="fake"))
         session.add(PaperFullTextSummary(arxiv_id="2605.00003v1", content="全文", model="fake"))
         session.commit()
 
@@ -214,12 +302,20 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "forest-detail-v2" in response.text
     assert "data-forest-grove" in response.text
     assert "data-forest-tile" in response.text
+    assert 'data-paper-rank="1"' in response.text
+    assert 'data-plant-tier="ancient"' in response.text
+    assert 'data-full-ai-package="true"' in response.text
+    assert '<span class="forest-tile-rank" aria-hidden="true">#1</span>' in response.text
     assert 'data-forest-tooltip-title="World Models for Robot Control"' in response.text
     assert "forest-mote" in response.text
     assert "forest-inspector-plant" in response.text
     assert "data-forest-detail-sprite" in response.text
     assert "forest-status-pixels" in response.text
-    assert "forest-growth-diary" in response.text
+    assert "forest-growth-diary" not in response.text
+    assert "forest-translation-card" in response.text
+    assert "data-forest-detail-translation-card" in response.text
+    assert "机器人控制的世界模型" in response.text
+    assert "本文介绍用于机器人控制的世界模型方法" in response.text
     assert "forest-season-badge" in response.text
     assert "forest-growth-status-badge" in response.text
     assert "data-forest-growth-fill" in response.text
@@ -244,10 +340,11 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "is-flipped" not in response.text
     assert 'data-forest-season="spring"' in response.text
     assert "春林" in response.text
-    assert 'data-growth-step="grown"' in response.text
-    assert "forest-growth-icon" in response.text
-    assert "论文成长进度" in response.text
+    assert 'data-growth-step="grown"' not in response.text
+    assert "forest-growth-icon" not in response.text
+    assert "论文成长进度" not in response.text
     assert "is-full-text-plant" in response.text
+    assert "is-ancient-tier" in response.text
     assert "已成长" in response.text
     assert "树苗" in response.text
     assert "VLA / Foundation" in response.text

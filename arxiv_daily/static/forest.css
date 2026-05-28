@@ -8013,7 +8013,8 @@ body .forest-inspector-close:focus-visible {
    older forest route layers instead of extending them. */
 body:has(.forest-shell-v2) {
   background: var(--bg, #f7f4ee);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body:has(.forest-shell-v2) .app-footer {
@@ -8023,11 +8024,10 @@ body:has(.forest-shell-v2) .app-footer {
 body:has(.forest-shell-v2) .shell {
   box-sizing: border-box;
   display: block;
-  height: calc(100dvh - 72px);
+  min-height: calc(100dvh - 72px);
   margin: 0 auto;
   max-width: 1280px;
-  min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   padding: 28px 28px 56px;
   width: 100%;
 }
@@ -10730,5 +10730,3613 @@ body .forest-detail-v2 .forest-inspector-kicker small {
   body .forest-grove-v2.is-compact-grove,
   body .forest-grove-v2.is-single-grove {
     grid-column: auto !important;
+  }
+}
+
+/* Detail dossier pass: make the right inspector read like a compact paper brief. */
+body .forest-board-v2 {
+  grid-template-columns: minmax(0, 1fr) clamp(420px, 30vw, 520px);
+}
+
+body .forest-detail-v2 {
+  gap: 8px;
+  overflow: auto;
+  padding: 10px;
+  scrollbar-gutter: stable;
+}
+
+body .forest-detail-v2 .forest-inspector-head {
+  gap: 10px;
+  grid-template-columns: 70px minmax(0, 1fr);
+  padding: 10px;
+}
+
+body .forest-detail-v2 .forest-inspector-plant {
+  height: 68px !important;
+  min-width: 68px;
+  width: 68px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plot {
+  bottom: 6px !important;
+  height: 15px !important;
+  width: 42px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant img,
+body .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 9px !important;
+  height: 52px !important;
+  width: 52px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 12px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-copy {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+body .forest-detail-v2 .forest-inspector-title-stack {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+body .forest-detail-v2 .forest-inspector-head h2 {
+  font-size: 17px;
+  line-height: 1.18;
+}
+
+body .forest-detail-v2 .forest-title-translation {
+  color: #426f46;
+  font-size: 14px;
+  font-weight: 820;
+  line-height: 1.3;
+  margin: 0;
+}
+
+body .forest-detail-v2 .forest-title-translation[hidden] {
+  display: none;
+}
+
+body .forest-detail-v2 .forest-inspector-actions {
+  gap: 7px;
+  padding: 8px;
+}
+
+body .forest-detail-v2 .forest-action-row {
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body .forest-detail-v2 .forest-read-action,
+body .forest-detail-v2 .forest-ai-submit {
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+body .forest-detail-v2 .forest-ai-submit {
+  font-size: 12px;
+}
+
+body .forest-detail-v2 .forest-ai-strip {
+  align-items: center;
+  gap: 8px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  padding: 7px;
+}
+
+body .forest-detail-v2 .forest-ai-head {
+  gap: 4px;
+  grid-template-columns: 1fr;
+}
+
+body .forest-detail-v2 .forest-ai-head small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body .forest-detail-v2 .forest-ai-chip {
+  font-size: 12px;
+  min-height: 30px;
+  padding: 6px 8px;
+}
+
+body .forest-detail-v2 .forest-inspector-meta {
+  gap: 6px;
+  padding: 7px;
+}
+
+body .forest-detail-v2 .forest-inspector-meta > span:not(.forest-growth-diary) {
+  font-size: 12px;
+  min-height: 28px;
+  padding: 6px 7px;
+}
+
+body .forest-detail-v2 .forest-inspector-meta .forest-growth-diary {
+  min-height: 34px;
+  padding: 5px 6px;
+}
+
+body .forest-detail-v2 .forest-detail-grid {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body .forest-detail-v2 .forest-detail-grid section,
+body .forest-detail-v2 .forest-abstract,
+body .forest-detail-v2 .forest-translation-card {
+  background: linear-gradient(180deg, #fffefa, #fffdf5);
+  border: 1px solid rgba(132, 105, 55, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 1px 0 rgba(69, 88, 50, 0.06);
+  padding: 9px;
+}
+
+body .forest-detail-v2 .forest-detail-grid section:first-child,
+body .forest-detail-v2 .forest-detail-grid section:nth-child(3),
+body .forest-detail-v2 .forest-detail-grid section:nth-child(5) {
+  grid-column: 1 / -1;
+}
+
+body .forest-detail-v2 .forest-translation-card {
+  border-color: rgba(74, 130, 68, 0.28);
+  display: grid;
+  gap: 7px;
+}
+
+body .forest-detail-v2 .forest-translation-card[hidden] {
+  display: none;
+}
+
+body .forest-detail-v2 .forest-translation-head {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+body .forest-detail-v2 .forest-translation-head a {
+  background: #edf8e8;
+  border: 1px solid #c8dfc2;
+  border-radius: 999px;
+  color: #2f5739;
+  font-size: 12px;
+  font-weight: 820;
+  padding: 4px 8px;
+}
+
+body .forest-detail-v2 .forest-translation-head a:hover {
+  border-color: #8fbe85;
+  text-decoration: none;
+}
+
+body .forest-detail-v2 .forest-translation-card h3 {
+  color: #234b30;
+  font-size: 15px;
+  line-height: 1.32;
+  margin: 0;
+}
+
+body .forest-detail-v2 .forest-translation-card h3[hidden] {
+  display: none;
+}
+
+body .forest-detail-v2 .forest-translation-card p,
+body .forest-detail-v2 .forest-abstract p {
+  color: #2c4535;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+body .forest-detail-v2 .forest-translation-card p {
+  max-height: 180px;
+}
+
+body .forest-detail-v2 .forest-abstract p {
+  max-height: 145px;
+}
+
+@media (max-width: 1280px) {
+  body .forest-board-v2 {
+    grid-template-columns: minmax(0, 1fr) 390px;
+  }
+}
+
+@media (max-width: 1180px) {
+  body .forest-board-v2 {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+
+  body .forest-detail-v2 .forest-ai-strip,
+  body .forest-detail-v2 .forest-action-row,
+  body .forest-detail-v2 .forest-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body .forest-detail-v2 .forest-detail-grid section {
+    grid-column: auto !important;
+  }
+}
+
+/* Compact filter dock: keep forest filters grouped instead of stretching across wide screens. */
+body .forest-sidebar-v2 {
+  justify-self: center;
+  gap: 6px;
+  max-width: 1320px;
+  width: min(100%, 1320px);
+}
+
+body .forest-panel-v2 {
+  gap: 8px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  padding: 6px 8px;
+}
+
+body .forest-panel-head-v2 {
+  gap: 5px;
+}
+
+body .forest-panel-head-v2 span {
+  font-size: 11px;
+  padding: 5px 6px;
+}
+
+body .forest-panel-head-v2 strong {
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+body .forest-filter-list-v2 {
+  gap: 6px;
+  grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
+  justify-content: center;
+}
+
+body .forest-filter-list-v2[data-filter-group="topic"] {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+
+body .forest-filter-list-v2[data-filter-group="status"] {
+  grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+}
+
+body .forest-shell-v2 .forest-filter {
+  gap: 5px;
+  min-height: 32px;
+  padding: 5px 7px;
+  width: 100%;
+}
+
+body .forest-shell-v2 .forest-filter span b {
+  font-size: 11px;
+  line-height: 1.08;
+}
+
+body .forest-shell-v2 .forest-filter .forest-filter-subtitle {
+  font-size: 9px;
+  line-height: 1.05;
+}
+
+body .forest-shell-v2 .forest-filter small {
+  font-size: 10px;
+  min-width: 18px;
+  padding: 3px 5px;
+}
+
+@media (max-width: 1280px) {
+  body .forest-sidebar-v2 {
+    max-width: none;
+    width: 100%;
+  }
+
+  body .forest-filter-list-v2,
+  body .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  body .forest-sidebar-v2 {
+    justify-self: stretch;
+  }
+
+  body .forest-panel-v2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Desktop filter rail: place status beside topics so the controls do not push the map downward. */
+@media (min-width: 981px) {
+  body .forest-sidebar-v2 {
+    align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 380px);
+  }
+
+  body .forest-sidebar-v2 .forest-panel-v2 {
+    min-height: 0;
+  }
+
+  body .forest-sidebar-v2 .forest-panel-v2:nth-child(2) {
+    grid-template-columns: 62px minmax(0, 1fr);
+  }
+
+  body .forest-sidebar-v2 .forest-panel-v2:nth-child(2) .forest-filter-list-v2 {
+    grid-template-columns: repeat(3, minmax(78px, 1fr));
+  }
+
+  body .forest-sidebar-v2 .forest-panel-v2:nth-child(2) .forest-filter {
+    min-height: 32px;
+  }
+}
+
+/* Ordered forest pass: preserve taxonomy order and show the overview rank on every tree. */
+body .forest-grid-v2 {
+  grid-auto-flow: row;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile {
+  padding-bottom: 16px !important;
+}
+
+body .forest-shell-v2 .forest-tile-rank {
+  background: rgba(255, 252, 226, 0.92);
+  border: 1px solid rgba(72, 103, 57, 0.28);
+  border-radius: 999px;
+  bottom: 0;
+  box-shadow: 0 1px 0 rgba(38, 68, 40, 0.1);
+  color: #24442d;
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 900;
+  left: 50%;
+  line-height: 1;
+  min-width: 24px;
+  padding: 3px 6px;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-50%);
+  z-index: 11;
+}
+
+body .forest-shell-v2 .forest-status-pixels {
+  bottom: 18px;
+}
+
+body .forest-shell-v2 .forest-tile:focus-visible::after,
+body .forest-shell-v2 .forest-tile.is-selected::after {
+  bottom: 0;
+}
+
+/* Stable overview map: keep taxonomy order without the uneven holes created by mixed grid spans. */
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grid-v2 {
+  align-items: start;
+  align-content: start !important;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: none;
+  overflow: visible;
+  padding: 8px;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-medium-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-compact-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-single-grove {
+  align-self: start;
+  flex: 0 0 calc(50% - 4px);
+  grid-column: auto !important;
+  grid-template-rows: auto auto auto;
+  min-height: 0;
+  padding: 6px;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove {
+  flex-basis: 100%;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees {
+  align-content: start !important;
+  grid-row: 2;
+  min-height: var(--grove-trees-min-height, 118px) !important;
+  overflow: visible !important;
+  padding: 16px 10px 12px !important;
+  row-gap: 8px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-pager {
+  grid-row: 3;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile {
+  height: var(--grove-tile-height, 96px);
+  min-height: var(--grove-tile-height, 96px) !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees {
+  padding-top: 14px !important;
+  row-gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile:hover .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile.growth-full_text .forest-tile-ground::before {
+  bottom: 18px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile-ground::after,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile[data-plant-stage] .forest-tile-ground::after,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile:hover .forest-tile-ground::after,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile:focus-visible .forest-tile-ground::after,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile.is-selected .forest-tile-ground::after {
+  bottom: 17px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-status-pixels {
+  bottom: 31px;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-tile-rank {
+  bottom: 1px;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-pixel-tree {
+  --asset-size: 46px;
+  bottom: 18px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree {
+  --asset-size: 38px;
+  bottom: 20px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-tile-ground::before {
+  bottom: 10px !important;
+  height: 16px !important;
+  width: 48px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-tile-ground::before {
+  bottom: 10px !important;
+  height: 14px !important;
+  width: 42px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile-ground::after,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile-ground::after {
+  bottom: 9px !important;
+  width: 34px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-grove-trees .tree-shadow,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-grove-trees .tree-shadow {
+  bottom: 16px !important;
+  width: 24px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove .forest-status-pixels,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove .forest-status-pixels {
+  bottom: 25px;
+}
+
+/* Sprite centering pass: generated sapling PNGs have slightly asymmetric transparent bounds. */
+body .forest-shell-v2 .forest-grove-trees .tree-sprite {
+  transform: translateX(var(--sprite-center-x, 0px)) !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-dataset {
+  --sprite-center-x: -0.3px;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-hardware {
+  --sprite-center-x: 1.3px;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-navigation,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-vla {
+  --sprite-center-x: -1.6px;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-simulation,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-manipulation {
+  --sprite-center-x: -1.3px;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-world_model {
+  --sprite-center-x: -0.8px;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-robotics {
+  --sprite-center-x: 0.3px;
+}
+
+body .forest-shell-v2 .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-hardware,
+body .forest-shell-v2 .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-hardware {
+  --sprite-center-x: 1px;
+}
+
+body .forest-shell-v2 .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-navigation,
+body .forest-shell-v2 .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-navigation,
+body .forest-shell-v2 .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-vla,
+body .forest-shell-v2 .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-vla {
+  --sprite-center-x: -1.2px;
+}
+
+body .forest-shell-v2 .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-simulation,
+body .forest-shell-v2 .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-simulation,
+body .forest-shell-v2 .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-manipulation,
+body .forest-shell-v2 .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-manipulation {
+  --sprite-center-x: -1px;
+}
+
+body .forest-shell-v2 .forest-grove-v2.is-wide-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-world_model,
+body .forest-shell-v2 .forest-grove-v2.is-field-grove .forest-grove-trees .forest-tile[data-plant-stage="sapling"].tree-world_model {
+  --sprite-center-x: -0.6px;
+}
+
+@media (min-width: 981px) {
+  body .forest-board-v2 {
+    align-items: start;
+  }
+
+  body .forest-detail-v2 {
+    align-self: start;
+    height: calc(100dvh - 92px);
+    max-height: calc(100dvh - 92px);
+    min-height: 0;
+    overflow: auto;
+    position: sticky;
+    top: 78px;
+    z-index: 3;
+  }
+}
+
+@media (max-width: 980px) {
+  body .forest-detail-v2 {
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grid-v2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Centered overview groves: each topic owns one stable row; trees center inside the land field. */
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grid-v2 {
+  align-content: start !important;
+  display: grid !important;
+  gap: 12px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  overflow: visible !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-medium-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-field-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-wide-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-compact-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-single-grove {
+  flex: none !important;
+  grid-column: 1 / -1 !important;
+  min-height: var(--grove-min-height, auto) !important;
+  padding: 8px !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees {
+  align-content: start !important;
+  column-gap: clamp(14px, 3vw, 36px) !important;
+  grid-row: auto !important;
+  justify-content: center !important;
+  min-height: var(--grove-trees-min-height, 126px) !important;
+  overflow: visible !important;
+  padding: 20px 14px 18px !important;
+  row-gap: 14px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-grove-trees {
+  column-gap: 10px !important;
+  padding: 14px 10px 12px !important;
+  row-gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-grove-trees {
+  column-gap: 12px !important;
+  padding: 15px 12px 13px !important;
+  row-gap: 8px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-single-grove .forest-grove-trees {
+  min-height: var(--grove-trees-min-height, 134px) !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-trees .forest-tile {
+  height: var(--grove-tile-height, 116px) !important;
+  min-height: var(--grove-tile-height, 116px) !important;
+  width: var(--grove-tile-width, 112px) !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-single-grove .forest-grove-trees .forest-tile {
+  height: var(--grove-tile-height, 126px) !important;
+  min-height: var(--grove-tile-height, 126px) !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .tree-sprite {
+  transform: translateX(var(--sprite-contact-shift, 0%)) !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant img {
+  transform: translateX(calc(-50% + var(--sprite-contact-shift, 0%))) !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="tree"].is-selected .forest-pixel-tree {
+  --asset-size: 66px;
+  bottom: 23px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile[data-plant-stage="sapling"].is-selected .forest-pixel-tree {
+  --asset-size: 54px;
+  bottom: 24px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="tree"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="tree"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="tree"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="tree"].is-selected .forest-pixel-tree {
+  --asset-size: 44px;
+  bottom: 21px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="sapling"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile[data-plant-stage="sapling"].is-selected .forest-pixel-tree {
+  --asset-size: 38px;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="tree"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="tree"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="tree"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="tree"].is-selected .forest-pixel-tree {
+  --asset-size: 50px;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="sapling"] .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="sapling"]:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="sapling"]:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile[data-plant-stage="sapling"].is-selected .forest-pixel-tree {
+  --asset-size: 42px;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-tile-rank {
+  bottom: 3px;
+}
+
+/* Filtered maps can leave only a few trees in a topic; keep those groves full-width so no tile is clipped in a narrow column. */
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) {
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grid-v2 {
+  align-content: start !important;
+  display: grid !important;
+  gap: 12px !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  overflow: visible !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-canopy-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-large-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-medium-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-field-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-wide-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-compact-grove,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-single-grove {
+  grid-column: 1 / -1 !important;
+  min-height: var(--grove-min-height, auto) !important;
+  padding: 8px !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-trees {
+  align-content: start !important;
+  column-gap: clamp(14px, 3vw, 36px) !important;
+  grid-row: auto !important;
+  justify-content: center !important;
+  min-height: var(--grove-trees-min-height, 126px) !important;
+  overflow: visible !important;
+  padding: 20px 14px 18px !important;
+  row-gap: 14px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-canopy-grove .forest-grove-trees {
+  column-gap: 10px !important;
+  padding: 14px 10px 12px !important;
+  row-gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-v2.is-large-grove .forest-grove-trees {
+  column-gap: 12px !important;
+  padding: 15px 12px 13px !important;
+  row-gap: 8px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-grove-trees .forest-tile {
+  height: var(--grove-tile-height, 116px) !important;
+  min-height: var(--grove-tile-height, 116px) !important;
+  width: var(--grove-tile-width, 112px) !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):is(.has-topic-filter, .has-status-filter) .forest-tile-rank {
+  bottom: 3px;
+}
+
+/* Wide desktop: use the screen instead of keeping the forest capped in the center. */
+body:has(.forest-shell-v2) .shell {
+  max-width: min(1960px, calc(100vw - 32px));
+  padding-left: clamp(8px, 1.2vw, 22px);
+  padding-right: clamp(8px, 1.2vw, 22px);
+}
+
+@media (min-width: 1500px) {
+  body .forest-board-v2 {
+    grid-template-columns: minmax(0, 1fr) clamp(430px, 28vw, 560px);
+  }
+
+  body .forest-detail-v2 .forest-inspector-head {
+    grid-template-columns: 72px minmax(0, 1fr) 58px;
+  }
+
+  body .forest-detail-v2 .forest-inspector-head h2 {
+    font-size: 16px;
+    -webkit-line-clamp: 4;
+  }
+
+  body .forest-detail-v2 .forest-abstract p {
+    max-height: 190px;
+  }
+}
+
+/* Edge-to-edge workspace: the filter dock should align with the map below on wide screens. */
+body:has(.forest-shell-v2) .shell {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  max-width: none !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  width: 100% !important;
+}
+
+body .forest-sidebar-v2 {
+  justify-self: stretch !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+@media (min-width: 981px) {
+  body .forest-sidebar-v2 {
+    grid-template-columns: minmax(0, 1fr) clamp(430px, 26vw, 560px) !important;
+  }
+}
+
+/* Three completed AI artifacts are the top visual tier: keep the tree image, but stage it larger than summary-only trees. */
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient {
+  overflow: visible !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient.is-selected .forest-pixel-tree {
+  --asset-size: 80px !important;
+  bottom: 25px !important;
+  transform: translateX(-50%) translateY(-5px) !important;
+  z-index: 5;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient .tree-shadow {
+  height: 12px !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient .forest-tile-rank {
+  bottom: 4px !important;
+  z-index: 6;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient.is-selected .forest-pixel-tree {
+  --asset-size: 58px !important;
+  bottom: 22px !important;
+  transform: translateX(-50%) translateY(-4px) !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient.is-selected .forest-pixel-tree {
+  --asset-size: 64px !important;
+  bottom: 23px !important;
+  transform: translateX(-50%) translateY(-4px) !important;
+}
+
+body .forest-detail-v2 .forest-inspector-head:has(.forest-inspector-plant.is-ancient-tier) {
+  grid-template-columns: 82px minmax(0, 1fr) 58px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-ancient-tier {
+  height: 82px !important;
+  min-width: 82px !important;
+  width: 82px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img,
+body .forest-detail-v2 .forest-inspector-plant.is-full-text-plant.is-ancient-tier img {
+  bottom: 7px !important;
+  height: 68px !important;
+  width: 68px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-ancient-tier .forest-inspector-plot {
+  bottom: 5px !important;
+  width: 58px !important;
+}
+
+body .forest-detail-v2 .forest-growth-step.is-ancient-tier .forest-growth-icon img {
+  transform: scale(1.14);
+}
+
+/* Forest page header should read like a compact command surface, not a large landing hero. */
+body .forest-shell-v2 .forest-command-v2 {
+  align-items: center !important;
+  gap: 18px !important;
+  margin: 0 auto 2px !important;
+  max-width: min(1680px, calc(100vw - 48px)) !important;
+  min-height: 0 !important;
+  padding: 16px 22px !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .eyebrow {
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  margin-bottom: 7px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 h1 {
+  font-size: clamp(28px, 2.25vw, 38px) !important;
+  line-height: 1.08 !important;
+  margin: 0 !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .forest-command-copy {
+  font-size: 13px !important;
+  line-height: 1.38 !important;
+  margin: 12px 0 0 !important;
+  max-width: 720px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .hero-controls {
+  gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .hero-controls .toolbar {
+  gap: 8px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .hero-controls input[type="date"] {
+  min-height: 42px !important;
+  padding: 8px 12px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .hero-controls .toolbar button {
+  min-height: 42px !important;
+  padding: 8px 16px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .date-jump {
+  gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .date-jump .compact-button {
+  min-height: 34px !important;
+  padding: 6px 10px !important;
+}
+
+/* Generated-content visual ladder: 0/1/2/3 AI artifacts map to sapling/young/mature/ancient consistently. */
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-young,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-mature,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient {
+  overflow: visible !important;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-young .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-young:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-young:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-young.is-selected .forest-pixel-tree {
+  --asset-size: 60px !important;
+  bottom: 24px !important;
+  transform: translateX(-50%) translateY(-1px) !important;
+  z-index: 4;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-mature .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-mature:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-mature:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-mature.is-selected .forest-pixel-tree {
+  --asset-size: 70px !important;
+  bottom: 24px !important;
+  transform: translateX(-50%) translateY(-3px) !important;
+  z-index: 5;
+}
+
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-grove-trees .forest-tile.tier-ancient.is-selected .forest-pixel-tree {
+  --asset-size: 84px !important;
+  bottom: 25px !important;
+  transform: translateX(-50%) translateY(-6px) !important;
+  z-index: 6;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-young .forest-pixel-tree {
+  --asset-size: 42px !important;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-young:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-young:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-young.is-selected .forest-pixel-tree {
+  --asset-size: 42px !important;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-mature .forest-pixel-tree {
+  --asset-size: 50px !important;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-mature:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-mature:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-mature.is-selected .forest-pixel-tree {
+  --asset-size: 50px !important;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient .forest-pixel-tree {
+  --asset-size: 60px !important;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-canopy-grove .forest-tile.tier-ancient.is-selected .forest-pixel-tree {
+  --asset-size: 60px !important;
+  bottom: 22px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-young .forest-pixel-tree {
+  --asset-size: 46px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-young:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-young:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-young.is-selected .forest-pixel-tree {
+  --asset-size: 46px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-mature .forest-pixel-tree {
+  --asset-size: 56px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-mature:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-mature:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-mature.is-selected .forest-pixel-tree {
+  --asset-size: 56px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient .forest-pixel-tree {
+  --asset-size: 66px !important;
+}
+
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient:hover .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient:focus-visible .forest-pixel-tree,
+body .forest-shell-v2 .forest-map-v2:not(.is-focused-forest):not(.has-topic-filter):not(.has-status-filter) .forest-grove-v2.is-large-grove .forest-tile.tier-ancient.is-selected .forest-pixel-tree {
+  --asset-size: 66px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-young-tier img {
+  bottom: 7px !important;
+  height: 54px !important;
+  width: 54px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-mature-tier {
+  height: 74px !important;
+  min-width: 74px !important;
+  width: 74px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-mature-tier img {
+  bottom: 7px !important;
+  height: 62px !important;
+  width: 62px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-ancient-tier {
+  height: 84px !important;
+  min-width: 84px !important;
+  width: 84px !important;
+}
+
+body .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img {
+  bottom: 6px !important;
+  height: 72px !important;
+  width: 72px !important;
+}
+
+@media (max-width: 760px) {
+  body .forest-shell-v2 .forest-command-v2 {
+    max-width: none !important;
+    padding: 14px 16px !important;
+  }
+}
+
+/* Align the forest route with the rest of the application page frame. */
+body:has(.forest-shell-v2) {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body:has(.forest-shell-v2) .shell {
+  box-sizing: border-box !important;
+  height: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  max-width: 1280px !important;
+  min-height: calc(100dvh - 72px) !important;
+  overflow: visible !important;
+  padding: 28px 28px 56px !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 {
+  gap: 12px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 {
+  align-items: center !important;
+  margin: 0 0 4px !important;
+  max-width: none !important;
+  min-height: 132px !important;
+  padding: 24px 28px !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 h1 {
+  font-size: clamp(29px, 2.55vw, 38px) !important;
+  line-height: 1.14 !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .forest-command-copy {
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin-top: 12px !important;
+}
+
+body .forest-shell-v2 .forest-command-v2 .hero-controls input[type="date"],
+body .forest-shell-v2 .forest-command-v2 .hero-controls .toolbar button {
+  min-height: 44px !important;
+}
+
+body .forest-shell-v2 .forest-board-v2,
+body .forest-shell-v2 .forest-sidebar-v2,
+body .forest-shell-v2 .forest-map-v2,
+body .forest-shell-v2 .forest-detail-v2 {
+  max-width: none !important;
+}
+
+@media (min-width: 981px) {
+  body .forest-sidebar-v2 {
+    grid-template-columns: minmax(0, 1fr) clamp(330px, 26vw, 420px) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body:has(.forest-shell-v2) .shell {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 20px 18px 44px !important;
+  }
+
+  body .forest-shell-v2 {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  body .forest-shell-v2 .forest-command-v2 {
+    min-height: auto !important;
+    padding: 22px 20px !important;
+  }
+}
+
+/* Right inspector density pass: keep the paper detail panel readable without oversized blocks. */
+body .forest-shell-v2 .forest-detail-v2 {
+  gap: 7px !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: start !important;
+  gap: 8px !important;
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  align-self: start !important;
+  height: 58px !important;
+  min-width: 58px !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  bottom: 5px !important;
+  height: 12px !important;
+  left: 8px !important;
+  width: 36px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 7px !important;
+  height: 44px !important;
+  width: 44px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 9px !important;
+  height: 36px !important;
+  width: 36px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-title-stack {
+  gap: 5px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  border-radius: 6px !important;
+  display: grid !important;
+  gap: 2px !important;
+  line-height: 1.12 !important;
+  min-height: 0 !important;
+  padding: 5px 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker b,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker small {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  font-size: clamp(15px, 1.15vw, 16.5px) !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  font-size: 12.5px !important;
+  line-height: 1.28 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-actions {
+  border-radius: 8px !important;
+  gap: 7px !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-action-row {
+  gap: 8px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-read-action,
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-submit {
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  min-height: 36px !important;
+  padding: 7px 10px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-strip {
+  align-items: center !important;
+  border-radius: 8px !important;
+  gap: 8px !important;
+  grid-template-columns: minmax(112px, 0.95fr) minmax(156px, 1.05fr) !important;
+  padding: 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-head {
+  gap: 4px !important;
+  grid-template-columns: 1fr !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-head span {
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-head small {
+  border-radius: 5px !important;
+  font-size: 11.5px !important;
+  min-height: 22px !important;
+  overflow: hidden !important;
+  padding: 4px 7px !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-links {
+  gap: 6px !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-chip {
+  border-radius: 6px !important;
+  font-size: 12.5px !important;
+  min-height: 30px !important;
+  padding: 5px 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta {
+  border-radius: 8px !important;
+  gap: 6px !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  padding: 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta > span:not(.forest-growth-diary) {
+  align-items: center !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  font-size: 12px !important;
+  justify-content: center !important;
+  line-height: 1.1 !important;
+  min-height: 28px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  padding: 5px 7px !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-diary {
+  align-items: center !important;
+  border-radius: 7px !important;
+  gap: 5px !important;
+  min-height: 32px !important;
+  padding: 5px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-growth-label {
+  border-radius: 5px !important;
+  font-size: 11px !important;
+  padding: 5px 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step {
+  border-radius: 6px !important;
+  gap: 4px !important;
+  min-height: 24px !important;
+  padding: 3px 6px 3px 4px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step small {
+  max-width: 82px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid {
+  gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid section,
+body .forest-shell-v2 .forest-detail-v2 .forest-abstract,
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card {
+  border-radius: 8px !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid p,
+body .forest-shell-v2 .forest-detail-v2 .forest-abstract p,
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card p {
+  font-size: 12.5px !important;
+  line-height: 1.45 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-label {
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  margin-bottom: 2px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card h3 {
+  font-size: 14px !important;
+  line-height: 1.28 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card p {
+  max-height: 150px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-abstract p {
+  max-height: 132px !important;
+}
+
+@media (max-width: 1180px) {
+  body .forest-shell-v2 .forest-detail-v2 .forest-ai-strip,
+  body .forest-shell-v2 .forest-detail-v2 .forest-action-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Right inspector redesign: a compact paper reading card instead of a nested form stack. */
+body .forest-shell-v2 .forest-detail-v2 {
+  background:
+    linear-gradient(180deg, rgba(255, 254, 247, 0.98), rgba(255, 250, 229, 0.98)) !important;
+  border: 1px solid rgba(57, 99, 50, 0.28) !important;
+  border-radius: 10px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 248, 0.72),
+    0 12px 28px rgba(38, 66, 40, 0.11) !important;
+  gap: 8px !important;
+  padding: 10px !important;
+}
+
+@media (min-width: 981px) {
+  body .forest-shell-v2 .forest-detail-v2 {
+    align-self: start !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    position: sticky !important;
+    top: 82px !important;
+  }
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  background:
+    linear-gradient(180deg, rgba(247, 254, 238, 0.96), rgba(255, 253, 239, 0.96)),
+    repeating-linear-gradient(90deg, rgba(47, 85, 45, 0.045) 0 1px, transparent 1px 12px) !important;
+  border: 1px solid rgba(73, 119, 65, 0.28) !important;
+  border-radius: 9px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 248, 0.7),
+    0 2px 0 rgba(54, 81, 46, 0.08) !important;
+  display: grid !important;
+  gap: 9px !important;
+  grid-template-columns: 60px minmax(0, 1fr) !important;
+  padding: 9px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  background:
+    linear-gradient(180deg, #fbfff6, #f0f8e7) !important;
+  border: 1px solid rgba(72, 124, 63, 0.38) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 3px 0 rgba(58, 78, 45, 0.13) !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  width: 60px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  bottom: 5px !important;
+  height: 13px !important;
+  left: 8px !important;
+  width: 38px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 7px !important;
+  height: 46px !important;
+  width: 46px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 9px !important;
+  height: 37px !important;
+  width: 37px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: start !important;
+  display: grid !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  align-items: center !important;
+  background: transparent !important;
+  border: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  white-space: normal !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker b,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker small {
+  align-items: center !important;
+  background: rgba(226, 244, 215, 0.95) !important;
+  border: 1px solid rgba(72, 124, 63, 0.26) !important;
+  border-radius: 999px !important;
+  color: #396d43 !important;
+  display: inline-flex !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  max-width: 100% !important;
+  min-height: 22px !important;
+  overflow: hidden !important;
+  padding: 5px 8px !important;
+  text-overflow: ellipsis !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker small {
+  background: rgba(255, 246, 197, 0.9) !important;
+  border-color: rgba(185, 150, 73, 0.28) !important;
+  color: #716039 !important;
+  text-transform: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-title-stack {
+  display: grid !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  color: #173321 !important;
+  font-size: clamp(16px, 1.14vw, 18px) !important;
+  font-weight: 900 !important;
+  line-height: 1.18 !important;
+  margin: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  color: #3b6f43 !important;
+  font-size: 12.5px !important;
+  font-weight: 850 !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-actions {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 228, 0.94), rgba(248, 252, 235, 0.94)) !important;
+  border: 1px solid rgba(129, 104, 58, 0.18) !important;
+  border-radius: 9px !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 246, 0.7) !important;
+  display: grid !important;
+  gap: 8px !important;
+  padding: 9px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-action-row {
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-read-action,
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-submit {
+  align-items: center !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  justify-content: center !important;
+  letter-spacing: 0 !important;
+  min-height: 38px !important;
+  padding: 8px 10px !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-read-action {
+  background: #c95e43 !important;
+  border-color: #c95e43 !important;
+  color: #fffaf2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-submit {
+  background: #d66548 !important;
+  border: 1px solid #d66548 !important;
+  color: #fffaf2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-strip {
+  background: rgba(255, 255, 249, 0.86) !important;
+  border: 1px solid rgba(129, 104, 58, 0.16) !important;
+  border-radius: 8px !important;
+  display: grid !important;
+  gap: 7px !important;
+  grid-template-columns: 1fr !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-head {
+  align-items: center !important;
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: space-between !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-head span {
+  color: #2d5739 !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-head small {
+  background: #fff3bf !important;
+  border: 1px solid rgba(180, 144, 67, 0.3) !important;
+  border-radius: 999px !important;
+  color: #6a5b36 !important;
+  flex: 0 1 auto !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 5px 8px !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-links {
+  display: grid !important;
+  gap: 6px !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-ai-chip {
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  min-height: 30px !important;
+  padding: 5px 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta {
+  background:
+    linear-gradient(180deg, rgba(249, 254, 239, 0.94), rgba(255, 252, 235, 0.92)) !important;
+  border: 1px solid rgba(129, 104, 58, 0.16) !important;
+  border-radius: 9px !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 246, 0.68) !important;
+  display: grid !important;
+  gap: 6px !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta > span:not(.forest-growth-diary) {
+  align-items: center !important;
+  background: #eef8e8 !important;
+  border: 1px solid #c6ddc0 !important;
+  border-radius: 7px !important;
+  color: #2f5739 !important;
+  display: inline-flex !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  justify-content: center !important;
+  line-height: 1.05 !important;
+  min-height: 30px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  padding: 6px 7px !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-diary {
+  align-items: center !important;
+  background: #fffdf3 !important;
+  border: 1px solid rgba(129, 104, 58, 0.16) !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 5px !important;
+  grid-column: 1 / -1 !important;
+  min-height: 34px !important;
+  overflow: hidden !important;
+  padding: 5px 6px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-diary::before,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-rail {
+  content: none !important;
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-growth-label {
+  background: #fff3bf !important;
+  border: 1px solid rgba(180, 144, 67, 0.32) !important;
+  border-radius: 6px !important;
+  color: #5f5132 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  padding: 5px 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step {
+  align-items: center !important;
+  background: #f3faed !important;
+  border: 1px solid #c6ddc0 !important;
+  border-radius: 7px !important;
+  display: inline-flex !important;
+  gap: 4px !important;
+  min-height: 26px !important;
+  padding: 4px 7px 4px 5px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step .forest-growth-icon {
+  flex: 0 0 22px !important;
+  height: 20px !important;
+  width: 22px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step .forest-growth-icon img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step.is-sapling-step .forest-growth-icon img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step.is-tree-step .forest-growth-icon img {
+  height: 18px !important;
+  width: 18px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step b,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-meta .forest-growth-step small {
+  font-size: 11px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid {
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid section,
+body .forest-shell-v2 .forest-detail-v2 .forest-abstract,
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card {
+  background:
+    linear-gradient(180deg, #fffefa, #fffdf4) !important;
+  border: 1px solid rgba(129, 104, 58, 0.17) !important;
+  border-radius: 9px !important;
+  box-shadow: 0 1px 0 rgba(69, 88, 50, 0.05) !important;
+  padding: 9px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid section:first-child,
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid section:nth-child(3),
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid section:nth-child(5) {
+  grid-column: 1 / -1 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-label {
+  color: #3b7245 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.1 !important;
+  margin-bottom: 4px !important;
+  text-transform: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid p,
+body .forest-shell-v2 .forest-detail-v2 .forest-abstract p,
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card p {
+  color: #2d4635 !important;
+  font-size: 12.5px !important;
+  line-height: 1.48 !important;
+  margin: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card {
+  border-color: rgba(72, 124, 63, 0.24) !important;
+  display: grid !important;
+  gap: 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card[hidden] {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-head {
+  align-items: center !important;
+  display: flex !important;
+  gap: 8px !important;
+  justify-content: space-between !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-head a {
+  background: #eef8e8 !important;
+  border: 1px solid #c6ddc0 !important;
+  border-radius: 999px !important;
+  color: #2f5739 !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  padding: 5px 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card h3 {
+  color: #234b30 !important;
+  font-size: 14px !important;
+  line-height: 1.3 !important;
+  margin: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card h3[hidden] {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-translation-card p {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-abstract p {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+@media (max-width: 1180px) {
+  body .forest-shell-v2 .forest-detail-v2 .forest-action-row,
+  body .forest-shell-v2 .forest-detail-v2 .forest-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Compact forest controls: make the top filters scan like a toolbar, not cards. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  align-items: start !important;
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: minmax(0, 1fr) 340px !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2 {
+  align-items: stretch !important;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 235, 0.92), rgba(247, 252, 237, 0.9)) !important;
+  border: 1px solid rgba(72, 116, 62, 0.22) !important;
+  border-radius: 9px !important;
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: 58px minmax(0, 1fr) !important;
+  min-height: 0 !important;
+  padding: 7px 8px !important;
+}
+
+body .forest-shell-v2 .forest-panel-head-v2 {
+  align-items: flex-start !important;
+  display: grid !important;
+  gap: 5px !important;
+  grid-template-rows: auto auto !important;
+  justify-content: start !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-panel-head-v2 span {
+  border-radius: 5px !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  padding: 5px 7px !important;
+}
+
+body .forest-shell-v2 .forest-panel-head-v2 strong {
+  color: #31583b !important;
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+  max-width: 58px !important;
+  white-space: normal !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2,
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"] {
+  align-content: start !important;
+  align-items: start !important;
+  display: grid !important;
+  gap: 6px !important;
+  grid-auto-rows: 48px !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+  grid-auto-rows: 36px !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-filter {
+  align-items: center !important;
+  align-self: stretch !important;
+  border-radius: 7px !important;
+  display: grid !important;
+  gap: 5px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  height: 48px !important;
+  max-height: 48px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 6px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] .forest-filter {
+  height: 36px !important;
+  max-height: 36px !important;
+  padding: 5px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter span {
+  display: grid !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body .forest-shell-v2 .forest-filter span b,
+body .forest-shell-v2 .forest-filter > span {
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.08 !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+body .forest-shell-v2 .forest-filter .forest-filter-subtitle {
+  color: rgba(72, 100, 70, 0.82) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter small:not(.forest-filter-subtitle) {
+  align-items: center !important;
+  border-radius: 5px !important;
+  display: inline-flex !important;
+  font-size: 11px !important;
+  justify-content: center !important;
+  min-height: 20px !important;
+  min-width: 21px !important;
+  padding: 3px 5px !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 244, 189, 0.38),
+    0 1px 0 rgba(31, 63, 37, 0.1) !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active .forest-filter-subtitle {
+  color: rgba(255, 247, 199, 0.84) !important;
+}
+
+/* Right inspector top alignment fix. */
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: center !important;
+  gap: 8px !important;
+  grid-template-columns: 52px minmax(0, 1fr) !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  align-self: center !important;
+  height: 52px !important;
+  justify-self: center !important;
+  margin: 0 !important;
+  min-width: 52px !important;
+  transform: none !important;
+  width: 52px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  bottom: 4px !important;
+  height: 11px !important;
+  left: 7px !important;
+  width: 34px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 6px !important;
+  height: 40px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 40px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 8px !important;
+  height: 32px !important;
+  width: 32px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: center !important;
+  gap: 5px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  gap: 4px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker b,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker small {
+  font-size: 10px !important;
+  min-height: 20px !important;
+  padding: 4px 7px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  display: -webkit-box !important;
+  font-size: clamp(15px, 1.05vw, 16.5px) !important;
+  line-height: 1.16 !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  display: -webkit-box !important;
+  font-size: 12px !important;
+  line-height: 1.24 !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 1280px) {
+  body .forest-shell-v2 .forest-sidebar-v2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Final override: lightweight filter rail. Keep this after legacy density passes. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  align-items: stretch !important;
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: minmax(0, 1fr) clamp(330px, 25vw, 430px) !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2 {
+  background:
+    linear-gradient(180deg, rgba(255, 254, 242, 0.78), rgba(248, 253, 239, 0.78)) !important;
+  border: 1px solid rgba(86, 128, 73, 0.2) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 249, 0.65),
+    0 1px 0 rgba(48, 76, 44, 0.05) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-height: 0 !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-panel-head-v2 {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2,
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"] {
+  align-content: start !important;
+  display: grid !important;
+  gap: 6px !important;
+  grid-auto-rows: 42px !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-filter {
+  align-items: center !important;
+  align-self: stretch !important;
+  background: rgba(247, 253, 241, 0.78) !important;
+  border: 1px solid rgba(107, 150, 97, 0.22) !important;
+  border-radius: 7px !important;
+  box-shadow: none !important;
+  color: #34573d !important;
+  display: grid !important;
+  gap: 5px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  height: 42px !important;
+  max-height: 42px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 6px 8px !important;
+  text-align: left !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active {
+  background: #18552d !important;
+  border-color: #18552d !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 247, 192, 0.3),
+    0 2px 0 rgba(23, 67, 35, 0.16) !important;
+  color: #fff7c8 !important;
+}
+
+body .forest-shell-v2 .forest-filter span {
+  display: grid !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter span b,
+body .forest-shell-v2 .forest-filter > span {
+  color: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body .forest-shell-v2 .forest-filter .forest-filter-subtitle {
+  color: rgba(72, 100, 70, 0.72) !important;
+  font-size: 9.5px !important;
+  font-weight: 760 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active .forest-filter-subtitle {
+  color: rgba(255, 247, 199, 0.78) !important;
+}
+
+body .forest-shell-v2 .forest-filter small:not(.forest-filter-subtitle) {
+  align-items: center !important;
+  background: rgba(255, 255, 252, 0.78) !important;
+  border: 1px solid rgba(86, 128, 73, 0.18) !important;
+  border-radius: 6px !important;
+  color: #48654c !important;
+  display: inline-flex !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  min-height: 22px !important;
+  min-width: 24px !important;
+  padding: 3px 6px !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active small:not(.forest-filter-subtitle) {
+  background: #fff3ae !important;
+  border-color: rgba(255, 246, 181, 0.54) !important;
+  color: #21472a !important;
+}
+
+@media (max-width: 1280px) {
+  body .forest-shell-v2 .forest-sidebar-v2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Final override: detail header shows only title and a raw plant asset. */
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: stretch !important;
+  display: block !important;
+  min-height: 112px !important;
+  overflow: visible !important;
+  padding: 18px 98px 18px 18px !important;
+  position: relative !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: center !important;
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 76px !important;
+  min-width: 0 !important;
+  padding-right: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  color: #173321 !important;
+  display: -webkit-box !important;
+  font-size: clamp(18px, 1.32vw, 21px) !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  color: #3f7146 !important;
+  display: -webkit-box !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.28 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation[hidden] {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 78px !important;
+  margin: 0 !important;
+  min-width: 78px !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 14px !important;
+  top: 16px !important;
+  transform: none !important;
+  width: 78px !important;
+  z-index: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::before,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::after,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  content: none !important;
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 0 !important;
+  height: 58px !important;
+  left: 50% !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  position: absolute !important;
+  transform: translateX(-50%) !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 4px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-young-tier img {
+  bottom: 2px !important;
+  height: 54px !important;
+  width: 54px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-mature-tier img {
+  bottom: 0 !important;
+  height: 66px !important;
+  width: 66px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant.is-ancient-tier img {
+  bottom: -2px !important;
+  height: 78px !important;
+  width: 78px !important;
+}
+
+/* Absolute final pass: use form-style filters only. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-filterbar-v3 {
+  align-items: center !important;
+  background: rgba(255, 254, 247, 0.58) !important;
+  border: 1px solid rgba(108, 137, 94, 0.16) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  display: grid !important;
+  gap: 10px !important;
+  grid-template-columns: minmax(260px, 1.25fr) minmax(200px, 0.8fr) auto !important;
+  min-height: 48px !important;
+  padding: 7px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-field {
+  align-items: center !important;
+  background: rgba(248, 253, 244, 0.72) !important;
+  border: 1px solid rgba(105, 146, 94, 0.18) !important;
+  border-radius: 7px !important;
+  display: grid !important;
+  gap: 7px !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  min-height: 34px !important;
+  min-width: 0 !important;
+  padding: 4px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-field > span,
+body .forest-shell-v2 .forest-filter-count > span {
+  color: rgba(50, 83, 60, 0.72) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter-field select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background:
+    linear-gradient(45deg, transparent 50%, #49654f 50%) right 10px center / 7px 7px no-repeat,
+    linear-gradient(135deg, #49654f 50%, transparent 50%) right 5px center / 7px 7px no-repeat,
+    transparent !important;
+  border: 0 !important;
+  color: #1f3f2d !important;
+  cursor: pointer !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  min-height: 26px !important;
+  min-width: 0 !important;
+  outline: none !important;
+  overflow: hidden !important;
+  padding: 2px 24px 2px 0 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-filter-field:focus-within {
+  background: rgba(241, 251, 235, 0.95) !important;
+  border-color: rgba(40, 92, 51, 0.45) !important;
+  box-shadow: 0 0 0 2px rgba(40, 92, 51, 0.08) !important;
+}
+
+body .forest-shell-v2 .forest-filter-count {
+  align-items: center !important;
+  background: #18552d !important;
+  border-radius: 999px !important;
+  color: #fff4bd !important;
+  display: inline-grid !important;
+  gap: 7px !important;
+  grid-template-columns: auto auto !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  padding: 5px 12px !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter-count > span {
+  color: rgba(255, 247, 199, 0.72) !important;
+}
+
+body .forest-shell-v2 .forest-filter-count strong {
+  color: #fff4bd !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2.forest-filter-fallback,
+body .forest-shell-v2 .forest-filter-fallback,
+body .forest-shell-v2 .forest-filter-fallback .forest-filter-list-v2 {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (max-width: 980px) {
+  body .forest-shell-v2 .forest-filterbar-v3 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-count {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body .forest-shell-v2 .forest-filterbar-v3,
+  body .forest-shell-v2 .forest-filter-field {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Clean filter rail: reduce the control area to quiet, one-line pills. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  align-items: start !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: grid !important;
+  gap: 10px !important;
+  grid-template-columns: minmax(0, 1fr) clamp(420px, 27vw, 520px) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2 {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: block !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2,
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"] {
+  display: grid !important;
+  gap: 6px !important;
+  grid-auto-rows: 32px !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-filter {
+  align-items: center !important;
+  background: rgba(248, 253, 244, 0.7) !important;
+  border: 1px solid rgba(108, 151, 98, 0.18) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  color: #335640 !important;
+  display: grid !important;
+  gap: 5px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  height: 32px !important;
+  max-height: 32px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 4px 7px 4px 11px !important;
+  text-align: left !important;
+}
+
+body .forest-shell-v2 .forest-filter:hover,
+body .forest-shell-v2 .forest-filter:focus-visible {
+  background: rgba(239, 250, 232, 0.94) !important;
+  border-color: rgba(72, 118, 65, 0.34) !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active {
+  background: #18552d !important;
+  border-color: #18552d !important;
+  box-shadow: 0 1px 0 rgba(18, 53, 27, 0.18) !important;
+  color: #fff4bd !important;
+}
+
+body .forest-shell-v2 .forest-filter span {
+  display: block !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter span b,
+body .forest-shell-v2 .forest-filter > span {
+  color: inherit !important;
+  display: block !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter .forest-filter-subtitle {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-filter small:not(.forest-filter-subtitle) {
+  align-items: center !important;
+  background: rgba(255, 255, 252, 0.82) !important;
+  border: 1px solid rgba(83, 123, 77, 0.16) !important;
+  border-radius: 999px !important;
+  color: #48654c !important;
+  display: inline-flex !important;
+  font-size: 10px !important;
+  font-weight: 850 !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  min-height: 20px !important;
+  min-width: 22px !important;
+  padding: 2px 6px !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active small:not(.forest-filter-subtitle) {
+  background: #fff3ae !important;
+  border-color: transparent !important;
+  color: #21472a !important;
+}
+
+/* Filter form mode: a single compact toolbar replaces the old button matrix. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-filterbar-v3 {
+  align-items: center !important;
+  background: rgba(255, 254, 247, 0.58) !important;
+  border: 1px solid rgba(108, 137, 94, 0.16) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  display: grid !important;
+  gap: 10px !important;
+  grid-template-columns: minmax(260px, 1.25fr) minmax(200px, 0.8fr) auto !important;
+  min-height: 48px !important;
+  padding: 7px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-field {
+  align-items: center !important;
+  background: rgba(248, 253, 244, 0.72) !important;
+  border: 1px solid rgba(105, 146, 94, 0.18) !important;
+  border-radius: 7px !important;
+  display: grid !important;
+  gap: 7px !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  min-height: 34px !important;
+  min-width: 0 !important;
+  padding: 4px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-field > span,
+body .forest-shell-v2 .forest-filter-count > span {
+  color: rgba(50, 83, 60, 0.72) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter-field select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background:
+    linear-gradient(45deg, transparent 50%, #49654f 50%) right 10px center / 7px 7px no-repeat,
+    linear-gradient(135deg, #49654f 50%, transparent 50%) right 5px center / 7px 7px no-repeat,
+    transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #1f3f2d !important;
+  cursor: pointer !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  min-height: 26px !important;
+  min-width: 0 !important;
+  outline: none !important;
+  overflow: hidden !important;
+  padding: 2px 24px 2px 0 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-filter-field:focus-within {
+  background: rgba(241, 251, 235, 0.95) !important;
+  border-color: rgba(40, 92, 51, 0.45) !important;
+  box-shadow: 0 0 0 2px rgba(40, 92, 51, 0.08) !important;
+}
+
+body .forest-shell-v2 .forest-filter-count {
+  align-items: center !important;
+  background: #18552d !important;
+  border-radius: 999px !important;
+  color: #fff4bd !important;
+  display: inline-grid !important;
+  gap: 7px !important;
+  grid-template-columns: auto auto !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  padding: 5px 12px !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter-count > span {
+  color: rgba(255, 247, 199, 0.72) !important;
+}
+
+body .forest-shell-v2 .forest-filter-count strong {
+  color: #fff4bd !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+body .forest-shell-v2 .forest-filter-fallback {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  body .forest-shell-v2 .forest-filterbar-v3 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-count {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body .forest-shell-v2 .forest-filterbar-v3,
+  body .forest-shell-v2 .forest-filter-field {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 1280px) {
+  body .forest-shell-v2 .forest-sidebar-v2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Final compact pass: the forest filters read as a light control rail. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  align-items: stretch !important;
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: minmax(0, 1fr) clamp(330px, 25vw, 430px) !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2 {
+  background:
+    linear-gradient(180deg, rgba(255, 254, 242, 0.78), rgba(248, 253, 239, 0.78)) !important;
+  border: 1px solid rgba(86, 128, 73, 0.2) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 249, 0.65),
+    0 1px 0 rgba(48, 76, 44, 0.05) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-height: 0 !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-panel-head-v2 {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2,
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"] {
+  align-content: start !important;
+  display: grid !important;
+  gap: 6px !important;
+  grid-auto-rows: 42px !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-filter {
+  align-items: center !important;
+  align-self: stretch !important;
+  background: rgba(247, 253, 241, 0.78) !important;
+  border: 1px solid rgba(107, 150, 97, 0.22) !important;
+  border-radius: 7px !important;
+  box-shadow: none !important;
+  color: #34573d !important;
+  display: grid !important;
+  gap: 5px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  height: 42px !important;
+  max-height: 42px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 6px 8px !important;
+  text-align: left !important;
+}
+
+body .forest-shell-v2 .forest-filter:hover,
+body .forest-shell-v2 .forest-filter:focus-visible {
+  background: rgba(238, 250, 230, 0.95) !important;
+  border-color: rgba(78, 124, 70, 0.36) !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active {
+  background: #18552d !important;
+  border-color: #18552d !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 247, 192, 0.3),
+    0 2px 0 rgba(23, 67, 35, 0.16) !important;
+  color: #fff7c8 !important;
+}
+
+body .forest-shell-v2 .forest-filter span {
+  display: grid !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter span b,
+body .forest-shell-v2 .forest-filter > span {
+  color: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body .forest-shell-v2 .forest-filter .forest-filter-subtitle {
+  color: rgba(72, 100, 70, 0.72) !important;
+  font-size: 9.5px !important;
+  font-weight: 760 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active .forest-filter-subtitle {
+  color: rgba(255, 247, 199, 0.78) !important;
+}
+
+body .forest-shell-v2 .forest-filter small:not(.forest-filter-subtitle) {
+  align-items: center !important;
+  background: rgba(255, 255, 252, 0.78) !important;
+  border: 1px solid rgba(86, 128, 73, 0.18) !important;
+  border-radius: 6px !important;
+  color: #48654c !important;
+  display: inline-flex !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  min-height: 22px !important;
+  min-width: 24px !important;
+  padding: 3px 6px !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active small:not(.forest-filter-subtitle) {
+  background: #fff3ae !important;
+  border-color: rgba(255, 246, 181, 0.54) !important;
+  color: #21472a !important;
+}
+
+@media (max-width: 1280px) {
+  body .forest-shell-v2 .forest-sidebar-v2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Final detail header: no category badges, no framed thumbnail, just title plus plant. */
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: stretch !important;
+  display: block !important;
+  min-height: 112px !important;
+  overflow: visible !important;
+  padding: 18px 98px 18px 18px !important;
+  position: relative !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: center !important;
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 76px !important;
+  min-width: 0 !important;
+  padding-right: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  color: #173321 !important;
+  display: -webkit-box !important;
+  font-size: clamp(18px, 1.32vw, 21px) !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  color: #3f7146 !important;
+  display: -webkit-box !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.28 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation[hidden] {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 78px !important;
+  margin: 0 !important;
+  min-width: 78px !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 14px !important;
+  top: 16px !important;
+  transform: none !important;
+  width: 78px !important;
+  z-index: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::before,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::after,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  content: none !important;
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 0 !important;
+  height: 58px !important;
+  left: 50% !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  position: absolute !important;
+  transform: translateX(-50%) !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 4px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-young-tier img {
+  bottom: 2px !important;
+  height: 54px !important;
+  width: 54px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-mature-tier img {
+  bottom: 0 !important;
+  height: 66px !important;
+  width: 66px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant.is-ancient-tier img {
+  bottom: -2px !important;
+  height: 78px !important;
+  width: 78px !important;
+}
+
+/* Detail header simplification: the title leads, the plant is a plain state cue. */
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: stretch !important;
+  display: block !important;
+  min-height: 110px !important;
+  overflow: visible !important;
+  padding: 18px 96px 18px 18px !important;
+  position: relative !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: center !important;
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 74px !important;
+  min-width: 0 !important;
+  padding-right: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-title-stack {
+  display: grid !important;
+  gap: 5px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  color: #173321 !important;
+  display: -webkit-box !important;
+  font-size: clamp(18px, 1.32vw, 21px) !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  color: #3f7146 !important;
+  display: -webkit-box !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.28 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation[hidden] {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 76px !important;
+  margin: 0 !important;
+  min-width: 76px !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 14px !important;
+  top: 16px !important;
+  transform: none !important;
+  width: 76px !important;
+  z-index: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 0 !important;
+  height: 58px !important;
+  left: 50% !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  position: absolute !important;
+  transform: translateX(-50%) !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 4px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-young-tier img {
+  bottom: 2px !important;
+  height: 54px !important;
+  width: 54px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-mature-tier img {
+  bottom: 0 !important;
+  height: 66px !important;
+  width: 66px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant.is-ancient-tier img {
+  bottom: -2px !important;
+  height: 78px !important;
+  width: 78px !important;
+}
+
+@media (max-width: 760px) {
+  body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+    min-height: 98px !important;
+    padding: 16px 78px 16px 16px !important;
+  }
+
+  body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+    height: 62px !important;
+    min-width: 62px !important;
+    right: 10px !important;
+    top: 16px !important;
+    width: 62px !important;
+  }
+
+  body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+    font-size: 17px !important;
+    -webkit-line-clamp: 4 !important;
+  }
+}
+
+/* Final override: lightweight filter rail. Keep this after legacy density passes. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  align-items: stretch !important;
+  display: grid !important;
+  gap: 8px !important;
+  grid-template-columns: minmax(0, 1fr) clamp(330px, 25vw, 430px) !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2 {
+  background:
+    linear-gradient(180deg, rgba(255, 254, 242, 0.78), rgba(248, 253, 239, 0.78)) !important;
+  border: 1px solid rgba(86, 128, 73, 0.2) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 249, 0.65),
+    0 1px 0 rgba(48, 76, 44, 0.05) !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  min-height: 0 !important;
+  padding: 8px !important;
+}
+
+body .forest-shell-v2 .forest-panel-head-v2 {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2,
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"] {
+  align-content: start !important;
+  display: grid !important;
+  gap: 6px !important;
+  grid-auto-rows: 42px !important;
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  min-height: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .forest-shell-v2 .forest-filter {
+  align-items: center !important;
+  align-self: stretch !important;
+  background: rgba(247, 253, 241, 0.78) !important;
+  border: 1px solid rgba(107, 150, 97, 0.22) !important;
+  border-radius: 7px !important;
+  box-shadow: none !important;
+  color: #34573d !important;
+  display: grid !important;
+  gap: 5px !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  height: 42px !important;
+  max-height: 42px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 6px 8px !important;
+  text-align: left !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active {
+  background: #18552d !important;
+  border-color: #18552d !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 247, 192, 0.3),
+    0 2px 0 rgba(23, 67, 35, 0.16) !important;
+  color: #fff7c8 !important;
+}
+
+body .forest-shell-v2 .forest-filter span {
+  display: grid !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+}
+
+body .forest-shell-v2 .forest-filter span b,
+body .forest-shell-v2 .forest-filter > span {
+  color: inherit !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+body .forest-shell-v2 .forest-filter .forest-filter-subtitle {
+  color: rgba(72, 100, 70, 0.72) !important;
+  font-size: 9.5px !important;
+  font-weight: 760 !important;
+  line-height: 1.05 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active .forest-filter-subtitle {
+  color: rgba(255, 247, 199, 0.78) !important;
+}
+
+body .forest-shell-v2 .forest-filter small:not(.forest-filter-subtitle) {
+  align-items: center !important;
+  background: rgba(255, 255, 252, 0.78) !important;
+  border: 1px solid rgba(86, 128, 73, 0.18) !important;
+  border-radius: 6px !important;
+  color: #48654c !important;
+  display: inline-flex !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  min-height: 22px !important;
+  min-width: 24px !important;
+  padding: 3px 6px !important;
+}
+
+body .forest-shell-v2 .forest-filter.is-active small:not(.forest-filter-subtitle) {
+  background: #fff3ae !important;
+  border-color: rgba(255, 246, 181, 0.54) !important;
+  color: #21472a !important;
+}
+
+@media (max-width: 1280px) {
+  body .forest-shell-v2 .forest-sidebar-v2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  body .forest-shell-v2 .forest-filter-list-v2,
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="topic"],
+  body .forest-shell-v2 .forest-filter-list-v2[data-filter-group="status"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Final override: detail header shows only title and a raw plant asset. */
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: stretch !important;
+  display: block !important;
+  min-height: 112px !important;
+  overflow: visible !important;
+  padding: 18px 98px 18px 18px !important;
+  position: relative !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: center !important;
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 76px !important;
+  min-width: 0 !important;
+  padding-right: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head h2 {
+  color: #173321 !important;
+  display: -webkit-box !important;
+  font-size: clamp(18px, 1.32vw, 21px) !important;
+  font-weight: 950 !important;
+  line-height: 1.15 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  overflow-wrap: anywhere !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 4 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation {
+  color: #3f7146 !important;
+  display: -webkit-box !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  line-height: 1.28 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-title-translation[hidden] {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 78px !important;
+  margin: 0 !important;
+  min-width: 78px !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 14px !important;
+  top: 16px !important;
+  transform: none !important;
+  width: 78px !important;
+  z-index: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::before,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::after,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  content: none !important;
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 0 !important;
+  height: 58px !important;
+  left: 50% !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  position: absolute !important;
+  transform: translateX(-50%) !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 4px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-young-tier img {
+  bottom: 2px !important;
+  height: 54px !important;
+  width: 54px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-mature-tier img {
+  bottom: 0 !important;
+  height: 66px !important;
+  width: 66px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant.is-ancient-tier img {
+  bottom: -2px !important;
+  height: 78px !important;
+  width: 78px !important;
+}
+/* Absolute final pass: form-style filters and raw tree detail. */
+body .forest-shell-v2 .forest-sidebar-v2 {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-filterbar-v3 {
+  align-items: center !important;
+  background: rgba(255, 254, 247, 0.58) !important;
+  border: 1px solid rgba(108, 137, 94, 0.16) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  display: grid !important;
+  gap: 10px !important;
+  grid-template-columns: minmax(260px, 1.25fr) minmax(200px, 0.8fr) auto !important;
+  min-height: 48px !important;
+  padding: 7px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-field {
+  align-items: center !important;
+  background: rgba(248, 253, 244, 0.72) !important;
+  border: 1px solid rgba(105, 146, 94, 0.18) !important;
+  border-radius: 7px !important;
+  display: grid !important;
+  gap: 7px !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  min-height: 34px !important;
+  min-width: 0 !important;
+  padding: 4px 8px !important;
+}
+
+body .forest-shell-v2 .forest-filter-field > span,
+body .forest-shell-v2 .forest-filter-count > span {
+  color: rgba(50, 83, 60, 0.72) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter-field select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background:
+    linear-gradient(45deg, transparent 50%, #49654f 50%) right 10px center / 7px 7px no-repeat,
+    linear-gradient(135deg, #49654f 50%, transparent 50%) right 5px center / 7px 7px no-repeat,
+    transparent !important;
+  border: 0 !important;
+  color: #1f3f2d !important;
+  cursor: pointer !important;
+  font: inherit !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+  min-height: 26px !important;
+  min-width: 0 !important;
+  outline: none !important;
+  overflow: hidden !important;
+  padding: 2px 24px 2px 0 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+}
+
+body .forest-shell-v2 .forest-filter-field:focus-within {
+  background: rgba(241, 251, 235, 0.95) !important;
+  border-color: rgba(40, 92, 51, 0.45) !important;
+  box-shadow: 0 0 0 2px rgba(40, 92, 51, 0.08) !important;
+}
+
+body .forest-shell-v2 .forest-filter-count {
+  align-items: center !important;
+  background: #18552d !important;
+  border-radius: 999px !important;
+  color: #fff4bd !important;
+  display: inline-grid !important;
+  gap: 7px !important;
+  grid-template-columns: auto auto !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  padding: 5px 12px !important;
+  white-space: nowrap !important;
+}
+
+body .forest-shell-v2 .forest-filter-count > span {
+  color: rgba(255, 247, 199, 0.72) !important;
+}
+
+body .forest-shell-v2 .forest-filter-count strong {
+  color: #fff4bd !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+}
+
+body .forest-shell-v2 .forest-panel-v2.forest-filter-fallback,
+body .forest-shell-v2 .forest-filter-fallback,
+body .forest-shell-v2 .forest-filter-fallback .forest-filter-list-v2 {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-head {
+  align-items: stretch !important;
+  display: block !important;
+  min-height: 112px !important;
+  overflow: visible !important;
+  padding: 18px 98px 18px 18px !important;
+  position: relative !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-kicker {
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-copy {
+  align-content: center !important;
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 76px !important;
+  min-width: 0 !important;
+  padding-right: 0 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  height: 78px !important;
+  margin: 0 !important;
+  min-width: 78px !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  right: 14px !important;
+  top: 16px !important;
+  transform: none !important;
+  width: 78px !important;
+  z-index: 2 !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::before,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant::after,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plot {
+  content: none !important;
+  display: none !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-tree-plant img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant img {
+  bottom: 0 !important;
+  height: 58px !important;
+  left: 50% !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  position: absolute !important;
+  transform: translateX(-50%) !important;
+  width: 58px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-sapling-plant img {
+  bottom: 4px !important;
+  height: 42px !important;
+  width: 42px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-young-tier img {
+  bottom: 2px !important;
+  height: 54px !important;
+  width: 54px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-mature-tier img {
+  bottom: 0 !important;
+  height: 66px !important;
+  width: 66px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-ancient-tier img,
+body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-plant.is-ancient-tier img {
+  bottom: -2px !important;
+  height: 78px !important;
+  width: 78px !important;
+}
+
+@media (max-width: 980px) {
+  body .forest-shell-v2 .forest-filterbar-v3 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  body .forest-shell-v2 .forest-filter-count {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body .forest-shell-v2 .forest-filterbar-v3,
+  body .forest-shell-v2 .forest-filter-field {
+    grid-template-columns: 1fr !important;
   }
 }

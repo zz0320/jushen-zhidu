@@ -81,6 +81,7 @@ from .text import (
     clean_translation_title,
     clean_translation_text,
     format_datetime,
+    inline_text_to_html,
     summary_excerpt,
     summary_to_html,
 )
@@ -90,6 +91,7 @@ templates = Jinja2Templates(directory=str(PACKAGE_DIR / "templates"))
 templates.env.filters["clean_latex"] = clean_latex_text
 templates.env.filters["translation_title"] = clean_translation_title
 templates.env.filters["translation_text"] = clean_translation_text
+templates.env.filters["inline_text"] = inline_text_to_html
 templates.env.filters["summary_html"] = summary_to_html
 templates.env.filters["summary_excerpt"] = summary_excerpt
 templates.env.filters["format_dt"] = format_datetime
@@ -709,15 +711,26 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
     @app.get("/users")
     def users_page(request: Request, message: str = "", error: str = "", session: Session = Depends(get_session)) -> Response:
         users = session.exec(select(User).order_by(User.role, User.username)).all()
-        active_sessions = session.exec(select(UserSession).where(UserSession.revoked_at == None)).all()  # noqa: E711
+        active_sessions = session.exec(
+            select(UserSession).where(UserSession.revoked_at == None, UserSession.expires_at > utc_now())  # noqa: E711
+        ).all()
         active_session_counts: Dict[int, int] = {}
         for auth_session in active_sessions:
             active_session_counts[auth_session.user_id] = active_session_counts.get(auth_session.user_id, 0) + 1
+        user_stats = {
+            "total": len(users),
+            "enabled": sum(1 for user in users if user.enabled),
+            "admin": sum(1 for user in users if user.role == "admin"),
+            "editor": sum(1 for user in users if user.role == "editor"),
+            "viewer": sum(1 for user in users if user.role == "viewer"),
+            "must_change_password": sum(1 for user in users if user.must_change_password),
+        }
         return templates.TemplateResponse(
             "users.html",
             {
                 "request": request,
                 "users": users,
+                "user_stats": user_stats,
                 "role_labels": ROLE_LABELS,
                 "active_session_counts": active_session_counts,
                 "message": message,

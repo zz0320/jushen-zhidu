@@ -77,7 +77,7 @@
                 <span>{{ paper.published_at.date() if paper.published_at else "-" }}</span>
                 <span>{{ paper.arxiv_id }}</span>
               </div>
-              <a class="paper-title paper-card-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|clean_latex }}</a>
+              <a class="paper-title paper-card-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|inline_text }}</a>
               <div class="muted paper-card-authors">{{ paper.authors[:5]|join(", ") }}{% if paper.authors|length > 5 %} et al.{% endif %}</div>
               <div class="chips paper-keywords paper-card-keywords">
                 {% for match in paper.matched_keywords[:6] %}

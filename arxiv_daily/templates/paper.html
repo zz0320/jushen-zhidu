@@ -4,9 +4,9 @@
   <section class="page-head paper-hero">
     <div>
       <div class="eyebrow">Paper Brief</div>
-      <h1>{{ paper.title|clean_latex }}</h1>
+      <h1>{{ paper.title|inline_text }}</h1>
       {% if abstract_translation and abstract_translation.title_content %}
-        <p class="paper-title-translation">{{ abstract_translation.title_content|translation_title }}</p>
+        <p class="paper-title-translation">{{ abstract_translation.title_content|translation_title|inline_text }}</p>
       {% endif %}
       <div class="paper-hero-meta">
         <span>Score {{ "%.1f"|format(paper.relevance_score) }}</span>
@@ -160,17 +160,17 @@
         <div class="bilingual-stack">
           <article class="bilingual-block">
             <div class="bilingual-label">English Title</div>
-            <h3>{{ paper.title|clean_latex }}</h3>
+            <h3>{{ paper.title|inline_text }}</h3>
           </article>
           {% if abstract_translation and abstract_translation.title_content %}
             <article class="bilingual-block translated">
               <div class="bilingual-label">中文题目</div>
-              <h3>{{ abstract_translation.title_content|translation_title }}</h3>
+              <h3>{{ abstract_translation.title_content|translation_title|inline_text }}</h3>
             </article>
           {% endif %}
           <article class="bilingual-block">
             <div class="bilingual-label">English Abstract</div>
-            <p class="abstract">{{ paper.abstract|clean_latex }}</p>
+            <p class="abstract">{{ paper.abstract|inline_text }}</p>
           </article>
         </div>
         {% if abstract_translation %}
@@ -186,7 +186,7 @@
               <span>{{ abstract_translation.generated_at|format_dt }}</span>
               <span>忠实翻译 arXiv 题目和摘要</span>
             </div>
-            <p class="abstract translated-abstract">{{ abstract_translation.content|translation_text }}</p>
+            <p class="abstract translated-abstract">{{ abstract_translation.content|translation_text|inline_text }}</p>
           </div>
         {% endif %}
       </section>

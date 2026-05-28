@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260527-bilingual-categories">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260528-filter-form-tree-only">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -33,7 +33,34 @@
       {% set forest_density = 'canopy' if tiles|length >= 28 else 'dense' if tiles|length >= 16 else 'open' %}
       <div class="forest-board-v2 forest-density-{{ forest_density }}" data-forest-experience>
         <aside class="forest-sidebar-v2" aria-label="森林筛选">
-          <section class="forest-panel-v2">
+          <div class="forest-filterbar-v3" aria-label="筛选过滤">
+            <label class="forest-filter-field">
+              <span>主题</span>
+              <select data-forest-filter-select="topic" aria-label="按主题筛选">
+                {% for filter_item in topic_filters %}
+                  <option value="{{ filter_item.key }}" {% if filter_item.key == 'all' %}selected{% endif %}>
+                    {{ filter_item.label }}{% if filter_item.label_zh %} · {{ filter_item.label_zh }}{% endif %}{% if filter_item.count is not none %}（{{ filter_item.count }}）{% endif %}
+                  </option>
+                {% endfor %}
+              </select>
+            </label>
+            <label class="forest-filter-field">
+              <span>状态</span>
+              <select data-forest-filter-select="status" aria-label="按状态筛选">
+                {% for filter_item in status_filters %}
+                  <option value="{{ filter_item.key }}" {% if filter_item.key == 'all' %}selected{% endif %}>
+                    {{ filter_item.label }}{% if filter_item.count is not none %}（{{ filter_item.count }}）{% endif %}
+                  </option>
+                {% endfor %}
+              </select>
+            </label>
+            <div class="forest-filter-count" aria-live="polite">
+              <span>当前</span>
+              <strong><span data-forest-filter-visible>{{ tiles|length }}</span>/<span data-forest-filter-total>{{ tiles|length }}</span></strong>
+            </div>
+          </div>
+
+          <section class="forest-panel-v2 is-topic-filter forest-filter-fallback">
             <div class="forest-panel-head-v2">
               <span>主题</span>
               <strong data-forest-active-topic>全部主题</strong>
@@ -51,7 +78,7 @@
             </div>
           </section>
 
-          <section class="forest-panel-v2">
+          <section class="forest-panel-v2 is-status-filter forest-filter-fallback">
             <div class="forest-panel-head-v2">
               <span>状态</span>
               <strong data-forest-active-status>全部状态</strong>
@@ -116,27 +143,33 @@
                 <div class="forest-grove-trees">
                   {% for tile in grove.tiles %}
                     <button
-                      class="forest-tile land-{{ tile.land }} tree-{{ tile.visual_kind }} rarity-{{ tile.rarity }} growth-{{ tile.growth }} accent-{{ tile.accent }} {{ 'is-selected' if tile.index == 1 else '' }}"
+                      class="forest-tile land-{{ tile.land }} tree-{{ tile.visual_kind }} rarity-{{ tile.rarity }} growth-{{ tile.growth }} tier-{{ tile.plant_tier }} accent-{{ tile.accent }} {{ 'is-selected' if tile.index == 1 else '' }}"
                       type="button"
-                      style="--sway-delay: {{ tile.sway_delay }}ms; --plant-delay: {{ tile.plant_delay }}ms;"
+                      style="--sway-delay: {{ tile.sway_delay }}ms; --plant-delay: {{ tile.plant_delay }}ms; --sprite-contact-shift: {{ tile.sprite_contact_shift }}%;"
                       data-forest-tile
                       data-arxiv-id="{{ tile.arxiv_id }}"
                       data-filter-key="{{ tile.filter_key }}"
                       data-grove-key="{{ grove.key }}"
                       data-grove-rank="{{ loop.index }}"
+                      data-paper-rank="{{ tile.index }}"
+                      data-tree-asset="{{ tile.asset }}"
                       data-grove-overflow="false"
                       data-plant-stage="{{ tile.plant_stage }}"
+                      data-plant-tier="{{ tile.plant_tier }}"
+                      data-generated-ai-count="{{ tile.generated_ai_count }}"
+                      data-plant-tier-label="{{ tile.plant_tier_label }}"
                       data-summarized="{{ 'true' if tile.summarized else 'false' }}"
+                      data-full-ai-package="{{ 'true' if tile.has_full_ai_package else 'false' }}"
                       data-high-relevance="{{ 'true' if tile.high_relevance else 'false' }}"
                       data-forest-tooltip-title="{{ tile.title|clean_latex }}"
                       aria-pressed="{{ 'true' if tile.index == 1 else 'false' }}"
-                      aria-label="{{ tile.kind_label }} / {{ tile.kind_label_zh }}，{{ tile.title|clean_latex }}"
+                      aria-label="#{{ tile.index }}，{{ tile.kind_label }} / {{ tile.kind_label_zh }}，{{ tile.title|clean_latex }}"
                     >
                       <span class="forest-tile-ground" aria-hidden="true">
                         <span class="tree-shadow"></span>
                         <span class="forest-pixel-tree">
                           {% set sprite_prefix = 'sapling-' if tile.plant_stage == 'sapling' else 'tree-' %}
-                          <img class="tree-sprite" src="{{ url_for('static', path='/forest/generated/' ~ sprite_prefix ~ tile.asset ~ '.png') }}?v=20260527-variants" alt="">
+                          <img class="tree-sprite" src="{{ url_for('static', path='/forest/generated/' ~ sprite_prefix ~ tile.asset ~ '.png') }}?v=20260528-forest-frame" alt="">
                           <span class="tree-trunk"></span>
                           <span class="tree-crown crown-one"></span>
                           <span class="tree-crown crown-two"></span>
@@ -151,6 +184,7 @@
                           <span class="status-pixel is-full-text"></span>
                         </span>
                       </span>
+                      <span class="forest-tile-rank" aria-hidden="true">#{{ tile.index }}</span>
                     </button>
                   {% endfor %}
                 </div>
@@ -177,16 +211,19 @@
         <aside class="forest-detail-v2 forest-inspector" id="forest-detail" aria-live="polite">
           <div class="forest-inspector-head">
             {% set first_sprite_prefix = 'sapling-' if first_tile.plant_stage == 'sapling' else 'tree-' %}
-            <span class="forest-inspector-plant tree-{{ first_tile.visual_kind }} land-{{ first_tile.land }} is-{{ first_tile.plant_stage }}-plant {{ 'is-high-relevance-plant' if first_tile.high_relevance else '' }} {{ 'is-full-text-plant' if first_tile.growth == 'full_text' else '' }}" data-forest-detail-plant aria-hidden="true">
+            <span class="forest-inspector-plant tree-{{ first_tile.visual_kind }} land-{{ first_tile.land }} is-{{ first_tile.plant_stage }}-plant is-{{ first_tile.plant_tier }}-tier {{ 'is-high-relevance-plant' if first_tile.high_relevance else '' }} {{ 'is-full-text-plant' if first_tile.growth == 'full_text' else '' }}" style="--sprite-contact-shift: {{ first_tile.sprite_contact_shift }}%;" data-forest-detail-plant aria-hidden="true">
               <span class="forest-inspector-plot"></span>
-              <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260527-variants" alt="">
+              <img data-forest-detail-sprite src="{{ url_for('static', path='/forest/generated/' ~ first_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260528-forest-frame" alt="">
             </span>
             <div class="forest-inspector-copy">
               <span class="forest-inspector-kicker" data-forest-detail-kind>
                 <b data-forest-detail-kind-en>{{ first_tile.kind_label }}</b>
                 <small data-forest-detail-kind-zh>{{ first_tile.kind_label_zh }}</small>
               </span>
-              <h2 data-forest-detail-title>{{ first_tile.title|clean_latex }}</h2>
+              <div class="forest-inspector-title-stack">
+                <h2 data-forest-detail-title>{{ first_tile.title|inline_text }}</h2>
+                <p class="forest-title-translation" data-forest-detail-title-translation {% if not first_tile.translated_title %}hidden{% endif %}>{{ first_tile.translated_title|inline_text }}</p>
+              </div>
               <button class="forest-inspector-close" type="button" data-forest-detail-close aria-label="收起论文详情">收起</button>
             </div>
           </div>
@@ -204,32 +241,25 @@
                 <small data-forest-detail-ai-status>{{ first_tile.summary_status }}</small>
               </div>
               <div class="forest-ai-links" aria-label="智能结果">
-                <a class="forest-ai-chip {{ 'is-ready' if first_tile.growth in ['translation', 'summary', 'full_text'] else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#abstract-translation" data-forest-detail-translation-link>译文</a>
-                <a class="forest-ai-chip {{ 'is-ready' if first_tile.growth in ['summary', 'full_text'] else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#abstract-summary" data-forest-detail-summary-link>摘要</a>
-                <a class="forest-ai-chip {{ 'is-ready' if first_tile.growth == 'full_text' else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#full-text-summary" data-forest-detail-full-link>全文</a>
+                <a class="forest-ai-chip {{ 'is-ready' if first_tile.has_translation_record else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#abstract-translation" data-forest-detail-translation-link>译文</a>
+                <a class="forest-ai-chip {{ 'is-ready' if first_tile.has_summary_record else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#abstract-summary" data-forest-detail-summary-link>摘要</a>
+                <a class="forest-ai-chip {{ 'is-ready' if first_tile.has_full_text_record else 'is-pending' }}" href="/papers/{{ first_tile.arxiv_id }}#full-text-summary" data-forest-detail-full-link>全文</a>
               </div>
             </div>
           </section>
-          {% set first_growth_steps = first_tile.growth_steps %}
+          <section class="forest-translation-card" data-forest-detail-translation-card {% if not first_tile.has_translation %}hidden{% endif %}>
+            <div class="forest-translation-head">
+              <span class="forest-detail-label">中文译文</span>
+              <a data-forest-detail-translation-link-secondary href="/papers/{{ first_tile.arxiv_id }}#abstract-translation">打开译文</a>
+            </div>
+            <h3 data-forest-detail-translated-title {% if not first_tile.translated_title %}hidden{% endif %}>{{ first_tile.translated_title|inline_text }}</h3>
+            <p data-forest-detail-translated-abstract>{{ first_tile.translated_abstract|inline_text }}</p>
+          </section>
           <div class="forest-inspector-meta">
             <span data-forest-detail-score>相关性 {{ first_tile.score_display }}</span>
             <span data-forest-detail-rarity>{{ first_tile.rarity_label }}</span>
-            <span data-forest-detail-growth>{{ "已成长" if first_tile.summarized else "树苗" }}</span>
+            <span data-forest-detail-growth>{{ first_tile.plant_tier_label }}</span>
             <span data-forest-detail-category>{{ first_tile.primary_category }}</span>
-            <span class="forest-growth-diary {{ 'is-single-step' if first_growth_steps|length == 1 else '' }}" data-forest-growth-diary data-current-growth="{{ first_tile.growth }}" data-step-count="{{ first_growth_steps|length }}" style="--forest-growth-step-count: {{ first_growth_steps|length }}; --forest-growth-progress: {{ 100 if first_growth_steps|length > 1 else 0 }}%;" aria-label="论文成长进度：{{ '已成长' if first_tile.summarized else '树苗' }}">
-              <span class="forest-growth-label">成长</span>
-              <span class="forest-growth-rail" aria-hidden="true"></span>
-              {% for step in first_growth_steps %}
-                <span class="forest-growth-step is-complete {{ 'is-current' if loop.last else '' }} is-{{ step.plant_stage }}-step" data-growth-step="{{ step.key }}" data-growth-rank="{{ step.rank }}">
-                  <i class="forest-growth-icon" aria-hidden="true">
-                    {% set step_sprite_prefix = 'sapling-' if step.plant_stage == 'sapling' else 'tree-' %}
-                    <img src="{{ url_for('static', path='/forest/generated/' ~ step_sprite_prefix ~ first_tile.asset ~ '.png') }}?v=20260527-variants" alt="">
-                  </i>
-                  <b>{{ step.label }}</b>
-                  <small>{{ step.detail }}</small>
-                </span>
-              {% endfor %}
-            </span>
           </div>
           <div class="forest-detail-grid">
             <section>
@@ -254,8 +284,8 @@
             </section>
           </div>
           <section class="forest-abstract">
-            <span class="forest-detail-label">摘要</span>
-            <p data-forest-detail-abstract>{{ first_tile.abstract|clean_latex }}</p>
+            <span class="forest-detail-label">英文摘要</span>
+            <p data-forest-detail-abstract>{{ first_tile.abstract|inline_text }}</p>
           </section>
         </aside>
       </div>

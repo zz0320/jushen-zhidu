@@ -10,6 +10,9 @@ from markupsafe import Markup, escape
 ARXIV_ID_PATTERN = re.compile(r"(?<![\w/.-])(?P<prefix>arXiv:\s*)?(?P<id>\d{4}\.\d{4,5}(?:v\d+)?)(?![\w.-])", re.IGNORECASE)
 HTML_LINK_SKIP_PATTERN = re.compile(r"(<a\b[^>]*>.*?</a>|<code>.*?</code>)", re.IGNORECASE | re.DOTALL)
 MARKDOWN_LINK_SKIP_PATTERN = re.compile(r"(`[^`]*`|\[[^\]]+\]\([^)]+\))")
+INLINE_MATH_PATTERN = re.compile(
+    r"\$\$(?P<display>[^$]{1,480})\$\$|\\\((?P<paren>[^)]{1,240})\\\)|\$(?P<dollar>[^$\n]{1,240})\$"
+)
 
 GREEK_REPLACEMENTS = {
     r"\alpha": "α",
@@ -91,6 +94,7 @@ def _clean_latex_fragment(value: str) -> str:
     for command in LATEX_COMMANDS_WITH_TEXT:
         cleaned = re.sub(rf"\\{command}\{{([^{{}}]+)\}}", r"\1", cleaned)
     cleaned = re.sub(r"[_^]\{([^{}]+)\}", r"\1", cleaned)
+    cleaned = re.sub(r"\^([A-Za-z0-9+\-.]+)", r"\1", cleaned)
     cleaned = re.sub(rf"([{re.escape(GREEK_CHARACTERS)}])_([A-Za-z0-9.]+)", r"\1\2", cleaned)
     cleaned = cleaned.replace(r"\&", "&").replace(r"\%", "%").replace(r"\_", "_")
     cleaned = cleaned.replace(r"\,", " ").replace(r"\;", " ").replace(r"\:", " ")
@@ -138,6 +142,27 @@ def clean_translation_title(value: str) -> str:
     text = TRANSLATION_TITLE_CLEAN_PATTERN.sub("", text).strip()
     text = text.strip("\"'“”‘’")
     return clean_latex_text(text)
+
+
+def inline_text_to_html(value: str) -> Markup:
+    """Render safe inline formatting for paper titles and abstracts."""
+    text = html.unescape(value or "")
+    if not text.strip():
+        return Markup("")
+
+    parts: list[str] = []
+    last_index = 0
+    for match in INLINE_MATH_PATTERN.finditer(text):
+        if match.start() > last_index:
+            parts.append(str(_rich_plain_inline_segment(text[last_index : match.start()])))
+        math_value = match.group("display") or match.group("paren") or match.group("dollar") or ""
+        parts.append(str(_render_math_inline(math_value)))
+        last_index = match.end()
+
+    if last_index < len(text):
+        parts.append(str(_rich_plain_inline_segment(text[last_index:])))
+
+    return Markup("".join(parts).strip())
 
 
 def summary_excerpt(value: str, max_chars: int = 280) -> str:
@@ -446,6 +471,65 @@ def _inline_markup(value: str) -> Markup:
     safe = safe.replace("**", "").replace("__", "")
     safe = _link_arxiv_ids_html(safe)
     return Markup(safe)
+
+
+def _rich_plain_inline_segment(value: str) -> Markup:
+    text = value or ""
+    for command, replacement in GREEK_REPLACEMENTS.items():
+        text = text.replace(command, replacement)
+    for command, replacement in LATEX_SYMBOL_REPLACEMENTS.items():
+        text = text.replace(command, replacement)
+
+    def replace_text_command(match: re.Match) -> str:
+        command = match.group(1)
+        content = match.group(2)
+        if command in {"textbf", "mathbf"}:
+            return f"**{content}**"
+        if command in {"textit", "mathit", "emph"}:
+            return f"*{content}*"
+        return content
+
+    text = re.sub(r"\\([A-Za-z]+)\{([^{}]+)\}", replace_text_command, text)
+    text = text.replace(r"\&", "&").replace(r"\%", "%").replace(r"\_", "_")
+    text = text.replace(r"\,", " ").replace(r"\;", " ").replace(r"\:", " ")
+    return _inline_markup(text)
+
+
+def _render_math_inline(value: str) -> Markup:
+    cleaned = value or ""
+    for command, replacement in GREEK_REPLACEMENTS.items():
+        cleaned = cleaned.replace(command, replacement)
+    for command, replacement in LATEX_SYMBOL_REPLACEMENTS.items():
+        cleaned = cleaned.replace(command, replacement)
+    for command in LATEX_COMMANDS_WITH_TEXT:
+        cleaned = re.sub(rf"\\{command}\{{([^{{}}]+)\}}", r"\1", cleaned)
+    cleaned = cleaned.replace(r"\&", "&").replace(r"\%", "%").replace(r"\_", "_")
+    cleaned = cleaned.replace(r"\,", " ").replace(r"\;", " ").replace(r"\:", " ")
+    cleaned = re.sub(r"\\([A-Za-z]+)", r"\1", cleaned)
+
+    tokens: list[tuple[str, str]] = []
+
+    def token(markup: str) -> str:
+        placeholder = f"\uE000{len(tokens)}\uE001"
+        tokens.append((placeholder, markup))
+        return placeholder
+
+    def render_script(tag: str, content: str) -> str:
+        compact = _clean_latex_fragment(content)
+        return token(f"<{tag}>{escape(compact)}</{tag}>")
+
+    cleaned = re.sub(r"\^\{([^{}]{1,120})\}", lambda match: render_script("sup", match.group(1)), cleaned)
+    cleaned = re.sub(r"_\{([^{}]{1,120})\}", lambda match: render_script("sub", match.group(1)), cleaned)
+    script_chars = rf"A-Za-z0-9+\-.{re.escape(GREEK_CHARACTERS)}≤≥<>"
+    cleaned = re.sub(rf"\^([{script_chars}]+)", lambda match: render_script("sup", match.group(1)), cleaned)
+    cleaned = re.sub(rf"_([{script_chars}]+)", lambda match: render_script("sub", match.group(1)), cleaned)
+    cleaned = cleaned.replace("{", "").replace("}", "")
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+    safe = str(escape(cleaned))
+    for placeholder, markup in tokens:
+        safe = safe.replace(placeholder, markup)
+    return Markup(f'<span class="math-inline">{safe}</span>')
 
 
 def _clean_inline_latex(value: str) -> str:

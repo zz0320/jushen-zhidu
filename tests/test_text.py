@@ -5,6 +5,7 @@ from arxiv_daily.text import (
     clean_translation_title,
     clean_translation_text,
     format_datetime,
+    inline_text_to_html,
     link_arxiv_ids_markdown,
     markdown_to_html,
     strip_first_markdown_heading,
@@ -16,6 +17,7 @@ from arxiv_daily.text import (
 def test_clean_latex_text_converts_arxiv_math_title():
     assert clean_latex_text(r"VGGT-$\Omega$: A Robot Benchmark") == "VGGT-Ω: A Robot Benchmark"
     assert clean_latex_text("VGGT-$Ω$") == "VGGT-Ω"
+    assert clean_latex_text(r"$R^3$: 3D Reconstruction") == "R3: 3D Reconstruction"
     assert clean_latex_text(r"History $o_{\leq t}$ and $a_{<t}$") == "History o≤t and a<t"
     assert clean_latex_text(r"Policies $\pi_{0.5}$ and $\pi_0$") == "Policies π0.5 and π0"
 
@@ -45,6 +47,18 @@ def test_clean_translation_text_removes_model_labels_and_latex():
 
 def test_clean_translation_title_removes_title_label():
     assert clean_translation_title("中文标题：DexHoldem：使用灵巧具身系统玩德州扑克") == "DexHoldem：使用灵巧具身系统玩德州扑克"
+
+
+def test_inline_text_to_html_renders_math_and_markdown_safely():
+    html = str(inline_text_to_html(r"$R^3$: **3D** via $\pi_{0.5}$ and $a_{<t}$ <script>"))
+
+    assert '<span class="math-inline">R<sup>3</sup></span>' in html
+    assert "<strong>3D</strong>" in html
+    assert "π<sub>0.5</sub>" in html
+    assert "a<sub>&lt;t</sub>" in html
+    assert "<script>" not in html
+    assert "&lt;script&gt;" in html
+    assert "$" not in html
 
 
 def test_summary_to_html_renders_numbered_sections_safely():

@@ -7418,11 +7418,47 @@ button.is-complete {
   margin: 0;
 }
 
+.user-head-copy {
+  border-left: 3px solid #cf6546;
+  padding-left: 18px;
+}
+
+.user-stat-strip {
+  display: grid;
+  flex: 0 0 min(520px, 48%);
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.user-stat-strip div {
+  background: #fffaf1;
+  border: 1px solid rgba(203, 185, 166, 0.68);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 12px 14px;
+}
+
+.user-stat-strip dt {
+  color: var(--ink-muted, var(--muted));
+  font-size: 12px;
+  font-weight: 780;
+  margin: 0 0 4px;
+}
+
+.user-stat-strip dd {
+  color: var(--ink-strong, var(--text));
+  font-size: 22px;
+  font-weight: 860;
+  line-height: 1;
+  margin: 0;
+}
+
 .user-admin-layout {
   align-items: start;
   display: grid;
-  gap: 18px;
-  grid-template-columns: minmax(280px, 0.34fr) minmax(0, 1fr);
+  gap: 20px;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
 }
 
 .user-create-panel,
@@ -7431,8 +7467,55 @@ button.is-complete {
   background: #fffdf8;
 }
 
+.user-create-panel {
+  position: sticky;
+  top: 92px;
+}
+
+.user-panel-head {
+  margin-bottom: 16px;
+}
+
+.user-create-form {
+  gap: 14px;
+}
+
+.user-create-form input,
+.user-create-form select {
+  min-height: 42px;
+}
+
+.user-create-form > button {
+  justify-content: center;
+  margin-top: 4px;
+  width: 100%;
+}
+
 .user-list-panel {
   min-width: 0;
+}
+
+.user-directory-head {
+  align-items: center;
+  margin: 0 0 12px;
+}
+
+.user-directory-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.user-directory-summary span {
+  background: #fffaf1;
+  border: 1px solid rgba(203, 185, 166, 0.68);
+  border-radius: 999px;
+  color: var(--ink-muted, var(--muted));
+  font-size: 12px;
+  font-weight: 760;
+  padding: 5px 10px;
+  white-space: nowrap;
 }
 
 .user-card-list {
@@ -7443,19 +7526,34 @@ button.is-complete {
 .user-card {
   background: #fffdf8;
   display: grid;
-  gap: 16px;
+  gap: 14px;
   margin: 0;
-  padding: 18px;
+  padding: 16px;
+  transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+}
+
+.user-card:hover {
+  border-color: rgba(207, 101, 70, 0.28);
+  box-shadow: 0 16px 34px rgba(43, 40, 35, 0.07);
 }
 
 .user-card.is-disabled {
   opacity: 0.72;
 }
 
+.user-card.is-current {
+  border-color: rgba(207, 101, 70, 0.34);
+}
+
 .user-card-main {
+  align-items: stretch;
   display: grid;
-  gap: 14px;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  gap: 16px;
+  grid-template-columns: minmax(220px, 1fr) minmax(330px, 0.9fr);
+}
+
+.user-identity-block {
+  min-width: 0;
 }
 
 .user-title-row {
@@ -7467,12 +7565,14 @@ button.is-complete {
 
 .user-title-row h3 {
   font-size: 20px;
+  line-height: 1.2;
   margin: 0;
 }
 
 .user-card-main p {
   color: var(--ink-muted, var(--muted));
   margin-top: 4px;
+  word-break: break-word;
 }
 
 .user-meta-grid {
@@ -7503,8 +7603,8 @@ button.is-complete {
 
 .user-actions-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(260px, 0.8fr) minmax(360px, 1.2fr) auto;
+  gap: 8px;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(360px, 1.1fr) max-content;
 }
 
 .user-actions-grid .compact-form {
@@ -7512,17 +7612,52 @@ button.is-complete {
   background: #fffaf1;
   border: 1px solid rgba(203, 185, 166, 0.62);
   border-radius: 10px;
+  display: grid;
+  gap: 8px;
   padding: 10px;
+}
+
+.user-role-form {
+  grid-template-columns: max-content minmax(120px, 1fr) max-content;
+}
+
+.user-reset-form {
+  grid-template-columns: max-content minmax(118px, 1fr) minmax(90px, 0.8fr) max-content;
 }
 
 .user-actions-grid .compact-form input,
 .user-actions-grid .compact-form select {
+  max-width: none;
   min-width: 0;
+}
+
+.user-actions-grid .compact-form button,
+.user-actions-grid .compact-form .button {
+  min-height: 38px;
+}
+
+.user-current-actions {
+  align-items: center;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.user-current-actions strong {
+  color: var(--ink-strong, var(--text));
+  display: block;
+  font-size: 15px;
+  line-height: 1.2;
+  margin-top: 4px;
 }
 
 .user-danger-actions {
   align-items: end;
   justify-content: flex-end;
+  min-width: 0;
+}
+
+.user-danger-actions form {
+  margin: 0;
 }
 
 .status-pill.warn {
@@ -7531,9 +7666,21 @@ button.is-complete {
   color: #68542b;
 }
 
+.status-pill.current {
+  background: #f7eee7;
+  border-color: #e3c8bb;
+  color: #944330;
+}
+
 @media (max-width: 1180px) {
   .user-card-main,
   .user-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-role-form,
+  .user-reset-form,
+  .user-current-actions {
     grid-template-columns: 1fr;
   }
 
@@ -7547,6 +7694,15 @@ button.is-complete {
   .account-layout,
   .user-admin-layout {
     grid-template-columns: 1fr;
+  }
+
+  .user-create-panel {
+    position: static;
+  }
+
+  .user-stat-strip {
+    flex-basis: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .account-menu {
@@ -7569,8 +7725,17 @@ button.is-complete {
     padding: 18px;
   }
 
+  .user-stat-strip,
   .user-meta-grid {
     grid-template-columns: 1fr;
+  }
+
+  .user-directory-head {
+    align-items: flex-start;
+  }
+
+  .user-directory-summary {
+    justify-content: flex-start;
   }
 }
 
@@ -11067,4 +11232,26 @@ body.has-paper-lightbox {
 .tree-simulation .detail-three {
   background: #f0cc65;
   z-index: 4;
+}
+
+.math-inline {
+  display: inline;
+  font-variant-numeric: lining-nums;
+  white-space: nowrap;
+}
+
+.math-inline sup,
+.math-inline sub {
+  font-size: 0.72em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.math-inline sup {
+  top: -0.48em;
+}
+
+.math-inline sub {
+  bottom: -0.2em;
 }

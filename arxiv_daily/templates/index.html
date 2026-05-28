@@ -143,9 +143,9 @@
                   <span>{{ paper.matched_keywords|length }} 个命中词</span>
                 {% endif %}
               </div>
-              <a class="paper-title paper-card-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|clean_latex }}</a>
+              <a class="paper-title paper-card-title" href="/papers/{{ paper.arxiv_id }}">{{ paper.title|inline_text }}</a>
               {% if translation and translation.title_content %}
-                <div class="paper-card-title-zh">{{ translation.title_content|translation_title }}</div>
+                <div class="paper-card-title-zh">{{ translation.title_content|translation_title|inline_text }}</div>
               {% endif %}
               <div class="muted paper-card-authors">{{ paper.authors[:5]|join(", ") }}{% if paper.authors|length > 5 %} et al.{% endif %}</div>
               {% if paper.affiliations %}
@@ -214,12 +214,12 @@
                 <div class="paper-card-abstract-grid">
                   <div>
                     <span>English</span>
-                    <p>{{ paper.abstract|clean_latex }}</p>
+                    <p>{{ paper.abstract|inline_text }}</p>
                   </div>
                   <div>
                     <span>中文</span>
                     {% if translation %}
-                      <p>{{ translation.content|translation_text }}</p>
+                      <p>{{ translation.content|translation_text|inline_text }}</p>
                     {% else %}
                       <p class="muted">进入详情页后可生成题目与摘要中文翻译。</p>
                     {% endif %}

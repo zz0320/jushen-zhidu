@@ -7,6 +7,7 @@ from datetime import date
 from typing import Dict, Iterable, List, Optional, Sequence
 
 from .models import Paper, PaperAbstractTranslation, PaperFullTextSummary, PaperSummary
+from .text import clean_latex_text, clean_translation_text, clean_translation_title, inline_text_to_html
 from .taxonomy import EMBODIED_TOPICS
 
 
@@ -83,9 +84,11 @@ GROWTH_STEP_DETAILS: Dict[str, Dict[str, object]] = {
     "grown": {"label": "已成长", "plant_stage": "tree"},
 }
 
-GROWN_STEP_DETAILS = {
-    "summary": "单篇总结",
-    "full_text": "全文总结",
+PLANT_TIER_BY_GENERATED_COUNT: Dict[int, Dict[str, object]] = {
+    0: {"tier": "sapling", "stage": "sapling", "label": "树苗", "rank": 0},
+    1: {"tier": "young", "stage": "tree", "label": "幼树", "rank": 1},
+    2: {"tier": "mature", "stage": "tree", "label": "大树", "rank": 2},
+    3: {"tier": "ancient", "stage": "tree", "label": "古树", "rank": 3},
 }
 
 LAND_VARIANTS = [
@@ -112,6 +115,43 @@ ASSET_VARIANT_COUNTS = {
     "simulation": 6,
     "hardware": 6,
     "other": 6,
+}
+
+SPRITE_CONTACT_SHIFTS = {
+    "tree:dataset-0": 1.17,
+    "tree:dataset-1": -1.98,
+    "tree:dataset-2": -11.52,
+    "tree:dataset-3": -1.08,
+    "tree:dataset-4": -1.83,
+    "tree:dataset-5": 11.06,
+    "tree:embodied_ai-0": 1.15,
+    "tree:embodied_ai-1": -5.09,
+    "tree:embodied_ai-2": -12.11,
+    "tree:embodied_ai-4": -5.44,
+    "tree:embodied_ai-5": 11.97,
+    "tree:manipulation-0": 1.56,
+    "tree:manipulation-1": -3.08,
+    "tree:manipulation-2": -8.79,
+    "tree:manipulation-3": -1.23,
+    "tree:manipulation-4": -3.83,
+    "tree:manipulation-5": 8.65,
+    "tree:navigation-0": -1.46,
+    "tree:navigation-3": 1.44,
+    "tree:other-4": -1.03,
+    "tree:other-5": 1.14,
+    "tree:simulation-2": -11.92,
+    "tree:simulation-5": 11.66,
+    "tree:vla-0": 1.05,
+    "tree:vla-1": -4.49,
+    "tree:vla-2": -12.00,
+    "tree:vla-4": -5.43,
+    "tree:vla-5": 11.54,
+    "tree:world_model-0": 1.58,
+    "tree:world_model-1": -12.35,
+    "tree:world_model-2": -11.90,
+    "tree:world_model-3": -1.15,
+    "tree:world_model-4": -14.18,
+    "tree:world_model-5": 11.90,
 }
 
 
@@ -155,6 +195,10 @@ def forest_asset_key(kind_key: str, seed: int) -> str:
     return f"{kind_key}-{seed % variant_count}"
 
 
+def sprite_contact_shift(plant_stage: str, asset_key: str) -> float:
+    return SPRITE_CONTACT_SHIFTS.get(f"{plant_stage}:{asset_key}", 0.0)
+
+
 def classify_rarity(score: float) -> ForestRarity:
     if score >= 30:
         return FOREST_RARITIES["legendary"]
@@ -180,13 +224,36 @@ def classify_growth(
     return FOREST_GROWTH["metadata"]
 
 
+def generated_ai_parts(
+    arxiv_id: str,
+    translations_by_paper: Dict[str, PaperAbstractTranslation],
+    summaries_by_paper: Dict[str, PaperSummary],
+    full_text_summaries_by_paper: Dict[str, PaperFullTextSummary],
+) -> List[str]:
+    parts = []
+    if arxiv_id in translations_by_paper:
+        parts.append("摘要翻译")
+    if arxiv_id in summaries_by_paper:
+        parts.append("单篇总结")
+    if arxiv_id in full_text_summaries_by_paper:
+        parts.append("全文总结")
+    return parts
+
+
+def plant_tier_for_generated_count(generated_count: int) -> Dict[str, object]:
+    return PLANT_TIER_BY_GENERATED_COUNT[min(max(generated_count, 0), 3)]
+
+
 def forest_growth_steps(
     arxiv_id: str,
     translations_by_paper: Dict[str, PaperAbstractTranslation],
     summaries_by_paper: Dict[str, PaperSummary],
     full_text_summaries_by_paper: Dict[str, PaperFullTextSummary],
 ) -> List[Dict[str, object]]:
-    growth = classify_growth(arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper)
+    generated_parts = generated_ai_parts(
+        arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper
+    )
+    tier = plant_tier_for_generated_count(len(generated_parts))
     metadata_step = GROWTH_STEP_DETAILS["metadata"]
     steps: List[Dict[str, object]] = [
         {
@@ -195,17 +262,18 @@ def forest_growth_steps(
             "detail": str(metadata_step["detail"]),
             "rank": 0,
             "plant_stage": str(metadata_step["plant_stage"]),
+            "plant_tier": "sapling",
         }
     ]
-    if growth.key in GROWN_STEP_DETAILS:
-        grown_step = GROWTH_STEP_DETAILS["grown"]
+    if generated_parts:
         steps.append(
             {
                 "key": "grown",
-                "label": str(grown_step["label"]),
-                "detail": GROWN_STEP_DETAILS[growth.key],
-                "rank": 1,
-                "plant_stage": str(grown_step["plant_stage"]),
+                "label": str(tier["label"]),
+                "detail": " / ".join(generated_parts),
+                "rank": int(tier["rank"]),
+                "plant_stage": str(tier["stage"]),
+                "plant_tier": str(tier["tier"]),
             }
         )
     return steps
@@ -226,24 +294,44 @@ def build_forest_tile(
     growth_steps = forest_growth_steps(
         paper.arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper
     )
+    translation = translations_by_paper.get(paper.arxiv_id)
+    translated_title = clean_translation_title(translation.title_content) if translation else ""
+    translated_abstract = clean_translation_text(translation.content) if translation else ""
     matched_keywords = [str(match.get("keyword")) for match in paper.matched_keywords if match.get("keyword")]
-    status_parts = []
-    if paper.arxiv_id in translations_by_paper:
-        status_parts.append("摘要翻译")
-    if paper.arxiv_id in summaries_by_paper:
-        status_parts.append("单篇总结")
-    if paper.arxiv_id in full_text_summaries_by_paper:
-        status_parts.append("全文总结")
-    has_ai_summary = paper.arxiv_id in summaries_by_paper or paper.arxiv_id in full_text_summaries_by_paper
+    has_summary_record = paper.arxiv_id in summaries_by_paper
+    has_full_text_record = paper.arxiv_id in full_text_summaries_by_paper
+    status_parts = generated_ai_parts(
+        paper.arxiv_id, translations_by_paper, summaries_by_paper, full_text_summaries_by_paper
+    )
+    generated_ai_count = len(status_parts)
+    plant_tier_state = plant_tier_for_generated_count(generated_ai_count)
+    has_ai_summary = has_summary_record or has_full_text_record
+    has_full_ai_package = generated_ai_count == 3
+    has_generated_ai = generated_ai_count > 0
+    plant_stage = str(plant_tier_state["stage"])
+    plant_tier = str(plant_tier_state["tier"])
+    plant_tier_label = str(plant_tier_state["label"])
+    asset = forest_asset_key(kind.asset_key, seed)
     return {
         "index": index,
         "seed": seed,
         "arxiv_id": paper.arxiv_id,
         "title": paper.title,
+        "title_display": clean_latex_text(paper.title),
+        "title_html": str(inline_text_to_html(paper.title)),
         "authors": paper.authors,
         "authors_display": ", ".join(paper.authors[:5]) + (" et al." if len(paper.authors) > 5 else ""),
         "abs_url": paper.abs_url or f"https://arxiv.org/abs/{paper.arxiv_id}",
         "abstract": paper.abstract,
+        "abstract_html": str(inline_text_to_html(paper.abstract)),
+        "translated_title": translated_title,
+        "translated_title_html": str(inline_text_to_html(translated_title)),
+        "translated_abstract": translated_abstract,
+        "translated_abstract_html": str(inline_text_to_html(translated_abstract)),
+        "has_translation": bool(translated_title or translated_abstract),
+        "has_translation_record": paper.arxiv_id in translations_by_paper,
+        "has_summary_record": has_summary_record,
+        "has_full_text_record": has_full_text_record,
         "score": paper.relevance_score,
         "score_display": f"{paper.relevance_score:.1f}",
         "matched_keywords": matched_keywords,
@@ -252,7 +340,7 @@ def build_forest_tile(
         "categories": paper.categories,
         "categories_display": ", ".join(paper.categories),
         "kind": kind.key,
-        "asset": forest_asset_key(kind.asset_key, seed),
+        "asset": asset,
         "visual_kind": kind.asset_key,
         "kind_label": kind.label,
         "kind_label_zh": kind.label_zh,
@@ -261,11 +349,17 @@ def build_forest_tile(
         "rarity": rarity.key,
         "rarity_label": rarity.label,
         "growth": growth.key,
-        "growth_label": growth.label,
-        "growth_rank": growth.rank,
+        "growth_label": plant_tier_label,
+        "growth_rank": int(plant_tier_state["rank"]),
         "growth_steps": growth_steps,
         "has_ai_summary": has_ai_summary,
-        "plant_stage": "tree" if has_ai_summary else "sapling",
+        "has_full_ai_package": has_full_ai_package,
+        "has_generated_ai": has_generated_ai,
+        "generated_ai_count": generated_ai_count,
+        "plant_stage": plant_stage,
+        "plant_tier": plant_tier,
+        "plant_tier_label": plant_tier_label,
+        "sprite_contact_shift": sprite_contact_shift(plant_stage, asset),
         "land": LAND_VARIANTS[seed % len(LAND_VARIANTS)],
         "flip": False,
         "accent": seed % 5,
@@ -273,7 +367,7 @@ def build_forest_tile(
         "scatter_y": 0,
         "sway_delay": seed % 1800,
         "plant_delay": (index % 18) * 34,
-        "summarized": has_ai_summary,
+        "summarized": has_generated_ai,
         "high_relevance": rarity.key in {"rare", "legendary"},
         "summary_status": " / ".join(status_parts) if status_parts else "只有元数据",
         "detail_url": f"/papers/{paper.arxiv_id}",
@@ -378,7 +472,6 @@ def forest_groves(tiles: Sequence[Dict[str, object]]) -> List[Dict[str, object]]
         for order, kind in enumerate(FOREST_KINDS.values())
         if grouped[kind.key]
     ]
-    groves.sort(key=lambda grove: (-len(grove["tiles"]), grove["order"]))
     return groves
 
 

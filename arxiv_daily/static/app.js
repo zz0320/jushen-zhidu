@@ -107,6 +107,29 @@
     }
   };
 
+  const resetButtonProgress = (form, button, defaultLabel = "") => {
+    const label = defaultLabel || button.dataset.defaultLabel || button.textContent.trim();
+    if (label) {
+      button.textContent = label;
+      button.dataset.defaultLabel = label;
+    }
+    button.disabled = false;
+    button.classList.remove("is-progressing", "is-complete");
+    button.style.removeProperty("--progress");
+    delete button.dataset.progressStatus;
+    delete form.dataset.progressStatus;
+    form.classList.remove("has-inline-progress");
+
+    const statusNode = form.querySelector("[data-inline-progress-status]");
+    if (statusNode) {
+      statusNode.remove();
+    }
+    const progressScope = form.closest(".action-card, .paper-action-group, .paper-card-ai-actions");
+    if (progressScope) {
+      delete progressScope.dataset.progressStatus;
+    }
+  };
+
   const setButtonProgress = (form, button, job, options = {}) => {
     const percent = Math.max(0, Math.min(100, Number(job.percent || 0)));
     const statusNode = ensureInlineStatus(form);
@@ -268,7 +291,14 @@
 
       let activeSummaryJobId = "";
 
-      const applySummaryProgress = (job) => {
+      const currentJobUrl = () => form.dataset.summaryJobUrl || initialJobUrl;
+      const isCurrentJobUrl = (jobUrl) => currentJobUrl() === jobUrl;
+
+      const applySummaryProgress = (job, trackedJobUrl = currentJobUrl()) => {
+        if (!isCurrentJobUrl(trackedJobUrl)) {
+          return null;
+        }
+        form.dataset.activeSummaryJobUrl = trackedJobUrl;
         const statusNode = setButtonProgress(form, button, job, {
           runningLabel: form.dataset.runningLabel || "生成中",
           completedLabel: form.dataset.completedLabel || button.dataset.completedLabel || "已完成",
@@ -277,61 +307,90 @@
         const label = job.label ? `${job.label} · ` : "";
         const model = job.model ? ` · ${job.model}` : "";
         renderInlineStatus(statusNode, `${label}${job.message || job.stage_label || "正在处理。"}${model}`, job);
+        return statusNode;
       };
 
-      const handleError = (error) => {
+      const handleError = (error, trackedJobUrl = currentJobUrl()) => {
+        if (!isCurrentJobUrl(trackedJobUrl)) {
+          return;
+        }
         applySummaryProgress({
           status: "failed",
           stage_label: "生成失败",
           message: error.message || "生成失败。",
           percent: 100,
-        });
+        }, trackedJobUrl);
       };
 
-      const poll = async (jobId, trackedJobUrl = form.dataset.summaryJobUrl || initialJobUrl) => {
+      const poll = async (jobId, trackedJobUrl = currentJobUrl()) => {
         const response = await fetch(`/summary-jobs/${jobId}`, { headers: { Accept: "application/json" } });
         if (!response.ok) {
           throw new Error("无法读取生成进度。");
         }
         const job = await response.json();
-        applySummaryProgress(job);
+        applySummaryProgress(job, trackedJobUrl);
 
         if (job.status === "completed") {
           clearStoredSummaryJob(trackedJobUrl, jobId);
           activeSummaryJobId = "";
-          window.setTimeout(() => {
-            navigateWithMessage(window.location.href, "");
-          }, 700);
+          if (isCurrentJobUrl(trackedJobUrl)) {
+            window.setTimeout(() => {
+              navigateWithMessage(window.location.href, "");
+            }, 700);
+          }
           return;
         }
 
         if (job.status === "failed" || job.status === "not_found") {
           clearStoredSummaryJob(trackedJobUrl, jobId);
           activeSummaryJobId = "";
-          applySummaryProgress({
-            ...job,
-            status: "failed",
-            message: job.status === "not_found" ? "任务状态已失效，可能服务已重启，请重新生成。" : job.error || job.message || "生成失败。",
-          });
+          if (isCurrentJobUrl(trackedJobUrl)) {
+            applySummaryProgress({
+              ...job,
+              status: "failed",
+              message: job.status === "not_found" ? "任务状态已失效，可能服务已重启，请重新生成。" : job.error || job.message || "生成失败。",
+            }, trackedJobUrl);
+          }
           return;
         }
 
         storeSummaryJob(trackedJobUrl, jobId, job);
-        window.setTimeout(() => poll(jobId, trackedJobUrl).catch(handleError), 850);
+        window.setTimeout(() => poll(jobId, trackedJobUrl).catch((error) => handleError(error, trackedJobUrl)), 850);
       };
+
+      const restoreCurrentSummaryJob = () => {
+        resetButtonProgress(form, button, button.dataset.defaultLabel || button.textContent.trim());
+        const jobUrl = currentJobUrl();
+        const storedJob = readStoredSummaryJob(jobUrl);
+        if (!storedJob || !storedJob.jobId) {
+          activeSummaryJobId = "";
+          return;
+        }
+        activeSummaryJobId = storedJob.jobId;
+        applySummaryProgress({
+          status: storedJob.status || "running",
+          stage_label: "恢复进度",
+          message: "正在恢复这篇论文的智能生成进度。",
+          percent: storedJob.percent || 2,
+        }, jobUrl);
+        poll(activeSummaryJobId, jobUrl).catch((error) => handleError(error, jobUrl));
+      };
+
+      form.addEventListener("summary-job-url-change", restoreCurrentSummaryJob);
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
+        const jobUrl = currentJobUrl();
+        form.dataset.activeSummaryJobUrl = jobUrl;
         const data = new FormData(form);
         applySummaryProgress({
           status: "queued",
           stage_label: "等待开始",
           message: "任务已创建，正在整理上下文。",
           percent: 3,
-        });
+        }, jobUrl);
 
         try {
-          const jobUrl = form.dataset.summaryJobUrl || initialJobUrl;
           const response = await fetch(jobUrl, {
             method: "POST",
             body: data,
@@ -347,9 +406,9 @@
             stage_label: "等待开始",
             percent: 3,
           });
-          await poll(activeSummaryJobId);
+          await poll(activeSummaryJobId, jobUrl);
         } catch (error) {
-          handleError(error);
+          handleError(error, jobUrl);
         }
       });
 
@@ -361,8 +420,8 @@
           stage_label: "恢复进度",
           message: "页面已重新打开，正在恢复智能生成进度。",
           percent: storedJob.percent || 2,
-        });
-        poll(activeSummaryJobId, initialJobUrl).catch(handleError);
+        }, initialJobUrl);
+        poll(activeSummaryJobId, initialJobUrl).catch((error) => handleError(error, initialJobUrl));
       }
     });
   };
@@ -705,6 +764,7 @@
     const tileById = new Map(tiles.map((tile) => [tile.arxiv_id, tile]));
     const buttons = Array.from(document.querySelectorAll("[data-forest-tile]"));
     const filters = Array.from(document.querySelectorAll("[data-forest-filter]"));
+    const filterSelects = Array.from(document.querySelectorAll("[data-forest-filter-select]"));
     const groves = Array.from(document.querySelectorAll("[data-forest-grove]"));
     const moreButtons = Array.from(document.querySelectorAll("[data-forest-focus-grove]"));
     const pagerButtons = Array.from(document.querySelectorAll("[data-grove-page-prev], [data-grove-page-next]"));
@@ -725,6 +785,7 @@
       kindEn: document.querySelector("[data-forest-detail-kind-en]"),
       kindZh: document.querySelector("[data-forest-detail-kind-zh]"),
       title: document.querySelector("[data-forest-detail-title]"),
+      titleTranslation: document.querySelector("[data-forest-detail-title-translation]"),
       paper: document.querySelector("[data-forest-detail-paper]"),
       score: document.querySelector("[data-forest-detail-score]"),
       rarity: document.querySelector("[data-forest-detail-rarity]"),
@@ -736,6 +797,9 @@
       categories: document.querySelector("[data-forest-detail-categories]"),
       status: document.querySelector("[data-forest-detail-status]"),
       abstract: document.querySelector("[data-forest-detail-abstract]"),
+      translationCard: document.querySelector("[data-forest-detail-translation-card]"),
+      translatedTitle: document.querySelector("[data-forest-detail-translated-title]"),
+      translatedAbstract: document.querySelector("[data-forest-detail-translated-abstract]"),
       plant: document.querySelector("[data-forest-detail-plant]"),
       sprite: document.querySelector("[data-forest-detail-sprite]"),
       aiForm: document.querySelector("[data-forest-detail-ai-form]"),
@@ -743,6 +807,7 @@
       aiSubmit: document.querySelector("[data-forest-detail-ai-submit]"),
       aiStatus: document.querySelector("[data-forest-detail-ai-status]"),
       translationLink: document.querySelector("[data-forest-detail-translation-link]"),
+      translationLinkSecondary: document.querySelector("[data-forest-detail-translation-link-secondary]"),
       summaryLink: document.querySelector("[data-forest-detail-summary-link]"),
       fullLink: document.querySelector("[data-forest-detail-full-link]"),
       growthDiary: document.querySelector("[data-forest-growth-diary]"),
@@ -750,6 +815,8 @@
       growthStatusFill: document.querySelector("[data-forest-growth-fill]"),
       grownVisible: document.querySelector("[data-forest-grown-visible]"),
       growthVisible: document.querySelector("[data-forest-growth-visible]"),
+      filterVisible: document.querySelector("[data-forest-filter-visible]"),
+      filterTotal: document.querySelector("[data-forest-filter-total]"),
       activeTopic: document.querySelector("[data-forest-active-topic]"),
       activeStatus: document.querySelector("[data-forest-active-status]"),
     };
@@ -757,6 +824,16 @@
     const text = (value, fallback = "") => {
       const normalized = Array.isArray(value) ? value.join(", ") : String(value || "");
       return normalized || fallback;
+    };
+
+    const setRichText = (node, html, fallback = "") => {
+      if (!node) return;
+      const rendered = String(html || "");
+      if (rendered) {
+        node.innerHTML = rendered;
+      } else {
+        node.textContent = fallback;
+      }
     };
 
     const matchedButtons = () => buttons.filter((button) => button.dataset.filterMatched === "true");
@@ -938,6 +1015,14 @@
       });
     };
 
+    const updateFilterSelects = () => {
+      filterSelects.forEach((select) => {
+        const group = select.dataset.forestFilterSelect;
+        if (!group) return;
+        select.value = activeFilters[group] || "all";
+      });
+    };
+
     const keepActiveFiltersInView = () => {
       filters.forEach((button) => {
         if (!button.classList.contains("is-active")) return;
@@ -1112,20 +1197,14 @@
 
     const spritePath = (tile) => {
       const prefix = tile.plant_stage === "sapling" ? "sapling-" : "tree-";
-      return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-plot-saplings`;
+      return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260528-forest-frame`;
     };
 
-    const growthStateLabel = (tile) => (tile?.summarized ? "已成长" : "树苗");
-
-    const grownStepDetail = (tile) => {
-      if (tile?.growth === "full_text") return "全文总结";
-      if (tile?.growth === "summary") return "单篇总结";
-      return "已生成总结";
-    };
+    const growthStateLabel = (tile) => tile?.plant_tier_label || (tile?.summarized ? "已生成" : "树苗");
 
     const growthSpritePath = (tile, step) => {
       const prefix = step.plant_stage === "tree" ? "tree-" : "sapling-";
-      return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260526-plot-saplings`;
+      return `/static/forest/generated/${prefix}${tile.asset}.png?v=20260528-forest-frame`;
     };
 
     const paperPath = (tile, hash = "") => `${tile.detail_url || `/papers/${tile.arxiv_id}`}${hash}`;
@@ -1133,13 +1212,13 @@
     const hasInsight = (tile, key) => {
       const status = tile?.summary_status || "";
       if (key === "translation") {
-        return status.includes("摘要翻译") || ["translation", "summary", "full_text"].includes(tile?.growth);
+        return Boolean(tile?.has_translation_record) || status.includes("摘要翻译");
       }
       if (key === "summary") {
-        return status.includes("单篇总结") || ["summary", "full_text"].includes(tile?.growth);
+        return Boolean(tile?.has_summary_record) || status.includes("单篇总结");
       }
       if (key === "full_text") {
-        return status.includes("全文总结") || tile?.growth === "full_text";
+        return Boolean(tile?.has_full_text_record) || status.includes("全文总结");
       }
       return false;
     };
@@ -1161,15 +1240,18 @@
           detail: "元数据",
           rank: 0,
           plant_stage: "sapling",
+          plant_tier: "sapling",
         },
       ];
-      if (tile.summarized) {
+      if (tile.summarized || Number(tile.generated_ai_count || 0) > 0) {
+        const tier = tile.plant_tier || "young";
         steps.push({
           key: "grown",
-          label: "已成长",
-          detail: grownStepDetail(tile),
-          rank: 1,
-          plant_stage: "tree",
+          label: tile.plant_tier_label || "幼树",
+          detail: tile.summary_status || "已生成智能内容",
+          rank: Number(tile.generated_ai_count || 1),
+          plant_stage: tier === "sapling" ? "sapling" : "tree",
+          plant_tier: tier,
         });
       }
       return steps;
@@ -1183,7 +1265,15 @@
         label: step.label || "树苗",
         detail: step.detail || "元数据",
         rank: Number(step.rank || 0),
-        plant_stage: step.plant_stage === "tree" ? "tree" : "sapling",
+        plant_stage:
+          step.plant_stage === "tree" || ["ancient", "mature", "young", "tree"].includes(step.plant_tier)
+            ? "tree"
+            : "sapling",
+        plant_tier: ["ancient", "mature", "young", "tree", "sapling"].includes(step.plant_tier)
+          ? step.plant_tier
+          : step.plant_stage === "tree" || Number(step.rank || 0) > 0
+            ? "young"
+            : "sapling",
       }));
     };
 
@@ -1210,7 +1300,7 @@
 
       steps.forEach((step, index) => {
         const item = document.createElement("span");
-        item.className = `forest-growth-step is-complete ${index === steps.length - 1 ? "is-current" : ""} is-${step.plant_stage}-step`;
+        item.className = `forest-growth-step is-complete ${index === steps.length - 1 ? "is-current" : ""} is-${step.plant_stage}-step is-${step.plant_tier}-tier`;
         item.dataset.growthStep = step.key;
         item.dataset.growthRank = String(step.rank);
 
@@ -1239,7 +1329,7 @@
       const inspector = nodes.title ? nodes.title.closest(".forest-inspector") : null;
       if (inspector) {
         inspector.classList.remove("is-updating", "is-tree-stage", "is-sapling-stage");
-        inspector.classList.add(tile.has_ai_summary ? "is-tree-stage" : "is-sapling-stage");
+        inspector.classList.add(tile.plant_stage === "tree" || tile.has_generated_ai ? "is-tree-stage" : "is-sapling-stage");
         void inspector.offsetWidth;
         inspector.classList.add("is-updating");
         window.setTimeout(() => inspector.classList.remove("is-updating"), 380);
@@ -1250,7 +1340,13 @@
         nodes.kind.textContent = tile.kind_label || tile.primary_category || "";
       }
       if (nodes.kindZh) nodes.kindZh.textContent = tile.kind_label_zh || "";
-      if (nodes.title) nodes.title.textContent = tile.title || "";
+      setRichText(nodes.title, tile.title_html, tile.title_display || tile.title || "");
+      const translatedTitle = text(tile.translated_title);
+      const translatedAbstract = text(tile.translated_abstract);
+      if (nodes.titleTranslation) {
+        setRichText(nodes.titleTranslation, tile.translated_title_html, translatedTitle);
+        nodes.titleTranslation.hidden = !translatedTitle;
+      }
       if (nodes.paper) nodes.paper.href = tile.detail_url || "#";
       if (nodes.score) nodes.score.textContent = `相关性 ${tile.score_display || tile.score || 0}`;
       if (nodes.rarity) nodes.rarity.textContent = tile.rarity_label || "";
@@ -1264,7 +1360,18 @@
       if (nodes.keywords) nodes.keywords.textContent = text(tile.matched_terms_display || tile.matched_keywords, "暂无关键词");
       if (nodes.categories) nodes.categories.textContent = text(tile.categories_display || tile.categories, tile.primary_category || "-");
       if (nodes.status) nodes.status.textContent = tile.summary_status || "只有元数据";
-      if (nodes.abstract) nodes.abstract.textContent = tile.abstract || "";
+      setRichText(nodes.abstract, tile.abstract_html, tile.abstract || "");
+      const hasTranslation = Boolean(translatedTitle || translatedAbstract);
+      if (nodes.translationCard) {
+        nodes.translationCard.hidden = !hasTranslation;
+      }
+      if (nodes.translatedTitle) {
+        setRichText(nodes.translatedTitle, tile.translated_title_html, translatedTitle);
+        nodes.translatedTitle.hidden = !translatedTitle;
+      }
+      if (nodes.translatedAbstract) {
+        setRichText(nodes.translatedAbstract, tile.translated_abstract_html, translatedAbstract);
+      }
       renderGrowthDiary(tile);
       if (nodes.sprite && tile.asset) {
         nodes.sprite.src = spritePath(tile);
@@ -1272,14 +1379,21 @@
       if (nodes.aiStatus) nodes.aiStatus.textContent = tile.summary_status || "只有元数据";
       if (nodes.aiForm && tile.arxiv_id) {
         const refresh = tile.growth === "full_text";
+        const submitLabel = refresh ? "刷新三项" : "生成三项";
         nodes.aiForm.action = `/papers/${tile.arxiv_id}/summarize-all`;
         nodes.aiForm.dataset.summaryJobUrl = `/summary-jobs/papers/${tile.arxiv_id}/all`;
         nodes.aiForm.dataset.runningLabel = refresh ? "刷新中" : "生成中";
         nodes.aiForm.dataset.completedLabel = refresh ? "已刷新" : "已生成";
         if (nodes.aiForce) nodes.aiForce.value = refresh ? "true" : "false";
-        if (nodes.aiSubmit) nodes.aiSubmit.textContent = refresh ? "刷新三项" : "生成三项";
+        if (nodes.aiSubmit) {
+          nodes.aiSubmit.textContent = submitLabel;
+          nodes.aiSubmit.dataset.defaultLabel = submitLabel;
+          nodes.aiSubmit.dataset.completedLabel = refresh ? "已刷新" : "已生成";
+        }
+        nodes.aiForm.dispatchEvent(new CustomEvent("summary-job-url-change"));
       }
       updateInsightLink(nodes.translationLink, tile, "translation", "#abstract-translation");
+      updateInsightLink(nodes.translationLinkSecondary, tile, "translation", "#abstract-translation");
       updateInsightLink(nodes.summaryLink, tile, "summary", "#abstract-summary");
       updateInsightLink(nodes.fullLink, tile, "full_text", "#full-text-summary");
       if (nodes.plant) {
@@ -1288,6 +1402,7 @@
           `tree-${tile.visual_kind || tile.kind || "other"}`,
           `land-${tile.land || "grass"}`,
           `is-${tile.plant_stage || "sapling"}-plant`,
+          `is-${tile.plant_tier || tile.plant_stage || "sapling"}-tier`,
         ];
         if (tile.high_relevance) {
           plantClasses.push("is-high-relevance-plant");
@@ -1297,6 +1412,7 @@
         }
         nodes.plant.className = plantClasses.join(" ");
         nodes.plant.dataset.growth = tile.growth || "";
+        nodes.plant.style.setProperty("--sprite-contact-shift", `${Number(tile.sprite_contact_shift || 0)}%`);
       }
     };
 
@@ -1336,7 +1452,7 @@
 
     const showTitleTooltip = (button) => {
       const tile = tileById.get(button.dataset.arxivId);
-      const paperTitle = tile?.title || button.dataset.forestTooltipTitle || button.getAttribute("aria-label") || "";
+      const paperTitle = tile?.title_display || button.dataset.forestTooltipTitle || tile?.title || button.getAttribute("aria-label") || "";
       if (!paperTitle) return;
       const topicLabel = [tile?.kind_label, tile?.kind_label_zh].filter(Boolean).join(" / ");
       titleTooltipMeta.textContent = [topicLabel, growthStateLabel(tile)].filter(Boolean).join(" · ");
@@ -1367,6 +1483,7 @@
     const groveLayoutTierForCount = (count) => {
       if (count <= 1) return "single";
       if (count <= 6) return "compact";
+      if (count >= 12 && !isExpandedGroveLayout()) return "field";
       if (count < 28 && !isExpandedGroveLayout()) return "wide";
       return "field";
     };
@@ -1382,10 +1499,23 @@
     };
 
     const tileWidthForGrove = (count, tier) => {
-      if (tier === "field") return count >= 30 ? 74 : 78;
-      if (tier === "wide") return count >= 16 ? 78 : 82;
-      if (tier === "compact") return count <= 3 ? 92 : 86;
-      return 96;
+      if (count >= 48) return 72;
+      if (count >= 28) return 82;
+      if (count >= 18) return 88;
+      if (tier === "field") return 96;
+      if (tier === "wide") return count >= 16 ? 98 : 106;
+      if (tier === "compact") return count <= 3 ? 116 : 108;
+      return 124;
+    };
+
+    const tileHeightForGrove = (count, tier) => {
+      if (count >= 48) return 74;
+      if (count >= 28) return 84;
+      if (count >= 18) return 90;
+      if (tier === "single") return 126;
+      if (tier === "compact") return count <= 3 ? 124 : 112;
+      if (tier === "wide") return count >= 12 ? 102 : 110;
+      return 104;
     };
 
     const updateGroveArrangements = () => {
@@ -1394,7 +1524,9 @@
         if (!trees || grove.hidden) {
           if (trees) {
             delete trees.dataset.groveColumns;
+            delete trees.dataset.groveRows;
             trees.style.removeProperty("--grove-tile-width");
+            trees.style.removeProperty("--grove-tile-height");
             trees.style.removeProperty("grid-template-columns");
           }
           return;
@@ -1408,7 +1540,9 @@
 
         const tier = grove.dataset.layoutTier || groveLayoutTierForCount(count);
         const tileWidth = tileWidthForGrove(count, tier);
+        const tileHeight = tileHeightForGrove(count, tier);
         trees.style.setProperty("--grove-tile-width", `${tileWidth}px`);
+        trees.style.setProperty("--grove-tile-height", `${tileHeight}px`);
 
         const style = window.getComputedStyle(trees);
         const columnGap = Number.parseFloat(style.columnGap) || 0;
@@ -1429,9 +1563,12 @@
         }
 
         columns = clampNumber(columns, 1, Math.min(maxColumns, count));
+        const arrangedRows = Math.ceil(count / columns);
         trees.dataset.groveColumns = String(columns);
+        trees.dataset.groveRows = String(arrangedRows);
         trees.style.gridTemplateColumns = `repeat(${columns}, minmax(var(--grove-tile-width), var(--grove-tile-width)))`;
         grove.style.setProperty("--grove-arranged-columns", String(columns));
+        grove.style.setProperty("--grove-arranged-rows", String(arrangedRows));
       });
     };
 
@@ -1510,8 +1647,15 @@
         }
       });
       updateFilterButtons();
+      updateFilterSelects();
       keepActiveFiltersInView();
       updateActiveFilterLabels();
+      if (nodes.filterVisible) {
+        nodes.filterVisible.textContent = String(visible);
+      }
+      if (nodes.filterTotal) {
+        nodes.filterTotal.textContent = String(buttons.length);
+      }
       if (stage) {
         stage.dataset.activeTopic = activeFilters.topic;
         stage.dataset.activeStatus = activeFilters.status;
@@ -1561,6 +1705,19 @@
       button.addEventListener("click", () => {
         const group = buttonGroup(button);
         activeFilters[group] = button.dataset.forestFilter || "all";
+        grovePages.clear();
+        if (group === "topic" && focusedGrove && (activeFilters.topic === "all" || activeFilters.topic !== focusedGrove)) {
+          setFocusedGrove("");
+        }
+        applyFilterState();
+      });
+    });
+
+    filterSelects.forEach((select) => {
+      select.addEventListener("change", () => {
+        const group = select.dataset.forestFilterSelect;
+        if (!group) return;
+        activeFilters[group] = select.value || "all";
         grovePages.clear();
         if (group === "topic" && focusedGrove && (activeFilters.topic === "all" || activeFilters.topic !== focusedGrove)) {
           setFocusedGrove("");

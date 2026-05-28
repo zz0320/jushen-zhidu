@@ -1,23 +1,41 @@
 {% extends "base.html" %}
 {% block title %}用户管理 · 具身智读{% endblock %}
 {% block content %}
+  {% set current_user_id = request.state.current_user.id if request.state.current_user else none %}
   <section class="page-head workspace-head">
-    <div>
+    <div class="user-head-copy">
       <div class="eyebrow">User administration</div>
       <h1>用户管理</h1>
-      <p>管理员负责创建账号、分配角色、停用异常账号和重置临时密码。</p>
     </div>
+    <dl class="user-stat-strip" aria-label="用户统计">
+      <div>
+        <dt>全部账号</dt>
+        <dd>{{ user_stats.total }}</dd>
+      </div>
+      <div>
+        <dt>启用中</dt>
+        <dd>{{ user_stats.enabled }}</dd>
+      </div>
+      <div>
+        <dt>管理员</dt>
+        <dd>{{ user_stats.admin }}</dd>
+      </div>
+      <div>
+        <dt>需改密</dt>
+        <dd>{{ user_stats.must_change_password }}</dd>
+      </div>
+    </dl>
   </section>
 
   <section class="user-admin-layout">
     <aside class="panel user-create-panel">
-      <div class="section-head compact-head">
+      <div class="section-head compact-head user-panel-head">
         <div>
           <div class="eyebrow">Create user</div>
           <h2>新建账号</h2>
         </div>
       </div>
-      <form class="stack-form settings-form" method="post" action="/users">
+      <form class="stack-form settings-form user-create-form" method="post" action="/users">
         <label>
           用户名
           <input name="username" placeholder="researcher.li" autocomplete="off" required>
@@ -48,21 +66,29 @@
     </aside>
 
     <section class="user-list-panel">
-      <div class="section-head compact-head">
+      <div class="section-head compact-head user-directory-head">
         <div>
           <div class="eyebrow">Directory</div>
           <h2>账号列表</h2>
         </div>
-        <span class="summary-badge">{{ users|length }} 个账号</span>
+        <div class="user-directory-summary" aria-label="角色统计">
+          <span>{{ user_stats.admin }} 管理员</span>
+          <span>{{ user_stats.editor }} 编辑者</span>
+          <span>{{ user_stats.viewer }} 阅读者</span>
+        </div>
       </div>
 
       <div class="user-card-list">
         {% for user in users %}
-          <article class="panel user-card {{ '' if user.enabled else 'is-disabled' }}">
+          {% set is_current_user = current_user_id == user.id %}
+          <article class="panel user-card {{ '' if user.enabled else 'is-disabled' }} {{ 'is-current' if is_current_user else '' }}">
             <div class="user-card-main">
-              <div>
+              <div class="user-identity-block">
                 <div class="user-title-row">
                   <h3>{{ user.display_name or user.username }}</h3>
+                  {% if is_current_user %}
+                    <span class="status-pill current">当前账号</span>
+                  {% endif %}
                   <span class="status-pill {{ '' if user.enabled else 'disabled' }}">{{ "启用中" if user.enabled else "已停用" }}</span>
                   {% if user.must_change_password %}
                     <span class="status-pill warn">需改密</span>
@@ -78,31 +104,41 @@
             </div>
 
             <div class="user-actions-grid">
-              <form class="inline-form compact-form" method="post" action="/users/{{ user.id }}/role">
-                <label>角色</label>
-                <select name="role">
-                  {% for role, label in role_labels.items() %}
-                    <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ label }}</option>
-                  {% endfor %}
-                </select>
-                <button class="secondary" type="submit">保存</button>
-              </form>
-
-              <form class="inline-form compact-form" method="post" action="/users/{{ user.id }}/password">
-                <label>重置密码</label>
-                <input name="password" type="password" placeholder="新临时密码" autocomplete="new-password" required>
-                <input name="password_confirm" type="password" placeholder="确认" autocomplete="new-password" required>
-                <button class="secondary" type="submit">重置</button>
-              </form>
-
-              <div class="row-actions user-danger-actions">
-                <form method="post" action="/users/{{ user.id }}/status">
-                  <button class="secondary" type="submit">{{ "停用" if user.enabled else "启用" }}</button>
+              {% if is_current_user %}
+                <div class="compact-form user-current-actions">
+                  <div>
+                    <label>角色</label>
+                    <strong>{{ role_labels.get(user.role, user.role) }}</strong>
+                  </div>
+                  <a class="button secondary" href="/account/password">修改密码</a>
+                </div>
+              {% else %}
+                <form class="inline-form compact-form user-role-form" method="post" action="/users/{{ user.id }}/role">
+                  <label>角色</label>
+                  <select name="role">
+                    {% for role, label in role_labels.items() %}
+                      <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <button class="secondary" type="submit">保存</button>
                 </form>
-                <form method="post" action="/users/{{ user.id }}/delete" onsubmit="return confirm('确认删除账号 {{ user.username }}？')">
-                  <button class="danger" type="submit">删除</button>
+
+                <form class="inline-form compact-form user-reset-form" method="post" action="/users/{{ user.id }}/password">
+                  <label>重置密码</label>
+                  <input name="password" type="password" placeholder="新临时密码" autocomplete="new-password" required>
+                  <input name="password_confirm" type="password" placeholder="确认" autocomplete="new-password" required>
+                  <button class="secondary" type="submit">重置</button>
                 </form>
-              </div>
+
+                <div class="row-actions user-danger-actions">
+                  <form method="post" action="/users/{{ user.id }}/status">
+                    <button class="secondary" type="submit">{{ "停用" if user.enabled else "启用" }}</button>
+                  </form>
+                  <form method="post" action="/users/{{ user.id }}/delete" onsubmit="return confirm('确认删除账号 {{ user.username }}？')">
+                    <button class="danger" type="submit">删除</button>
+                  </form>
+                </div>
+              {% endif %}
             </div>
           </article>
         {% endfor %}
