@@ -990,6 +990,68 @@
       return focusedMatch && overflowMatch && matchesTopicFilter(button) && matchesStatusFilter(button);
     };
 
+    const filterOptionsForGroup = (group) => {
+      const values = new Set(["all"]);
+      filterSelects
+        .filter((select) => select.dataset.forestFilterSelect === group)
+        .forEach((select) => {
+          Array.from(select.options).forEach((option) => values.add(option.value || "all"));
+        });
+      filters
+        .filter((button) => buttonGroup(button) === group)
+        .forEach((button) => values.add(button.dataset.forestFilter || "all"));
+      return values;
+    };
+
+    const validFilterOptions = {
+      topic: filterOptionsForGroup("topic"),
+      status: filterOptionsForGroup("status"),
+    };
+
+    const normalizeFilterKey = (group, value) => {
+      const key = String(value || "all");
+      if (validFilterOptions[group]?.has(key)) {
+        return key;
+      }
+      return "all";
+    };
+
+    const applyUrlFilterState = () => {
+      const params = new URLSearchParams(window.location.search);
+      activeFilters.topic = normalizeFilterKey("topic", params.get("topic"));
+      activeFilters.status = normalizeFilterKey("status", params.get("status"));
+
+      const legacyFilter = params.get("filter");
+      if (legacyFilter && activeFilters.topic === "all" && activeFilters.status === "all") {
+        if (validFilterOptions.status.has(legacyFilter)) {
+          activeFilters.status = legacyFilter;
+        } else if (validFilterOptions.topic.has(legacyFilter)) {
+          activeFilters.topic = legacyFilter;
+        }
+      }
+    };
+
+    const syncFilterStateToUrl = () => {
+      const url = new URL(window.location.href);
+      ["topic", "status"].forEach((group) => {
+        const value = normalizeFilterKey(group, activeFilters[group]);
+        if (value === "all") {
+          url.searchParams.delete(group);
+        } else {
+          url.searchParams.set(group, value);
+        }
+      });
+      url.searchParams.delete("filter");
+      url.searchParams.delete("_refresh");
+      window.history.replaceState(
+        {
+          forestFilters: { ...activeFilters },
+        },
+        "",
+        url.toString()
+      );
+    };
+
     const selectedVisibleButton = () => buttons.find((button) => !button.hidden && button.classList.contains("is-selected"));
 
     const filterLabel = (group) => {
@@ -1709,6 +1771,7 @@
         if (group === "topic" && focusedGrove && (activeFilters.topic === "all" || activeFilters.topic !== focusedGrove)) {
           setFocusedGrove("");
         }
+        syncFilterStateToUrl();
         applyFilterState();
       });
     });
@@ -1722,6 +1785,7 @@
         if (group === "topic" && focusedGrove && (activeFilters.topic === "all" || activeFilters.topic !== focusedGrove)) {
           setFocusedGrove("");
         }
+        syncFilterStateToUrl();
         applyFilterState();
       });
     });
@@ -1774,7 +1838,12 @@
 
     grid.addEventListener("scroll", hideTitleTooltip, { passive: true });
 
-    const initialButton = buttons.find((button) => button.classList.contains("is-selected")) || buttons[0];
+    applyUrlFilterState();
+    syncFilterStateToUrl();
+    const initialButton =
+      buttons.find((button) => button.classList.contains("is-selected") && matchesActiveFilters(button, { ignoreOverflow: true })) ||
+      buttons.find((button) => matchesActiveFilters(button, { ignoreOverflow: true })) ||
+      buttons[0];
     if (initialButton) {
       setSelected(initialButton, false);
       renderDetails(tileById.get(initialButton.dataset.arxivId));
