@@ -1,31 +1,45 @@
 {% extends "base.html" %}
-{% block title %}单篇论文 · 具身智读{% endblock %}
+{% block title %}{{ "我的收藏" if favorites_page else "单篇论文" }} · 具身智读{% endblock %}
 {% block content %}
   <section class="page-head workspace-head">
     <div>
-      <div class="eyebrow">Paper workspace</div>
-      <h1>单篇论文</h1>
-      <p>集中进入单篇阅读、摘要总结和全文总结；列表来自 {{ day }} 的总览结果。</p>
+      <div class="eyebrow">{{ "Saved papers" if favorites_page else "Paper workspace" }}</div>
+      <h1>{{ "我的收藏" if favorites_page else "单篇论文" }}</h1>
+      <p>
+        {% if favorites_page %}
+          汇总当前账号收藏的论文，方便跨日期回看和继续生成智能阅读包。
+        {% elif favorites_only %}
+          只显示 {{ day }} 已收藏的论文；可随时切回当日全部论文。
+        {% else %}
+          集中进入单篇阅读、摘要总结和全文总结；列表来自 {{ day }} 的总览结果。
+        {% endif %}
+      </p>
     </div>
     <div class="hero-controls">
-      <form class="toolbar" method="get" action="/papers">
-        <label class="visually-hidden" for="paper-day-picker">选择日期</label>
-        <input id="paper-day-picker" type="date" name="day" value="{{ day }}">
-        <button type="submit">查看</button>
-      </form>
-      <div class="date-jump" aria-label="单篇论文日期快捷跳转">
-        <a class="button secondary compact-button" href="/papers?day={{ previous_day }}">前一天</a>
-        <a class="button secondary compact-button" href="/papers?day={{ next_day }}">后一天</a>
-        <a class="button secondary compact-button" href="/forest?date={{ day }}">论文森林</a>
-      </div>
+      {% if favorites_page %}
+        <a class="button secondary" href="/papers">返回单篇论文</a>
+      {% else %}
+        <form class="toolbar" method="get" action="/papers">
+          <label class="visually-hidden" for="paper-day-picker">选择日期</label>
+          <input id="paper-day-picker" type="date" name="day" value="{{ day }}">
+          {% if favorites_only %}<input type="hidden" name="favorites" value="true">{% endif %}
+          <button type="submit">查看</button>
+        </form>
+        <div class="date-jump" aria-label="单篇论文日期快捷跳转">
+          <a class="button secondary compact-button" href="/papers?day={{ previous_day }}{% if favorites_only %}&favorites=true{% endif %}">前一天</a>
+          <a class="button secondary compact-button" href="/papers?day={{ next_day }}{% if favorites_only %}&favorites=true{% endif %}">后一天</a>
+          <a class="button secondary compact-button" href="/forest?date={{ day }}">论文森林</a>
+        </div>
+      {% endif %}
     </div>
   </section>
 
   <div class="page-layout">
     <nav class="anchor-nav workflow-nav" aria-label="单篇论文导航">
-      <span class="nav-label">单篇论文</span>
+      <span class="nav-label">{{ "我的收藏" if favorites_page else "单篇论文" }}</span>
       <a href="#paper-library">论文入口</a>
       <a href="#paper-filter">快速筛选</a>
+      <a class="nav-external" href="/favorites">我的收藏</a>
       <a class="nav-external" href="/forest?date={{ day }}">论文森林</a>
     </nav>
 
@@ -33,7 +47,11 @@
       <section class="summary-strip insight-strip">
         <div class="metric-card">
           <strong>{{ papers|length }}</strong>
-          <span>当日论文</span>
+          <span>{{ "收藏论文" if favorites_page or favorites_only else "当日论文" }}</span>
+        </div>
+        <div class="metric-card">
+          <strong data-favorite-count>{{ favorite_count }}</strong>
+          <span>账号收藏</span>
         </div>
         <div class="metric-card">
           <strong>{{ summaries_by_paper|length }}</strong>
@@ -51,6 +69,17 @@
             <span>快速筛选</span>
             <input data-paper-filter type="search" placeholder="搜索标题、作者、分类或关键词">
           </label>
+          <div class="paper-saved-tools" aria-label="收藏筛选">
+            {% if favorites_page %}
+              <a class="button secondary compact-button" href="/papers">按日期浏览</a>
+            {% elif favorites_only %}
+              <a class="button secondary compact-button" href="/papers?day={{ day }}">显示全部</a>
+              <a class="button secondary compact-button" href="/favorites">全部收藏</a>
+            {% else %}
+              <a class="button secondary compact-button" href="/papers?day={{ day }}&favorites=true">只看收藏</a>
+              <a class="button secondary compact-button" href="/favorites">全部收藏</a>
+            {% endif %}
+          </div>
           <div class="list-count">
             <strong data-paper-filter-count>{{ papers|length }}</strong>
             <span>/ {{ papers|length }} 篇</span>
@@ -62,11 +91,12 @@
         </div>
       {% endif %}
 
-      <section class="paper-feed paper-library anchor-target" id="paper-library" aria-label="单篇论文入口">
+      <section class="paper-feed paper-library anchor-target" id="paper-library" aria-label="单篇论文入口" data-favorites-only="{{ 'true' if favorites_page or favorites_only else 'false' }}">
         {% for paper in papers %}
           {% set paper_summary = summaries_by_paper.get(paper.arxiv_id) %}
           {% set paper_full_text_summary = full_text_summaries_by_paper.get(paper.arxiv_id) %}
-          <article class="paper-card paper-library-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
+          {% set is_favorite = paper.arxiv_id in favorite_ids %}
+          <article class="paper-card paper-library-card {{ 'is-favorite' if is_favorite else '' }} {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-arxiv-id="{{ paper.arxiv_id }}" data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
             <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
               <strong>{{ "%.1f"|format(paper.relevance_score) }}</strong>
@@ -91,6 +121,12 @@
               <div class="paper-card-primary-actions">
                 <a class="button compact-button" href="/papers/{{ paper.arxiv_id }}">打开</a>
                 <a class="paper-link" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
+                <form class="favorite-form paper-card-favorite-form" method="post" action="/papers/{{ paper.arxiv_id }}/favorite" data-favorite-form data-arxiv-id="{{ paper.arxiv_id }}" data-favorite="{{ 'true' if is_favorite else 'false' }}">
+                  <input type="hidden" name="next" value="{{ current_url }}">
+                  <button class="button secondary compact-button favorite-toggle {{ 'is-favorite' if is_favorite else '' }}" type="submit" aria-pressed="{{ 'true' if is_favorite else 'false' }}">
+                    <span data-favorite-label>{{ "已收藏" if is_favorite else "收藏" }}</span>
+                  </button>
+                </form>
               </div>
               <div class="paper-card-ai-actions" aria-label="已有智能内容">
                 <span>状态</span>
@@ -101,8 +137,8 @@
           </article>
         {% else %}
           <div class="empty-state paper-empty">
-            <strong>当前日期还没有论文</strong>
-            <span>先到总览同步 arXiv，或切换到其他日期。</span>
+            <strong>{{ "还没有收藏论文" if favorites_page or favorites_only else "当前日期还没有论文" }}</strong>
+            <span>{{ "在总览、单篇论文或论文森林里点击“收藏”后会显示在这里。" if favorites_page or favorites_only else "先到总览同步 arXiv，或切换到其他日期。" }}</span>
           </div>
         {% endfor %}
       </section>

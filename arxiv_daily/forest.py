@@ -40,16 +40,16 @@ FOREST_KINDS: Dict[str, ForestKind] = {
 }
 FOREST_KINDS["other"] = ForestKind("other", "Other", "其他", "普通树", "other", "other")
 
-KIND_RULES = [(topic.key, list(topic.include)) for topic in EMBODIED_TOPICS]
-KIND_RULE_MAP = {key: needles for key, needles in KIND_RULES}
+KIND_RULES = [(topic.key, list(topic.include), list(topic.exclude)) for topic in EMBODIED_TOPICS]
+KIND_RULE_MAP = {key: needles for key, needles, _excludes in KIND_RULES}
+KIND_EXCLUDE_MAP = {key: excludes for key, _needles, excludes in KIND_RULES}
 
 CLASSIFICATION_ORDER = [
-    "world_model",
     "foundation",
-    "manipulation",
+    "ego_umi",
     "navigation_mobility",
-    "simulation_data_loop",
-    "reasoning_planning",
+    "simulation_synthetic",
+    "data_loop",
     "learning_control",
     "perception_spatial",
     "hardware_teleop",
@@ -58,11 +58,20 @@ CLASSIFICATION_ORDER = [
 
 FILTER_ALIASES = {
     "vla": "foundation",
+    "vlm": "foundation",
+    "world_model": "foundation",
+    "wam": "foundation",
     "dataset": "evaluation_benchmark",
     "robotics": "learning_control",
     "embodied_ai": "perception_spatial",
     "navigation": "navigation_mobility",
-    "simulation": "simulation_data_loop",
+    "manipulation": "learning_control",
+    "grasping": "learning_control",
+    "simulation": "simulation_synthetic",
+    "synthetic_data": "simulation_synthetic",
+    "data_loop": "data_loop",
+    "umi": "ego_umi",
+    "ego": "ego_umi",
 }
 
 FOREST_RARITIES: Dict[str, ForestRarity] = {
@@ -177,6 +186,9 @@ def classify_forest_kind(paper: Paper) -> ForestKind:
     text = _paper_text(paper)
     for key in CLASSIFICATION_ORDER:
         needles = KIND_RULE_MAP.get(key, [])
+        excludes = KIND_EXCLUDE_MAP.get(key, [])
+        if excludes and any(_matches_topic(text, needle) for needle in excludes):
+            continue
         if any(_matches_topic(text, needle) for needle in needles):
             return FOREST_KINDS[key]
     return FOREST_KINDS["other"]

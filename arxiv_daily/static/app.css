@@ -11255,3 +11255,57 @@ body.has-paper-lightbox {
 .math-inline sub {
   bottom: -0.2em;
 }
+/* Per-user paper favorites. */
+.favorite-form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.favorite-toggle {
+  align-items: center;
+  background: #fffaf0 !important;
+  border-color: #d8c9b5 !important;
+  color: #4f4336 !important;
+  gap: 6px;
+}
+
+.favorite-toggle:hover,
+.favorite-toggle:focus-visible {
+  background: #fff3cf !important;
+  border-color: #c79d50 !important;
+  color: #143c26 !important;
+}
+
+.favorite-toggle.is-favorite {
+  background: #fff0b7 !important;
+  border-color: #d0a13f !important;
+  color: #143c26 !important;
+}
+
+.favorite-toggle.is-favorite [data-favorite-label]::before {
+  background: #d0a13f;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(208, 161, 63, 0.18);
+  content: "";
+  display: inline-block;
+  height: 8px;
+  margin-right: 6px;
+  vertical-align: 1px;
+  width: 8px;
+}
+
+.paper-feed .paper-card.is-favorite {
+  border-color: #d8bf76 !important;
+  box-shadow: 0 14px 30px rgba(116, 88, 36, 0.08) !important;
+}
+
+.paper-saved-tools {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.paper-detail-favorite-form,
+.paper-card-favorite-form {
+  align-items: center;
+}

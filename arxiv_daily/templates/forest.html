@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260528-filter-form-tree-only">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260529-favorites">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -230,6 +230,12 @@
           <section class="forest-inspector-actions" aria-label="论文操作">
             <div class="forest-action-row">
               <a class="button compact-button forest-read-action" data-forest-detail-paper href="{{ first_tile.detail_url }}">阅读论文</a>
+              <form class="favorite-form forest-favorite-form" method="post" action="/papers/{{ first_tile.arxiv_id }}/favorite" data-favorite-form data-forest-detail-favorite-form data-arxiv-id="{{ first_tile.arxiv_id }}" data-favorite="{{ 'true' if first_tile.favorite else 'false' }}">
+                <input type="hidden" name="next" value="{{ current_url }}">
+                <button class="button secondary compact-button favorite-toggle forest-favorite-toggle {{ 'is-favorite' if first_tile.favorite else '' }}" type="submit" aria-pressed="{{ 'true' if first_tile.favorite else 'false' }}" data-forest-detail-favorite-button>
+                  <span data-favorite-label>{{ "已收藏" if first_tile.favorite else "收藏" }}</span>
+                </button>
+              </form>
               <form method="post" action="/papers/{{ first_tile.arxiv_id }}/summarize-all" data-progress-summary="true" data-summary-job-url="/summary-jobs/papers/{{ first_tile.arxiv_id }}/all" data-running-label="{{ '刷新中' if first_tile.growth == 'full_text' else '生成中' }}" data-completed-label="{{ '已刷新' if first_tile.growth == 'full_text' else '已生成' }}" data-forest-detail-ai-form>
                 <input type="hidden" name="force" value="{{ 'true' if first_tile.growth == 'full_text' else 'false' }}" data-forest-detail-ai-force>
                 <button class="forest-ai-submit" type="submit" data-forest-detail-ai-submit>{{ "刷新三项" if first_tile.growth == "full_text" else "生成三项" }}</button>

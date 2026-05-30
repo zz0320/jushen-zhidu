@@ -439,10 +439,12 @@
     const applyFilter = () => {
       const query = input.value.trim().toLowerCase();
       let visibleCount = 0;
+      const favoritesOnly = rows.some((row) => row.closest("[data-favorites-only='true']"));
 
       rows.forEach((row) => {
         const haystack = row.dataset.paperSearch || "";
-        const matched = !query || haystack.includes(query);
+        const favoriteMatched = !row.closest("[data-favorites-only='true']") || row.dataset.favoriteVisible !== "false";
+        const matched = favoriteMatched && (!query || haystack.includes(query));
         row.hidden = !matched;
         if (matched) {
           visibleCount += 1;
@@ -453,12 +455,88 @@
         countNode.textContent = numberText(visibleCount);
       }
       if (emptyNode) {
-        emptyNode.hidden = !query || visibleCount > 0;
+        emptyNode.hidden = (!query && !favoritesOnly) || visibleCount > 0;
       }
     };
 
     input.addEventListener("input", applyFilter);
+    document.addEventListener("paper-filter-refresh", applyFilter);
     applyFilter();
+  };
+
+  const setFavoriteButtonState = (button, favorite) => {
+    if (!button) return;
+    button.classList.toggle("is-favorite", favorite);
+    button.setAttribute("aria-pressed", favorite ? "true" : "false");
+    button.title = favorite ? "取消收藏" : "收藏论文";
+    const label = button.querySelector("[data-favorite-label]");
+    if (label) {
+      label.textContent = favorite ? "已收藏" : "收藏";
+    } else {
+      button.textContent = favorite ? "已收藏" : "收藏";
+    }
+  };
+
+  const syncFavoriteState = (arxivId, favorite, favoriteCount = null) => {
+    if (!arxivId) return;
+    document.querySelectorAll("[data-favorite-form]").forEach((form) => {
+      if (form.dataset.arxivId !== arxivId) return;
+      form.dataset.favorite = favorite ? "true" : "false";
+      const button = form.querySelector("[data-favorite-label]")?.closest("button") || form.querySelector("button");
+      setFavoriteButtonState(button, favorite);
+      if (button) {
+        button.disabled = false;
+      }
+    });
+    document.querySelectorAll("[data-paper-row]").forEach((row) => {
+      if (row.dataset.arxivId !== arxivId) return;
+      row.classList.toggle("is-favorite", favorite);
+      row.dataset.favoriteVisible = favorite ? "true" : "false";
+    });
+    document.querySelectorAll("[data-favorite-count]").forEach((node) => {
+      if (favoriteCount !== null) node.textContent = numberText(favoriteCount);
+    });
+    document.dispatchEvent(new CustomEvent("paper-favorite-change", {
+      detail: { arxivId, favorite, favoriteCount },
+    }));
+    document.dispatchEvent(new CustomEvent("paper-filter-refresh"));
+  };
+
+  const setupFavoriteToggles = () => {
+    const forms = Array.from(document.querySelectorAll("[data-favorite-form]"));
+    if (!forms.length) {
+      return;
+    }
+    forms.forEach((form) => {
+      const button = form.querySelector("button");
+      setFavoriteButtonState(button, form.dataset.favorite === "true");
+      form.addEventListener("submit", async (event) => {
+        if (!window.fetch) {
+          return;
+        }
+        event.preventDefault();
+        const submitButton = form.querySelector("button");
+        if (submitButton) {
+          submitButton.disabled = true;
+        }
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: { Accept: "application/json" },
+          });
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || "收藏失败。");
+          }
+          syncFavoriteState(payload.arxiv_id || form.dataset.arxivId, Boolean(payload.favorite), payload.favorite_count);
+        } catch (_error) {
+          if (submitButton) {
+            submitButton.disabled = false;
+          }
+        }
+      });
+    });
   };
 
   const setupSettingsPresets = () => {
@@ -802,6 +880,8 @@
       translatedAbstract: document.querySelector("[data-forest-detail-translated-abstract]"),
       plant: document.querySelector("[data-forest-detail-plant]"),
       sprite: document.querySelector("[data-forest-detail-sprite]"),
+      favoriteForm: document.querySelector("[data-forest-detail-favorite-form]"),
+      favoriteButton: document.querySelector("[data-forest-detail-favorite-button]"),
       aiForm: document.querySelector("[data-forest-detail-ai-form]"),
       aiForce: document.querySelector("[data-forest-detail-ai-force]"),
       aiSubmit: document.querySelector("[data-forest-detail-ai-submit]"),
@@ -1410,6 +1490,12 @@
         nodes.titleTranslation.hidden = !translatedTitle;
       }
       if (nodes.paper) nodes.paper.href = tile.detail_url || "#";
+      if (nodes.favoriteForm && tile.arxiv_id) {
+        nodes.favoriteForm.action = `/papers/${tile.arxiv_id}/favorite`;
+        nodes.favoriteForm.dataset.arxivId = tile.arxiv_id;
+        nodes.favoriteForm.dataset.favorite = tile.favorite ? "true" : "false";
+      }
+      setFavoriteButtonState(nodes.favoriteButton, Boolean(tile.favorite));
       if (nodes.score) nodes.score.textContent = `相关性 ${tile.score_display || tile.score || 0}`;
       if (nodes.rarity) nodes.rarity.textContent = tile.rarity_label || "";
       if (nodes.growth) nodes.growth.textContent = growthStateLabel(tile);
@@ -1816,6 +1902,17 @@
       detailCloseButton.addEventListener("click", closeDetailDrawer);
     }
 
+    document.addEventListener("paper-favorite-change", (event) => {
+      const arxivId = event.detail?.arxivId || "";
+      if (!arxivId || !tileById.has(arxivId)) return;
+      const tile = tileById.get(arxivId);
+      tile.favorite = Boolean(event.detail.favorite);
+      const selected = buttons.find((button) => button.classList.contains("is-selected"));
+      if (selected?.dataset.arxivId === arxivId) {
+        renderDetails(tile);
+      }
+    });
+
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") {
         return;
@@ -1856,6 +1953,7 @@
   setupFetchProgress();
   setupSummaryProgress();
   setupPaperFilter();
+  setupFavoriteToggles();
   setupSettingsPresets();
   setupFigureLightbox();
   setupForest();

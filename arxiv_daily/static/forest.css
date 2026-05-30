@@ -14340,3 +14340,20 @@ body .forest-shell-v2 .forest-detail-v2 .forest-inspector-plant.is-full-text-pla
     grid-template-columns: 1fr !important;
   }
 }
+body .forest-shell-v2 .forest-detail-v2 .forest-favorite-form {
+  display: inline-flex;
+  margin: 0;
+  min-width: 0;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-favorite-toggle {
+  background: #fffaf0 !important;
+  border-color: #d8c9b5 !important;
+  color: #274832 !important;
+  min-width: 82px !important;
+}
+
+body .forest-shell-v2 .forest-detail-v2 .forest-favorite-toggle.is-favorite {
+  background: #fff0b7 !important;
+  border-color: #d0a13f !important;
+}

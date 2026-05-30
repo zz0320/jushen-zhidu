@@ -14,6 +14,7 @@ from arxiv_daily.models import (
     PaperAbstractTranslation,
     PaperFullTextSummary,
     PaperSummary,
+    UserPaperFavorite,
 )
 from auth_helpers import authenticated_client
 
@@ -238,6 +239,116 @@ def test_papers_workspace_lists_day_papers(tmp_path):
     assert "单篇论文" in html
     assert "Paper Workspace Entry" in html
     assert "Paper not found" not in html
+
+
+def test_paper_favorites_are_user_scoped_and_filterable(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18730v1",
+                title="Favorite Robot Paper",
+                abstract="A favorite robot paper abstract.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=18.0,
+            )
+        )
+        session.add(
+            Paper(
+                arxiv_id="2605.18731v1",
+                title="Unmarked Robot Paper",
+                abstract="An unmarked robot paper abstract.",
+                authors_json='["Bob Lee"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=8.0,
+            )
+        )
+        session.commit()
+
+    admin = authenticated_client(app, engine)
+    response = admin.post(
+        "/papers/2605.18730v1/favorite",
+        data={"next": "/papers?day=2026-05-19"},
+        headers={"accept": "application/json"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["favorite"] is True
+    with Session(engine) as session:
+        favorite = session.exec(
+            select(UserPaperFavorite).where(UserPaperFavorite.arxiv_id == "2605.18730v1")
+        ).first()
+        assert favorite is not None
+
+    day_html = admin.get("/papers?day=2026-05-19").text
+    assert "Favorite Robot Paper" in day_html
+    assert "已收藏" in day_html
+    assert 'href="/papers?day=2026-05-19&favorites=true"' in day_html
+
+    filtered_html = admin.get("/papers?day=2026-05-19&favorites=true").text
+    assert "Favorite Robot Paper" in filtered_html
+    assert "Unmarked Robot Paper" not in filtered_html
+
+    favorites_html = admin.get("/favorites").text
+    assert "我的收藏" in favorites_html
+    assert "Favorite Robot Paper" in favorites_html
+    assert "Unmarked Robot Paper" not in favorites_html
+
+    viewer = authenticated_client(app, engine, role="viewer")
+    viewer_favorites = viewer.get("/favorites").text
+    assert "Favorite Robot Paper" not in viewer_favorites
+    assert "还没有收藏论文" in viewer_favorites
+
+
+def test_forest_marks_favorite_tiles_for_current_user(tmp_path):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.18732v1",
+                title="Favorite Forest Paper",
+                abstract="A favorite forest paper abstract.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-19",
+                relevance_score=18.0,
+                matched_keywords_json='[{"keyword":"robot","group":"Robotics","weight":2.5,"kind":"include"}]',
+            )
+        )
+        session.commit()
+
+    client = authenticated_client(app, engine)
+    client.post(
+        "/papers/2605.18732v1/favorite",
+        data={"next": "/forest?date=2026-05-19"},
+        headers={"accept": "application/json"},
+    )
+
+    html = client.get("/forest?date=2026-05-19").text
+    assert "Favorite Forest Paper" in html
+    assert 'data-forest-detail-favorite-form' in html
+    assert 'data-favorite="true"' in html
+
+    payload = client.get("/api/forest?date=2026-05-19").json()
+    assert payload["tiles"][0]["favorite"] is True
 
 
 def test_clear_day_cache_removes_day_data_but_preserves_limit_runs(tmp_path):

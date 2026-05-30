@@ -41,6 +41,12 @@
         <div class="paper-action-group paper-nav-actions" aria-label="页面与外部链接">
           <a class="button secondary" href="/?day={{ paper.fetched_for_date }}">当日总览</a>
           <a class="button secondary" href="/papers?day={{ paper.fetched_for_date }}">单篇列表</a>
+          <form class="favorite-form paper-detail-favorite-form" method="post" action="/papers/{{ paper.arxiv_id }}/favorite" data-favorite-form data-arxiv-id="{{ paper.arxiv_id }}" data-favorite="{{ 'true' if is_favorite else 'false' }}">
+            <input type="hidden" name="next" value="{{ current_url }}">
+            <button class="button secondary favorite-toggle {{ 'is-favorite' if is_favorite else '' }}" type="submit" aria-pressed="{{ 'true' if is_favorite else 'false' }}">
+              <span data-favorite-label>{{ "已收藏" if is_favorite else "收藏" }}</span>
+            </button>
+          </form>
           {% if previous_paper %}
             <a class="button secondary" href="/papers/{{ previous_paper.arxiv_id }}">上一篇</a>
           {% endif %}

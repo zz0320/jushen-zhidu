@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import Column, Text
+from sqlalchemy import Column, Text, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -94,6 +94,15 @@ class UserSession(SQLModel, table=True):
     last_seen_at: datetime = Field(default_factory=utc_now)
     revoked_at: Optional[datetime] = Field(default=None, index=True)
     user_agent: str = Field(default="", sa_column=Column(Text))
+
+
+class UserPaperFavorite(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("user_id", "arxiv_id", name="uq_user_paper_favorite"),)
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id", index=True)
+    arxiv_id: str = Field(foreign_key="paper.arxiv_id", index=True)
+    created_at: datetime = Field(default_factory=utc_now, index=True)
 
 
 class Paper(SQLModel, table=True):

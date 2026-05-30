@@ -130,7 +130,8 @@
           {% set paper_summary = summaries_by_paper.get(paper.arxiv_id) %}
           {% set paper_full_text_summary = full_text_summaries_by_paper.get(paper.arxiv_id) %}
           {% set all_insights_ready = translation and paper_summary and paper_full_text_summary %}
-          <article class="paper-card {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ (paper.affiliations|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
+          {% set is_favorite = paper.arxiv_id in favorite_ids %}
+          <article class="paper-card {{ 'is-favorite' if is_favorite else '' }} {{ 'score-hot' if paper.relevance_score >= 20 else 'score-warm' if paper.relevance_score >= 8 else 'score-cool' }}" data-paper-row data-arxiv-id="{{ paper.arxiv_id }}" data-paper-search="{{ (paper.title ~ ' ' ~ (paper.authors|join(' ')) ~ ' ' ~ (paper.affiliations|join(' ')) ~ ' ' ~ paper.primary_category ~ ' ' ~ (paper.matched_terms or ''))|clean_latex|lower }}">
             <div class="paper-card-rank" aria-label="排名和相关性">
               <span>#{{ loop.index }}</span>
               <strong>{{ "%.1f"|format(paper.relevance_score) }}</strong>
@@ -231,6 +232,12 @@
               <div class="paper-card-primary-actions">
                 <a class="button compact-button" href="/papers/{{ paper.arxiv_id }}">阅读</a>
                 <a class="paper-link" href="{{ paper.abs_url }}" target="_blank" rel="noreferrer">arXiv</a>
+                <form class="favorite-form paper-card-favorite-form" method="post" action="/papers/{{ paper.arxiv_id }}/favorite" data-favorite-form data-arxiv-id="{{ paper.arxiv_id }}" data-favorite="{{ 'true' if is_favorite else 'false' }}">
+                  <input type="hidden" name="next" value="{{ current_url }}">
+                  <button class="button secondary compact-button favorite-toggle {{ 'is-favorite' if is_favorite else '' }}" type="submit" aria-pressed="{{ 'true' if is_favorite else 'false' }}">
+                    <span data-favorite-label>{{ "已收藏" if is_favorite else "收藏" }}</span>
+                  </button>
+                </form>
               </div>
               <div class="paper-card-ai-actions" aria-label="智能快捷动作">
                 <span>智能</span>

@@ -32,13 +32,26 @@ def _paper(
 
 
 def test_forest_kind_classification_rules():
-    assert classify_forest_kind(_paper(title="Open VLA for Dexterous Robots")).tree_label == "果树"
+    assert classify_forest_kind(_paper(title="Open VLA for Dexterous Robots")).tree_label == "基座树"
+    assert classify_forest_kind(
+        _paper(title="Embodied VLM for Robot Policies", matched_keywords_json='[{"keyword":"vlm"}]')
+    ).label == "Foundation Model"
     assert classify_forest_kind(
         _paper(title="World Models for Robot Planning", matched_keywords_json='[{"keyword":"world model"}]')
-    ).tree_label == "水晶树"
+    ).label == "Foundation Model"
     assert classify_forest_kind(
         _paper(title="World Action Models for Vision-Language-Action Control", matched_keywords_json='[{"keyword":"world action model"},{"keyword":"vla"}]')
-    ).label == "World Model / WAM"
+    ).label == "Foundation Model"
+    assert classify_forest_kind(
+        _paper(title="VLA Reinforcement Learning for Robot Control", matched_keywords_json='[{"keyword":"vla reinforcement learning"}]')
+    ).label == "Foundation Model"
+    assert classify_forest_kind(
+        _paper(
+            title="EgoMimic: Learning Robot Policies from Egocentric Human Videos",
+            abstract="A universal manipulation interface collects first-person human demonstrations.",
+            matched_keywords_json='[{"keyword":"egocentric"},{"keyword":"umi"}]',
+        )
+    ).label == "Ego / UMI"
     assert classify_forest_kind(
         _paper(
             title="A Robotics Dataset Benchmark",
@@ -55,11 +68,18 @@ def test_forest_kind_classification_rules():
     ).tree_label == "机械松树"
     assert classify_forest_kind(
         _paper(
+            title="Dexterous Manipulation with Diffusion Policies",
+            abstract="A bimanual grasping policy improves tool use and visual servoing.",
+            matched_keywords_json='[{"keyword":"manipulation"},{"keyword":"diffusion policy"}]',
+        )
+    ).label == "Learning / Control"
+    assert classify_forest_kind(
+        _paper(
             title="Robot Planning with Online Evaluation",
             abstract="We report a benchmark after deployment, but the method is a robot planner.",
             matched_keywords_json='[{"keyword":"robotics"}]',
         )
-    ).label == "Reasoning / Planning"
+    ).label == "Evaluation / Benchmark"
     assert classify_forest_kind(
         _paper(
             title="Vision-Language Navigation with Self Awareness",
@@ -67,6 +87,20 @@ def test_forest_kind_classification_rules():
             matched_keywords_json='[{"keyword":"navigation"},{"keyword":"data engine","group":"World Models and Data Loop"}]',
         )
     ).label == "Navigation / Mobility"
+    assert classify_forest_kind(
+        _paper(
+            title="Robot Data Engine for Continual Manipulation Improvement",
+            abstract="A data flywheel curates real robot rollouts into a closed-loop data pipeline.",
+            matched_keywords_json='[{"keyword":"data engine"}]',
+        )
+    ).label == "Data Loop"
+    assert classify_forest_kind(
+        _paper(
+            title="Synthetic Robot Demonstrations from a Physics Simulator",
+            abstract="The system creates synthetic data in MuJoCo for sim-to-real policy learning.",
+            matched_keywords_json='[{"keyword":"synthetic data"},{"keyword":"simulator"}]',
+        )
+    ).label == "Simulation / Synthetic Data"
     assert classify_forest_kind(
         _paper(
             title="Unrelated Language Model",
@@ -218,13 +252,13 @@ def test_forest_groves_keep_taxonomy_order_instead_of_count_order():
         {"filter_key": "evaluation_benchmark", "summarized": False, "high_relevance": False, "rarity": "common"},
         {"filter_key": "evaluation_benchmark", "summarized": False, "high_relevance": False, "rarity": "common"},
         {"filter_key": "foundation", "summarized": False, "high_relevance": False, "rarity": "common"},
-        {"filter_key": "reasoning_planning", "summarized": False, "high_relevance": False, "rarity": "common"},
-        {"filter_key": "reasoning_planning", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "ego_umi", "summarized": False, "high_relevance": False, "rarity": "common"},
+        {"filter_key": "data_loop", "summarized": False, "high_relevance": False, "rarity": "common"},
     ]
 
     groves = forest_groves(tiles)
 
-    assert [grove["key"] for grove in groves] == ["foundation", "reasoning_planning", "evaluation_benchmark"]
+    assert [grove["key"] for grove in groves] == ["foundation", "ego_umi", "data_loop", "evaluation_benchmark"]
 
 
 def test_forest_api_returns_tiles_and_filtering(tmp_path):
@@ -255,7 +289,7 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
     assert payload["scene"]["season_key"] == "spring"
     assert payload["counts"]["total"] == 2
     assert payload["filters"][0]["count"] == 2
-    assert payload["tiles"][0]["tree_label"] == "果树"
+    assert payload["tiles"][0]["tree_label"] == "基座树"
     assert payload["tiles"][0]["kind"] == "foundation"
     assert payload["tiles"][0]["visual_kind"] == "vla"
     assert payload["tiles"][0]["growth_label"] == "幼树"
@@ -347,14 +381,18 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
     assert "is-ancient-tier" in response.text
     assert "已成长" in response.text
     assert "树苗" in response.text
-    assert "VLA / Foundation" in response.text
+    assert "Foundation Model" in response.text
+    assert "VLA / Foundation" not in response.text
+    assert "Ego / UMI" in response.text
     assert "Perception / Spatial" in response.text
-    assert "World Model / WAM" in response.text
-    assert "Reasoning / Planning" in response.text
+    assert "World Model / WAM" not in response.text
+    assert "Reasoning / Planning" not in response.text
     assert "Learning / Control" in response.text
-    assert "Manipulation" in response.text
+    assert "Manipulation" not in response.text
     assert "Navigation / Mobility" in response.text
-    assert "Simulation / Data Loop" in response.text
+    assert "Data Loop" in response.text
+    assert "Simulation / Synthetic Data" in response.text
+    assert "Simulation / Data Loop" not in response.text
     assert "Evaluation / Benchmark" in response.text
     assert "Hardware / Teleop" in response.text
     assert "Other" in response.text

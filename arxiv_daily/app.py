@@ -67,6 +67,7 @@ from .models import (
     PaperFullTextSummary,
     PaperSummary,
     User,
+    UserPaperFavorite,
     UserSession,
     utc_now,
 )
@@ -120,6 +121,40 @@ def _day_nav_context(target_day: date, session: Session) -> Dict[str, str]:
         "next_day": (target_day + timedelta(days=1)).isoformat(),
         "latest_day": _latest_day_with_papers(session),
     }
+
+
+def _request_path_with_query(request: Request) -> str:
+    path = request.url.path
+    return f"{path}?{request.url.query}" if request.url.query else path
+
+
+def _current_user_id(request: Request) -> int:
+    current_user = getattr(request.state, "current_user", None)
+    return int(current_user.id or 0) if current_user is not None and current_user.id is not None else 0
+
+
+def _favorite_ids(session: Session, user_id: int, paper_ids: list[str]) -> set[str]:
+    if not user_id or not paper_ids:
+        return set()
+    return set(
+        session.exec(
+            select(UserPaperFavorite.arxiv_id).where(
+                UserPaperFavorite.user_id == user_id,
+                UserPaperFavorite.arxiv_id.in_(paper_ids),
+            )
+        ).all()
+    )
+
+
+def _favorite_count(session: Session, user_id: int) -> int:
+    if not user_id:
+        return 0
+    return len(session.exec(select(UserPaperFavorite.id).where(UserPaperFavorite.user_id == user_id)).all())
+
+
+def _mark_favorite_tiles(tiles: list[Dict[str, object]], favorite_ids: set[str]) -> None:
+    for tile in tiles:
+        tile["favorite"] = str(tile.get("arxiv_id") or "") in favorite_ids
 
 
 def _parse_optional_day(value: Optional[str], settings: Settings) -> tuple[date, str]:
@@ -286,6 +321,10 @@ def _clear_day_paper_cache(session: Session, target_day: date, settings: Setting
     }
 
     if paper_ids:
+        _delete_rows(
+            session,
+            session.exec(select(UserPaperFavorite).where(UserPaperFavorite.arxiv_id.in_(paper_ids))).all(),
+        )
         counts["translations"] = _delete_rows(
             session,
             session.exec(select(PaperAbstractTranslation).where(PaperAbstractTranslation.arxiv_id.in_(paper_ids))).all(),
@@ -330,6 +369,7 @@ def _clear_generated_figure_cache(output_dir: Optional[Path] = None) -> int:
 def _clear_all_paper_cache(session: Session) -> Dict[str, int]:
     counts = {
         "papers": 0,
+        "favorites": _delete_rows(session, session.exec(select(UserPaperFavorite)).all()),
         "translations": _delete_rows(session, session.exec(select(PaperAbstractTranslation)).all()),
         "paper_summaries": _delete_rows(session, session.exec(select(PaperSummary)).all()),
         "full_text_summaries": _delete_rows(session, session.exec(select(PaperFullTextSummary)).all()),
@@ -438,7 +478,7 @@ def _summary_error_message(exc: Exception) -> str:
     return message
 
 
-def _forest_data(session: Session, target_day: date) -> Dict[str, object]:
+def _forest_data(session: Session, target_day: date, user_id: int = 0) -> Dict[str, object]:
     papers = session.exec(
         select(Paper)
         .where(Paper.fetched_for_date == target_day.isoformat())
@@ -461,6 +501,7 @@ def _forest_data(session: Session, target_day: date) -> Dict[str, object]:
         else []
     )
     tiles = build_forest_tiles(papers, target_day, translations, paper_summaries, full_text_summaries)
+    _mark_favorite_tiles(tiles, _favorite_ids(session, user_id, paper_ids))
     return {
         "papers": papers,
         "tiles": tiles,
@@ -846,6 +887,8 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             return _redirect("/users", error="至少需要保留一个启用中的管理员。")
         for auth_session in session.exec(select(UserSession).where(UserSession.user_id == user_id)).all():
             session.delete(auth_session)
+        for favorite in session.exec(select(UserPaperFavorite).where(UserPaperFavorite.user_id == user_id)).all():
+            session.delete(favorite)
         session.delete(user)
         session.commit()
         return _redirect("/users", message=f"账号 {user.username} 已删除。")
@@ -883,12 +926,17 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             else []
         )
         full_text_summaries_by_paper = {summary.arxiv_id: summary for summary in full_text_summaries}
+        user_id = _current_user_id(request)
+        favorite_ids = _favorite_ids(session, user_id, paper_ids)
         return templates.TemplateResponse(
             "index.html",
             {
                 "request": request,
+                "current_url": _request_path_with_query(request),
                 "day": target_day.isoformat(),
                 "papers": papers,
+                "favorite_ids": favorite_ids,
+                "favorite_count": _favorite_count(session, user_id),
                 "translations_by_paper": translations_by_paper,
                 "summaries_by_paper": summaries_by_paper,
                 "full_text_summaries_by_paper": full_text_summaries_by_paper,
@@ -1713,11 +1761,12 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         session: Session = Depends(get_session),
     ) -> Response:
         target_day, date_error = _parse_optional_day(forest_date, settings)
-        data = _forest_data(session, target_day)
+        data = _forest_data(session, target_day, _current_user_id(request))
         return templates.TemplateResponse(
             "forest.html",
             {
                 "request": request,
+                "current_url": _request_path_with_query(request),
                 "day": target_day.isoformat(),
                 "message": message,
                 "error": error or date_error,
@@ -1728,12 +1777,13 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @app.get("/api/forest")
     def forest_api(
+        request: Request,
         forest_date: Optional[str] = Query(None, alias="date"),
         filter_key: Optional[str] = Query(None, alias="filter"),
         session: Session = Depends(get_session),
     ) -> Dict[str, object]:
         target_day, date_error = _parse_optional_day(forest_date, settings)
-        data = _forest_data(session, target_day)
+        data = _forest_data(session, target_day, _current_user_id(request))
         tiles = data["tiles"]
         if filter_key:
             tiles = [tile for tile in tiles if filter_tile(tile, filter_key)]
@@ -1752,6 +1802,9 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
     def papers_index(
         request: Request,
         day: Optional[str] = None,
+        favorites: bool = Query(False),
+        message: str = "",
+        error: str = "",
         session: Session = Depends(get_session),
     ) -> Response:
         latest_day = _latest_day_with_papers(session)
@@ -1762,6 +1815,11 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             .order_by(Paper.relevance_score.desc(), Paper.published_at.desc())
         ).all()
         paper_ids = [paper.arxiv_id for paper in papers]
+        user_id = _current_user_id(request)
+        favorite_ids = _favorite_ids(session, user_id, paper_ids)
+        if favorites:
+            papers = [paper for paper in papers if paper.arxiv_id in favorite_ids]
+            paper_ids = [paper.arxiv_id for paper in papers]
         paper_summaries = (
             session.exec(select(PaperSummary).where(PaperSummary.arxiv_id.in_(paper_ids))).all()
             if paper_ids
@@ -1776,11 +1834,68 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             "papers.html",
             {
                 "request": request,
+                "current_url": _request_path_with_query(request),
                 "day": target_day.isoformat(),
                 "papers": papers,
+                "favorite_ids": favorite_ids,
+                "favorite_count": _favorite_count(session, user_id),
+                "favorites_only": favorites,
+                "favorites_page": False,
+                "message": message,
+                "error": error,
                 "summaries_by_paper": {summary.arxiv_id: summary for summary in paper_summaries},
                 "full_text_summaries_by_paper": {summary.arxiv_id: summary for summary in full_text_summaries},
                 **_day_nav_context(target_day, session),
+            },
+        )
+
+    @app.get("/favorites")
+    def favorites_page(
+        request: Request,
+        message: str = "",
+        error: str = "",
+        session: Session = Depends(get_session),
+    ) -> Response:
+        user_id = _current_user_id(request)
+        favorite_rows = session.exec(
+            select(UserPaperFavorite)
+            .where(UserPaperFavorite.user_id == user_id)
+            .order_by(UserPaperFavorite.created_at.desc())
+        ).all()
+        favorite_order = [favorite.arxiv_id for favorite in favorite_rows]
+        papers_by_id = {}
+        if favorite_order:
+            papers = session.exec(select(Paper).where(Paper.arxiv_id.in_(favorite_order))).all()
+            papers_by_id = {paper.arxiv_id: paper for paper in papers}
+        papers = [papers_by_id[arxiv_id] for arxiv_id in favorite_order if arxiv_id in papers_by_id]
+        paper_ids = [paper.arxiv_id for paper in papers]
+        paper_summaries = (
+            session.exec(select(PaperSummary).where(PaperSummary.arxiv_id.in_(paper_ids))).all()
+            if paper_ids
+            else []
+        )
+        full_text_summaries = (
+            session.exec(select(PaperFullTextSummary).where(PaperFullTextSummary.arxiv_id.in_(paper_ids))).all()
+            if paper_ids
+            else []
+        )
+        today = parse_day(None, settings.timezone)
+        return templates.TemplateResponse(
+            "papers.html",
+            {
+                "request": request,
+                "current_url": _request_path_with_query(request),
+                "day": today.isoformat(),
+                "papers": papers,
+                "favorite_ids": set(paper_ids),
+                "favorite_count": len(favorite_order),
+                "favorites_only": True,
+                "favorites_page": True,
+                "message": message,
+                "error": error,
+                "summaries_by_paper": {summary.arxiv_id: summary for summary in paper_summaries},
+                "full_text_summaries_by_paper": {summary.arxiv_id: summary for summary in full_text_summaries},
+                **_day_nav_context(today, session),
             },
         )
 
@@ -1821,11 +1936,15 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             if paper_position is not None and paper_position + 1 < len(day_papers)
             else None
         )
+        user_id = _current_user_id(request)
         return templates.TemplateResponse(
             "paper.html",
             {
                 "request": request,
+                "current_url": _request_path_with_query(request),
                 "paper": paper,
+                "is_favorite": paper.arxiv_id in _favorite_ids(session, user_id, [paper.arxiv_id]),
+                "favorite_count": _favorite_count(session, user_id),
                 "paper_position": paper_position + 1 if paper_position is not None else None,
                 "paper_count": len(day_papers),
                 "previous_paper": previous_paper,
@@ -1837,6 +1956,47 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "error": error,
             },
         )
+
+    @app.post("/papers/{arxiv_id:path}/favorite")
+    def toggle_paper_favorite(
+        request: Request,
+        arxiv_id: str,
+        next: str = Form(""),
+        session: Session = Depends(get_session),
+    ) -> Response:
+        current_user = request.state.current_user
+        if current_user is None or current_user.id is None:
+            return _redirect("/login", next=safe_next_url(next or "/"))
+        paper = session.get(Paper, arxiv_id)
+        if paper is None:
+            if "application/json" in request.headers.get("accept", ""):
+                return JSONResponse({"error": "论文不存在。"}, status_code=404)
+            return _redirect_to_safe_url(next or "/papers", error="论文不存在。")
+        existing = session.exec(
+            select(UserPaperFavorite).where(
+                UserPaperFavorite.user_id == current_user.id,
+                UserPaperFavorite.arxiv_id == arxiv_id,
+            )
+        ).first()
+        if existing is None:
+            session.add(UserPaperFavorite(user_id=current_user.id, arxiv_id=arxiv_id))
+            favorite = True
+            message = "已加入收藏。"
+        else:
+            session.delete(existing)
+            favorite = False
+            message = "已取消收藏。"
+        session.commit()
+        if "application/json" in request.headers.get("accept", ""):
+            return JSONResponse(
+                {
+                    "arxiv_id": arxiv_id,
+                    "favorite": favorite,
+                    "favorite_count": _favorite_count(session, current_user.id),
+                    "message": message,
+                }
+            )
+        return _redirect_to_safe_url(next or f"/papers/{arxiv_id}", message=message)
 
     @app.post("/papers/{arxiv_id:path}/summarize-all")
     def summarize_paper_all(

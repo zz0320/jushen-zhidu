@@ -6,10 +6,10 @@
     <title>{% block title %}具身智读{% endblock %}</title>
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', path='/logo.svg') }}?v=20260520-resume-summary-jobs">
     <link rel="shortcut icon" href="{{ url_for('static', path='/logo.svg') }}?v=20260520-resume-summary-jobs">
-    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260528-inline-math">
+    <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}?v=20260529-favorites">
     {% block extra_head %}{% endblock %}
     <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
-    <script src="{{ url_for('static', path='/app.js') }}?v=20260528-filter-state" defer></script>
+    <script src="{{ url_for('static', path='/app.js') }}?v=20260529-favorites" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
@@ -22,6 +22,7 @@
       <nav class="main-nav app-main-nav" aria-label="主导航">
         <a class="{{ 'is-active' if current_path == '/' else '' }}" href="/">总览</a>
         <a class="{{ 'is-active' if current_path.startswith('/papers') else '' }}" href="/papers">单篇论文</a>
+        <a class="{{ 'is-active' if current_path.startswith('/favorites') else '' }}" href="/favorites">我的收藏</a>
         <a class="{{ 'is-active' if current_path.startswith('/forest') else '' }}" href="/forest">论文森林</a>
         <a class="{{ 'is-active' if current_path.startswith('/keywords') else '' }}" href="/keywords">扫描规则</a>
         <a class="{{ 'is-active' if current_path.startswith('/settings') else '' }}" href="/settings">智能设置</a>
