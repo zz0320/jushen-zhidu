@@ -54,6 +54,13 @@ def test_forest_kind_classification_rules():
     ).label == "Ego / UMI"
     assert classify_forest_kind(
         _paper(
+            title="UMI-VLA: Vision-Language-Action Policies from First-Person Demonstrations",
+            abstract="A universal manipulation interface collects egocentric demonstrations for VLA policy learning.",
+            matched_keywords_json='[{"keyword":"umi"},{"keyword":"vision-language-action"}]',
+        )
+    ).label == "Ego / UMI"
+    assert classify_forest_kind(
+        _paper(
             title="A Robotics Dataset Benchmark",
             abstract="A diagnostic benchmark and dataset for embodied agents.",
             matched_keywords_json='[{"keyword":"benchmark"}]',

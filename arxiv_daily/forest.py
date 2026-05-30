@@ -45,8 +45,8 @@ KIND_RULE_MAP = {key: needles for key, needles, _excludes in KIND_RULES}
 KIND_EXCLUDE_MAP = {key: excludes for key, _needles, excludes in KIND_RULES}
 
 CLASSIFICATION_ORDER = [
-    "foundation",
     "ego_umi",
+    "foundation",
     "navigation_mobility",
     "simulation_synthetic",
     "data_loop",
