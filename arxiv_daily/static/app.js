@@ -1,6 +1,19 @@
 (() => {
   const numberText = (value) => String(value || 0);
 
+  const emptyArxivFetchMessage = (day, sourceText) => {
+    const text = String(day || "").trim();
+    const parts = text.split("-").map((part) => Number(part));
+    if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
+      const weekday = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay();
+      if (weekday === 0 || weekday === 6) {
+        return `arXiv 没有返回 ${text} 的论文。该日期是周末；arXiv 通常不在周末发布新的公开公告批次，周末提交会进入后续工作日批次。${sourceText}`;
+      }
+      return `arXiv 没有返回 ${text} 的论文；通常是该日期尚未发布新批次、节假日暂停，或本地日期与 arXiv 公告批次存在时差。${sourceText}`;
+    }
+    return `arXiv 没有返回这一天的论文；通常是该日期尚未发布新批次，或周末/节假日没有新提交。${sourceText}`;
+  };
+
   const buildUrlWithMessage = (target, message) => {
     const url = new URL(target || window.location.href, window.location.origin);
     if (message) {
@@ -217,9 +230,15 @@
       if (job.status === "completed") {
         window.setTimeout(() => {
           const target = job.redirect_url || `/?day=${encodeURIComponent(day)}`;
-          const countText = job.current_count ? `当前共 ${job.current_count} 篇。` : "";
+          const fetchedCount = Number(job.fetched || 0);
+          const currentCount = Number(job.current_count || 0);
+          const countText = currentCount ? `当前共 ${currentCount} 篇。` : "";
           const sourceText = `官方 API 请求 ${numberText(job.network_requests)} 次，缓存 ${numberText(job.cached_pages)} 页。`;
-          navigateWithMessage(target, `抓取完成，论文列表已刷新。${countText}${sourceText}`);
+          const fallbackMessage =
+            fetchedCount === 0 && currentCount === 0
+              ? emptyArxivFetchMessage(day, sourceText)
+              : `抓取完成，论文列表已刷新。${countText}${sourceText}`;
+          navigateWithMessage(target, job.message || fallbackMessage);
         }, 900);
         return;
       }

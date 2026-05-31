@@ -260,11 +260,27 @@ def _arxiv_policy_view(settings: Settings) -> Dict[str, object]:
     }
 
 
-def _message_from_fetch(result: FetchResult) -> str:
+def _empty_fetch_message(target_day: Optional[date] = None) -> str:
+    if target_day is not None and target_day.weekday() >= 5:
+        return (
+            f"arXiv 没有返回 {target_day.isoformat()} 的论文。该日期是周末；"
+            "arXiv 通常不在周末发布新的公开公告批次，周末提交会进入后续工作日批次。"
+        )
+    if target_day is not None:
+        return (
+            f"arXiv 没有返回 {target_day.isoformat()} 的论文；通常是该日期尚未发布新批次、"
+            "节假日暂停，或本地日期与 arXiv 公告批次存在时差。"
+        )
+    return "arXiv 没有返回这一天的论文；通常是该日期尚未发布新批次，或周末/节假日没有新提交。"
+
+
+def _message_from_fetch(result: FetchResult, target_day: Optional[date] = None) -> str:
     source_note = f"联网请求 {result.network_requests} 次，缓存页 {result.cached_pages} 页。"
     quota_note = ""
     if result.daily_network_fetch_limit > 0:
         quota_note = f" 今日有效拉取额度 {result.daily_network_fetch_used}/{result.daily_network_fetch_limit}。"
+    if result.fetched == 0:
+        return f"{_empty_fetch_message(target_day)} {source_note}{quota_note}"
     return (
         f"读取 {result.fetched} 篇；命中 {result.matched} 篇；"
         f"新增 {result.saved} 篇；刷新已有 {result.updated} 篇；"
@@ -453,6 +469,18 @@ def _fetch_error_message(exc: Exception) -> str:
     return str(exc)
 
 
+def _fetch_job_stale_after(job: Dict[str, object], settings: Settings) -> float:
+    stale_after = max(90.0, settings.request_timeout_seconds * 3)
+    stage = str(job.get("stage") or "")
+    if stage in {"waiting", "locked"}:
+        try:
+            wait_seconds = float(job.get("wait_seconds") or 0.0)
+        except (TypeError, ValueError):
+            wait_seconds = 0.0
+        stale_after = max(stale_after, wait_seconds + settings.request_timeout_seconds + 30.0)
+    return stale_after
+
+
 def _summary_stage_label(stage: str) -> str:
     labels = {
         "queued": "等待开始",
@@ -596,17 +624,40 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         with Session(engine) as session:
             yield session
 
-    def active_fetch_job_for_day(day_text: str) -> Optional[Dict[str, object]]:
-        with fetch_jobs_lock:
-            active_jobs = [
-                dict(job)
-                for job in fetch_jobs.values()
-                if job.get("day") == day_text and job.get("status") in {"queued", "running"}
-            ]
+    def expire_fetch_job_if_stale(job: Dict[str, object]) -> bool:
+        if job.get("status") not in {"queued", "running"}:
+            return False
+        updated_at = float(job.get("updated_at") or 0.0)
+        if time.time() - updated_at <= _fetch_job_stale_after(job, settings):
+            return False
+        job.update(
+            status="failed",
+            stage="failed",
+            stage_label="抓取失败",
+            percent=100,
+            error="抓取任务长时间没有进展，请重新抓取。",
+            message="抓取任务长时间没有进展，请重新抓取。",
+            updated_at=time.time(),
+        )
+        return True
+
+    def active_fetch_job_for_day_locked(day_text: str) -> Optional[Dict[str, object]]:
+        active_jobs = []
+        for job in fetch_jobs.values():
+            expire_fetch_job_if_stale(job)
+            if job.get("day") == day_text and job.get("status") in {"queued", "running"}:
+                active_jobs.append(dict(job))
         if not active_jobs:
             return None
         active_jobs.sort(key=lambda job: float(job.get("created_at") or 0.0))
         return active_jobs[-1]
+
+    def active_fetch_job_for_day(day_text: str) -> Optional[Dict[str, object]]:
+        with fetch_jobs_lock:
+            active_job = active_fetch_job_for_day_locked(day_text)
+            if active_job is None:
+                return None
+            return dict(active_job)
 
     @app.get("/setup-admin")
     def setup_admin_page(
@@ -961,7 +1012,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 result = fetch_papers_for_date(session, target_day, settings, force_refresh=force_refresh)
         except Exception as exc:  # pragma: no cover - exercised through manual runtime
             return _redirect("/", day=day, error=_fetch_error_message(exc))
-        return _redirect("/", day=day, message=_message_from_fetch(result))
+        return _redirect("/", day=day, message=_message_from_fetch(result, target_day))
 
     @app.post("/day-cache/{day}/clear")
     def clear_day_cache(day: str, session: Session = Depends(get_session)) -> RedirectResponse:
@@ -985,6 +1036,9 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             quota_view = _fetch_quota_view(target_day, quota_session, settings)
         now = time.time()
         with fetch_jobs_lock:
+            active_job = active_fetch_job_for_day_locked(day)
+            if active_job is not None:
+                return {"job_id": active_job["id"], "reused": True}
             fetch_jobs[job_id] = {
                 "id": job_id,
                 "day": day,
@@ -1037,6 +1091,12 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             with Session(engine) as worker_session:
                 try:
                     lock_started_at = time.monotonic()
+                    total_pages = max(1, (settings.arxiv_max_results + settings.arxiv_page_size - 1) // settings.arxiv_page_size)
+                    lock_wait_limit = max(
+                        900.0,
+                        settings.request_timeout_seconds * (settings.arxiv_retry_count + 2),
+                        settings.effective_arxiv_request_delay_seconds * total_pages + 120.0,
+                    )
                     while not arxiv_fetch_lock.acquire(timeout=1.0):
                         waited = int(time.monotonic() - lock_started_at)
                         update_job(
@@ -1047,8 +1107,8 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             wait_seconds=waited,
                             message=f"上一个抓取任务仍在运行，已等待 {waited} 秒。",
                         )
-                        if waited >= max(30, settings.request_timeout_seconds * 2):
-                            raise RuntimeError("上一个抓取任务长时间未结束。请刷新页面后重新抓取。")
+                        if waited >= lock_wait_limit:
+                            raise RuntimeError("另一个抓取任务长时间未释放，请稍后刷新状态或重启服务。")
                     try:
                         result = fetch_papers_for_date(
                             worker_session,
@@ -1064,6 +1124,11 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             select(Paper.arxiv_id).where(Paper.fetched_for_date == target_day.isoformat())
                         ).all()
                     )
+                    latest_day = _latest_day_with_papers(worker_session)
+                    redirect_url = f"/?day={urllib.parse.quote(day)}"
+                    completion_message = _message_from_fetch(result, target_day)
+                    if current_count == 0 and latest_day and latest_day != target_day.isoformat():
+                        completion_message = f"{completion_message} 本地最近有论文的日期是 {latest_day}，可手动切换查看。"
                 except Exception as exc:  # pragma: no cover - runtime network path
                     error_message = _fetch_error_message(exc)
                     update_job(
@@ -1097,7 +1162,9 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                     ),
                     query=result.query,
                     current_count=current_count,
-                    message=_message_from_fetch(result),
+                    latest_day=latest_day,
+                    redirect_url=redirect_url,
+                    message=completion_message,
                     error="",
                 )
 
@@ -1111,20 +1178,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             job = fetch_jobs.get(job_id)
             if job is None:
                 return {"id": job_id, "status": "not_found", "stage_label": "任务不存在", "percent": 100}
-            stale_after = max(90.0, settings.request_timeout_seconds * 3)
-            if (
-                job.get("status") in {"queued", "running"}
-                and time.time() - float(job.get("updated_at") or 0.0) > stale_after
-            ):
-                job.update(
-                    status="failed",
-                    stage="failed",
-                    stage_label="抓取失败",
-                    percent=100,
-                    error="抓取任务长时间没有进展，请重新抓取。",
-                    message="抓取任务长时间没有进展，请重新抓取。",
-                    updated_at=time.time(),
-                )
+            expire_fetch_job_if_stale(job)
             return dict(job)
 
     def create_summary_job(kind: str, label: str, redirect_url: str) -> str:

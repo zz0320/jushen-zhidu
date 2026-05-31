@@ -1,3 +1,5 @@
+import threading
+import time
 from datetime import date, datetime, timezone
 
 from sqlalchemy.pool import StaticPool
@@ -5,6 +7,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 
 import arxiv_daily.app as app_module
 from arxiv_daily.app import create_app
+from arxiv_daily.arxiv import FetchResult
 from arxiv_daily.config import Settings
 from arxiv_daily.dates import arxiv_date_range, arxiv_submitted_date_query
 from arxiv_daily.models import (
@@ -527,3 +530,140 @@ def test_app_startup_marks_stale_fetch_runs_failed(tmp_path):
         assert run is not None
         assert run.status == "failed"
         assert "服务重启" in run.message
+
+
+def test_fetch_job_reuses_active_job_for_same_day(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    started = threading.Event()
+    release = threading.Event()
+
+    def fake_fetch(*args, **kwargs):
+        started.set()
+        release.wait(timeout=2)
+        return FetchResult(
+            fetched=0,
+            saved=0,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="fake",
+        )
+
+    monkeypatch.setattr(app_module, "fetch_papers_for_date", fake_fetch)
+    client = authenticated_client(app, engine, role="editor")
+
+    first = client.post("/fetch-jobs", data={"day": "2026-05-25"})
+    try:
+        assert first.status_code == 200
+        first_job_id = first.json()["job_id"]
+        assert started.wait(timeout=1)
+
+        second = client.post("/fetch-jobs", data={"day": "2026-05-25"})
+
+        assert second.status_code == 200
+        assert second.json()["job_id"] == first_job_id
+        assert second.json()["reused"] is True
+    finally:
+        release.set()
+
+
+def test_fetch_job_stale_threshold_respects_long_arxiv_wait(tmp_path):
+    settings = Settings(database_path=tmp_path / "test.sqlite3", request_timeout_seconds=30)
+
+    stale_after = app_module._fetch_job_stale_after({"stage": "waiting", "wait_seconds": 240}, settings)
+
+    assert stale_after >= 300
+
+
+def test_empty_fetch_result_explains_no_arxiv_batch():
+    message = app_module._message_from_fetch(
+        FetchResult(
+            fetched=0,
+            saved=0,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="fake",
+            network_requests=1,
+        )
+    )
+
+    assert "没有返回这一天的论文" in message
+    assert "联网请求 1 次" in message
+
+
+def test_empty_fetch_result_explains_weekend_batch_delay():
+    message = app_module._message_from_fetch(
+        FetchResult(
+            fetched=0,
+            saved=0,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="fake",
+            network_requests=1,
+        ),
+        date(2026, 5, 31),
+    )
+
+    assert "2026-05-31" in message
+    assert "该日期是周末" in message
+    assert "后续工作日批次" in message
+
+
+def test_empty_fetch_job_stays_on_requested_day_and_reports_latest_available(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2605.29000v1",
+                title="Latest Available Paper",
+                abstract="A paper from the latest available arXiv batch.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-29",
+                relevance_score=10.0,
+            )
+        )
+        session.commit()
+
+    def fake_fetch(*args, **kwargs):
+        return FetchResult(
+            fetched=0,
+            saved=0,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="fake",
+            network_requests=1,
+        )
+
+    monkeypatch.setattr(app_module, "fetch_papers_for_date", fake_fetch)
+    client = authenticated_client(app, engine, role="editor")
+
+    started = client.post("/fetch-jobs", data={"day": "2026-05-31"})
+    assert started.status_code == 200
+    job_id = started.json()["job_id"]
+    payload = {}
+    for _ in range(50):
+        payload = client.get(f"/fetch-jobs/{job_id}").json()
+        if payload.get("status") == "completed":
+            break
+        time.sleep(0.02)
+
+    assert payload["status"] == "completed"
+    assert payload["current_count"] == 0
+    assert payload["latest_day"] == "2026-05-29"
+    assert payload["redirect_url"] == "/?day=2026-05-31"
+    assert "没有返回 2026-05-31 的论文" in payload["message"]
+    assert "该日期是周末" in payload["message"]
+    assert "最近有论文的日期是 2026-05-29" in payload["message"]

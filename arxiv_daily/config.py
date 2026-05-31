@@ -16,7 +16,7 @@ class Settings:
     timezone: str = "Asia/Shanghai"
     arxiv_base_url: str = "https://export.arxiv.org/api/query"
     arxiv_page_size: int = 100
-    arxiv_max_results: int = 300
+    arxiv_max_results: int = 600
     arxiv_request_delay_seconds: float = 5.0
     arxiv_user_agent: str = "jushen-zhidu/0.1 (arXiv API client)"
     arxiv_retry_count: int = 3
@@ -69,7 +69,7 @@ def get_settings() -> Settings:
         timezone=os.getenv("ARXIV_DAILY_TIMEZONE", "Asia/Shanghai"),
         arxiv_base_url=os.getenv("ARXIV_BASE_URL", "https://export.arxiv.org/api/query"),
         arxiv_page_size=int(os.getenv("ARXIV_PAGE_SIZE", "100")),
-        arxiv_max_results=int(os.getenv("ARXIV_MAX_RESULTS", "300")),
+        arxiv_max_results=int(os.getenv("ARXIV_MAX_RESULTS", "600")),
         arxiv_request_delay_seconds=float(os.getenv("ARXIV_REQUEST_DELAY_SECONDS", "5.0")),
         arxiv_user_agent=os.getenv("ARXIV_USER_AGENT", "jushen-zhidu/0.1 (arXiv API client)"),
         arxiv_retry_count=int(os.getenv("ARXIV_RETRY_COUNT", "3")),
