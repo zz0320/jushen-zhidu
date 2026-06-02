@@ -29,9 +29,9 @@ def test_arxiv_date_ranges_split_utc_midnight():
 
 
 def test_arxiv_submitted_date_query_uses_arxiv_cutoff_batch():
-    assert arxiv_submitted_date_query(date(2026, 5, 15), "Asia/Shanghai") == (
-        "(submittedDate:[202605141800 TO 202605142359] "
-        "OR submittedDate:[202605150000 TO 202605151759])"
+    assert arxiv_submitted_date_query(date(2026, 5, 14), "Asia/Shanghai") == (
+        "(submittedDate:[202605131800 TO 202605132359] "
+        "OR submittedDate:[202605140000 TO 202605141759])"
     )
 
 
@@ -44,6 +44,13 @@ def test_monday_arxiv_batch_covers_weekend_submission_window():
     ]
 
 
-def test_weekend_has_no_regular_arxiv_batch():
-    assert arxiv_batch_utc_range(date(2026, 5, 30)) is None
-    assert arxiv_batch_date_ranges(date(2026, 5, 31)) == []
+def test_sunday_arxiv_batch_covers_thursday_to_friday_cutoff():
+    assert arxiv_batch_date_ranges(date(2026, 5, 31)) == [
+        "[202605281800 TO 202605282359]",
+        "[202605290000 TO 202605291759]",
+    ]
+
+
+def test_friday_and_saturday_have_no_regular_arxiv_batch():
+    assert arxiv_batch_utc_range(date(2026, 5, 29)) is None
+    assert arxiv_batch_date_ranges(date(2026, 5, 30)) == []

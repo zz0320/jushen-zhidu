@@ -6,8 +6,8 @@
     const parts = text.split("-").map((part) => Number(part));
     if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
       const weekday = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay();
-      if (weekday === 0 || weekday === 6) {
-        return `arXiv 没有返回 ${text} 的论文。该日期是周末；arXiv 常规批次按美东工作日 14:00 截止，周末提交会进入后续工作日批次。${sourceText}`;
+      if (weekday === 5 || weekday === 6) {
+        return `arXiv 没有返回 ${text} 的论文。arXiv 周五和周六没有常规公告；周五 14:00 后到周一 14:00 前的提交会进入周一公告批次。${sourceText}`;
       }
       return `arXiv 没有返回 ${text} 的论文；通常是该批次尚未公开、节假日暂停，或美东批次时间还未到。${sourceText}`;
     }

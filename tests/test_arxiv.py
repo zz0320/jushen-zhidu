@@ -82,18 +82,25 @@ def test_parse_atom_page_extracts_opensearch_metadata():
 
 
 def test_build_search_query_uses_categories_and_submitted_date():
-    query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 15), "Asia/Shanghai")
+    query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 14), "Asia/Shanghai")
 
     assert "(cat:cs.RO OR cat:cs.CV)" in query
-    assert "submittedDate:[202605141800 TO 202605142359]" in query
-    assert "submittedDate:[202605150000 TO 202605151759]" in query
+    assert "submittedDate:[202605131800 TO 202605132359]" in query
+    assert "submittedDate:[202605140000 TO 202605141759]" in query
     assert " OR " in query
 
 
-def test_build_search_query_returns_empty_for_weekend_without_regular_batch():
+def test_build_search_query_returns_empty_for_days_without_regular_batch():
     query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 30), "Asia/Shanghai")
 
     assert query == ""
+
+
+def test_build_search_query_uses_sunday_announcement_batch():
+    query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 31), "Asia/Shanghai")
+
+    assert "submittedDate:[202605281800 TO 202605282359]" in query
+    assert "submittedDate:[202605290000 TO 202605291759]" in query
 
 
 def test_fetch_papers_scores_and_saves_relevant_paper():
@@ -105,7 +112,7 @@ def test_fetch_papers_scores_and_saves_relevant_paper():
         def fake_get(*args, **kwargs):
             return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
 
-        result = fetch_papers_for_date(session, date(2026, 5, 15), http_get=fake_get)
+        result = fetch_papers_for_date(session, date(2026, 5, 14), http_get=fake_get)
         assert result.fetched == 1
         assert result.saved == 1
         paper = session.get(__import__("arxiv_daily.models").models.Paper, "2605.00001v1")
@@ -115,7 +122,7 @@ def test_fetch_papers_scores_and_saves_relevant_paper():
         assert "world" in paper.matched_terms.lower()
 
 
-def test_fetch_papers_skips_network_for_weekend_without_regular_batch():
+def test_fetch_papers_skips_network_for_day_without_regular_batch():
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
@@ -141,7 +148,7 @@ def test_fetch_papers_refreshes_existing_paper_timestamp(tmp_path):
         def fake_get(*args, **kwargs):
             return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
 
-        fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
         paper = session.get(Paper, "2605.00001v1")
         assert paper is not None
         old_refreshed_at = datetime(2026, 1, 1)
@@ -149,7 +156,7 @@ def test_fetch_papers_refreshes_existing_paper_timestamp(tmp_path):
         session.add(paper)
         session.commit()
 
-        result = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        result = fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
         paper = session.get(Paper, "2605.00001v1")
 
     assert result.saved == 0
@@ -171,7 +178,7 @@ def test_fetch_papers_reports_progress():
 
         result = fetch_papers_for_date(
             session,
-            date(2026, 5, 15),
+            date(2026, 5, 14),
             http_get=fake_get,
             progress_callback=events.append,
         )
@@ -196,10 +203,10 @@ def test_fetch_papers_uses_cached_page_on_repeated_query(tmp_path):
             calls.append(kwargs)
             return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
 
-        first = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        first = fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
         second = fetch_papers_for_date(
             session,
-            date(2026, 5, 15),
+            date(2026, 5, 14),
             settings=settings,
             http_get=fake_get,
             progress_callback=events.append,
@@ -267,7 +274,7 @@ def test_fetch_papers_uses_total_results_to_avoid_empty_extra_page(tmp_path):
                 request=httpx.Request("GET", "https://example.test"),
             )
 
-        result = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        result = fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
 
     assert result.network_requests == 1
     assert result.fetched == 1
@@ -286,10 +293,10 @@ def test_fetch_papers_force_refresh_ignores_cached_page(tmp_path):
             calls.append(kwargs)
             return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
 
-        fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
         result = fetch_papers_for_date(
             session,
-            date(2026, 5, 15),
+            date(2026, 5, 14),
             settings=settings,
             http_get=fake_get,
             force_refresh=True,
@@ -315,12 +322,12 @@ def test_fetch_papers_blocks_realtime_refresh_after_daily_limit(tmp_path):
             calls.append(kwargs)
             return httpx.Response(200, text=ATOM, request=httpx.Request("GET", "https://example.test"))
 
-        first = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
-        cached = fetch_papers_for_date(session, date(2026, 5, 15), settings=settings, http_get=fake_get)
+        first = fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
+        cached = fetch_papers_for_date(session, date(2026, 5, 14), settings=settings, http_get=fake_get)
         try:
             fetch_papers_for_date(
                 session,
-                date(2026, 5, 15),
+                date(2026, 5, 14),
                 settings=settings,
                 http_get=fake_get,
                 force_refresh=True,
@@ -345,7 +352,7 @@ def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_p
     with Session(engine) as session:
         session.add(
             ArxivFetchRun(
-                target_date="2026-05-15",
+                target_date="2026-05-14",
                 run_date=run_date,
                 status="failed",
                 network_requests=0,
@@ -354,7 +361,7 @@ def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_p
         )
         session.add(
             ArxivFetchRun(
-                target_date="2026-05-15",
+                target_date="2026-05-14",
                 run_date=run_date,
                 status="failed",
                 network_requests=1,
@@ -363,7 +370,7 @@ def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_p
         )
         session.add(
             ArxivFetchRun(
-                target_date="2026-05-15",
+                target_date="2026-05-14",
                 run_date=run_date,
                 status="completed",
                 network_requests=1,
@@ -373,7 +380,7 @@ def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_p
         )
         session.add(
             ArxivFetchRun(
-                target_date="2026-05-15",
+                target_date="2026-05-14",
                 run_date=run_date,
                 status="completed",
                 network_requests=1,
@@ -382,14 +389,14 @@ def test_fetch_quota_counts_only_running_or_completed_runs_with_new_papers(tmp_p
         )
         session.add(
             ArxivFetchRun(
-                target_date="2026-05-15",
+                target_date="2026-05-14",
                 run_date=run_date,
                 status="running",
             )
         )
         session.commit()
 
-        status = fetch_quota_status(session, date(2026, 5, 15), settings)
+        status = fetch_quota_status(session, date(2026, 5, 14), settings)
 
     assert status.used == 1
     assert status.remaining == 4
@@ -418,7 +425,7 @@ def test_fetch_papers_retries_429_with_wait(tmp_path):
 
         result = fetch_papers_for_date(
             session,
-            date(2026, 5, 15),
+            date(2026, 5, 14),
             settings=settings,
             http_get=fake_get,
             progress_callback=events.append,

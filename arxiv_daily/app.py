@@ -261,10 +261,10 @@ def _arxiv_policy_view(settings: Settings) -> Dict[str, object]:
 
 
 def _empty_fetch_message(target_day: Optional[date] = None) -> str:
-    if target_day is not None and target_day.weekday() >= 5:
+    if target_day is not None and target_day.weekday() in {4, 5}:
         return (
-            f"arXiv 没有返回 {target_day.isoformat()} 的论文。该日期是周末；"
-            "arXiv 常规批次按美东工作日 14:00 截止，周末提交会进入后续工作日批次。"
+            f"arXiv 没有返回 {target_day.isoformat()} 的论文。arXiv 周五和周六没有常规公告；"
+            "周五 14:00 后到周一 14:00 前的提交会进入周一公告批次。"
         )
     if target_day is not None:
         return (

@@ -596,7 +596,7 @@ def test_empty_fetch_result_explains_no_arxiv_batch():
     assert "联网请求 1 次" in message
 
 
-def test_empty_fetch_result_explains_weekend_batch_delay():
+def test_empty_fetch_result_explains_no_friday_saturday_batch():
     message = app_module._message_from_fetch(
         FetchResult(
             fetched=0,
@@ -606,12 +606,12 @@ def test_empty_fetch_result_explains_weekend_batch_delay():
             query="fake",
             network_requests=1,
         ),
-        date(2026, 5, 31),
+        date(2026, 5, 30),
     )
 
-    assert "2026-05-31" in message
-    assert "该日期是周末" in message
-    assert "后续工作日批次" in message
+    assert "2026-05-30" in message
+    assert "周五和周六没有常规公告" in message
+    assert "周一公告批次" in message
 
 
 def test_empty_fetch_job_stays_on_requested_day_and_reports_latest_available(tmp_path, monkeypatch):
@@ -650,7 +650,7 @@ def test_empty_fetch_job_stays_on_requested_day_and_reports_latest_available(tmp
     monkeypatch.setattr(app_module, "fetch_papers_for_date", fake_fetch)
     client = authenticated_client(app, engine, role="editor")
 
-    started = client.post("/fetch-jobs", data={"day": "2026-05-31"})
+    started = client.post("/fetch-jobs", data={"day": "2026-05-30"})
     assert started.status_code == 200
     job_id = started.json()["job_id"]
     payload = {}
@@ -663,7 +663,7 @@ def test_empty_fetch_job_stays_on_requested_day_and_reports_latest_available(tmp
     assert payload["status"] == "completed"
     assert payload["current_count"] == 0
     assert payload["latest_day"] == "2026-05-29"
-    assert payload["redirect_url"] == "/?day=2026-05-31"
-    assert "没有返回 2026-05-31 的论文" in payload["message"]
-    assert "该日期是周末" in payload["message"]
+    assert payload["redirect_url"] == "/?day=2026-05-30"
+    assert "没有返回 2026-05-30 的论文" in payload["message"]
+    assert "周五和周六没有常规公告" in payload["message"]
     assert "最近有论文的日期是 2026-05-29" in payload["message"]

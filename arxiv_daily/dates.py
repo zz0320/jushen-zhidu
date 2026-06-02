@@ -43,14 +43,20 @@ def _split_utc_ranges(start_utc: datetime, end_utc: datetime) -> List[str]:
 
 
 def arxiv_batch_utc_range(day: date) -> Optional[Tuple[datetime, datetime]]:
-    """Return the arXiv weekday batch window for an Eastern-time cutoff day."""
-    if day.weekday() >= 5:
+    """Return the arXiv announcement batch window for an Eastern-time date."""
+    weekday = day.weekday()
+    if weekday in {4, 5}:
         return None
 
     batch_tz = ZoneInfo(ARXIV_BATCH_TIMEZONE)
-    previous_cutoff_day = day - timedelta(days=3 if day.weekday() == 0 else 1)
-    start_local = datetime.combine(previous_cutoff_day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz)
-    end_local = datetime.combine(day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz) - timedelta(minutes=1)
+    if weekday == 6:
+        start_day = day - timedelta(days=3)
+        end_day = day - timedelta(days=2)
+    else:
+        start_day = day - timedelta(days=3 if weekday == 0 else 1)
+        end_day = day
+    start_local = datetime.combine(start_day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz)
+    end_local = datetime.combine(end_day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz) - timedelta(minutes=1)
     return start_local.astimezone(timezone.utc), end_local.astimezone(timezone.utc)
 
 
