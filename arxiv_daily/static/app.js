@@ -7,11 +7,11 @@
     if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
       const weekday = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay();
       if (weekday === 0 || weekday === 6) {
-        return `arXiv 没有返回 ${text} 的论文。该日期是周末；arXiv 通常不在周末发布新的公开公告批次，周末提交会进入后续工作日批次。${sourceText}`;
+        return `arXiv 没有返回 ${text} 的论文。该日期是周末；arXiv 常规批次按美东工作日 14:00 截止，周末提交会进入后续工作日批次。${sourceText}`;
       }
-      return `arXiv 没有返回 ${text} 的论文；通常是该日期尚未发布新批次、节假日暂停，或本地日期与 arXiv 公告批次存在时差。${sourceText}`;
+      return `arXiv 没有返回 ${text} 的论文；通常是该批次尚未公开、节假日暂停，或美东批次时间还未到。${sourceText}`;
     }
-    return `arXiv 没有返回这一天的论文；通常是该日期尚未发布新批次，或周末/节假日没有新提交。${sourceText}`;
+    return `arXiv 没有返回这一天的论文；通常是该批次尚未公开，或周末/节假日没有新提交。${sourceText}`;
   };
 
   const buildUrlWithMessage = (target, message) => {

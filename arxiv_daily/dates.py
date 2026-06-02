@@ -4,6 +4,9 @@ from datetime import date, datetime, time, timedelta, timezone
 from typing import List, Optional, Tuple
 from zoneinfo import ZoneInfo
 
+ARXIV_BATCH_TIMEZONE = "America/New_York"
+ARXIV_BATCH_CUTOFF_HOUR = 14
+
 
 def parse_day(value: Optional[str], timezone_name: str = "Asia/Shanghai") -> date:
     if value:
@@ -25,19 +28,44 @@ def arxiv_date_range(day: date, timezone_name: str = "Asia/Shanghai") -> str:
 
 def arxiv_date_ranges(day: date, timezone_name: str = "Asia/Shanghai") -> List[str]:
     start_utc, end_utc = local_day_to_utc_range(day, timezone_name)
-    if start_utc.date() == end_utc.date():
-        return [f"[{start_utc:%Y%m%d%H%M} TO {end_utc:%Y%m%d%H%M}]"]
+    return _split_utc_ranges(start_utc, end_utc)
 
-    first_end = datetime.combine(start_utc.date(), time(23, 59), tzinfo=timezone.utc)
-    second_start = datetime.combine(end_utc.date(), time.min, tzinfo=timezone.utc)
-    return [
-        f"[{start_utc:%Y%m%d%H%M} TO {first_end:%Y%m%d%H%M}]",
-        f"[{second_start:%Y%m%d%H%M} TO {end_utc:%Y%m%d%H%M}]",
-    ]
+
+def _split_utc_ranges(start_utc: datetime, end_utc: datetime) -> List[str]:
+    ranges: List[str] = []
+    current_start = start_utc
+    while current_start.date() < end_utc.date():
+        current_end = datetime.combine(current_start.date(), time(23, 59), tzinfo=timezone.utc)
+        ranges.append(f"[{current_start:%Y%m%d%H%M} TO {current_end:%Y%m%d%H%M}]")
+        current_start = datetime.combine(current_start.date() + timedelta(days=1), time.min, tzinfo=timezone.utc)
+    ranges.append(f"[{current_start:%Y%m%d%H%M} TO {end_utc:%Y%m%d%H%M}]")
+    return ranges
+
+
+def arxiv_batch_utc_range(day: date) -> Optional[Tuple[datetime, datetime]]:
+    """Return the arXiv weekday batch window for an Eastern-time cutoff day."""
+    if day.weekday() >= 5:
+        return None
+
+    batch_tz = ZoneInfo(ARXIV_BATCH_TIMEZONE)
+    previous_cutoff_day = day - timedelta(days=3 if day.weekday() == 0 else 1)
+    start_local = datetime.combine(previous_cutoff_day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz)
+    end_local = datetime.combine(day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz) - timedelta(minutes=1)
+    return start_local.astimezone(timezone.utc), end_local.astimezone(timezone.utc)
+
+
+def arxiv_batch_date_ranges(day: date) -> List[str]:
+    batch_range = arxiv_batch_utc_range(day)
+    if batch_range is None:
+        return []
+    start_utc, end_utc = batch_range
+    return _split_utc_ranges(start_utc, end_utc)
 
 
 def arxiv_submitted_date_query(day: date, timezone_name: str = "Asia/Shanghai") -> str:
-    terms = [f"submittedDate:{date_range}" for date_range in arxiv_date_ranges(day, timezone_name)]
+    terms = [f"submittedDate:{date_range}" for date_range in arxiv_batch_date_ranges(day)]
     if len(terms) == 1:
         return terms[0]
+    if not terms:
+        return ""
     return "(" + " OR ".join(terms) + ")"

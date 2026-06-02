@@ -214,8 +214,11 @@ def build_search_query(categories: Iterable[str], day: date, timezone_name: str 
     category_terms = [f"cat:{category}" for category in categories]
     if not category_terms:
         raise ValueError("At least one arXiv category must be enabled.")
+    date_query = arxiv_submitted_date_query(day, timezone_name)
+    if not date_query:
+        return ""
     category_query = "(" + " OR ".join(category_terms) + ")"
-    return f"{category_query} AND {arxiv_submitted_date_query(day, timezone_name)}"
+    return f"{category_query} AND {date_query}"
 
 
 def _upsert_paper(
@@ -507,6 +510,32 @@ def fetch_papers_for_date(
     categories = enabled_categories(session)
     rules = rules if rules is not None else load_keyword_rules(session)
     query = build_search_query(categories, target_day, settings.timezone)
+    if not query:
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "stage": "complete",
+                    "percent": 100,
+                    "page": 0,
+                    "total_pages": 0,
+                    "fetched": 0,
+                    "saved": 0,
+                    "matched": 0,
+                    "updated": 0,
+                    "skipped_no_keyword": 0,
+                    "skipped_excluded": 0,
+                    "query": "",
+                    "start": 0,
+                    "max_results": settings.arxiv_max_results,
+                }
+            )
+        return FetchResult(
+            fetched=0,
+            saved=0,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="",
+        )
     fetched = 0
     saved = 0
     matched = 0

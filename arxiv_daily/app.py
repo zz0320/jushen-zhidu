@@ -43,7 +43,7 @@ from .auth import (
 from .app_settings import qwen_settings_view, resolve_runtime_settings, save_qwen_form
 from .config import Settings, get_settings
 from .database import build_engine, create_db_and_tables
-from .dates import arxiv_date_range, arxiv_date_ranges, parse_day
+from .dates import arxiv_batch_date_ranges, arxiv_date_range, arxiv_date_ranges, parse_day
 from .defaults import init_default_config
 from .forest import (
     build_forest_tiles,
@@ -264,14 +264,14 @@ def _empty_fetch_message(target_day: Optional[date] = None) -> str:
     if target_day is not None and target_day.weekday() >= 5:
         return (
             f"arXiv 没有返回 {target_day.isoformat()} 的论文。该日期是周末；"
-            "arXiv 通常不在周末发布新的公开公告批次，周末提交会进入后续工作日批次。"
+            "arXiv 常规批次按美东工作日 14:00 截止，周末提交会进入后续工作日批次。"
         )
     if target_day is not None:
         return (
-            f"arXiv 没有返回 {target_day.isoformat()} 的论文；通常是该日期尚未发布新批次、"
-            "节假日暂停，或本地日期与 arXiv 公告批次存在时差。"
+            f"arXiv 没有返回 {target_day.isoformat()} 的论文；通常是该批次尚未公开、"
+            "节假日暂停，或美东批次时间还未到。"
         )
-    return "arXiv 没有返回这一天的论文；通常是该日期尚未发布新批次，或周末/节假日没有新提交。"
+    return "arXiv 没有返回这一天的论文；通常是该批次尚未公开，或周末/节假日没有新提交。"
 
 
 def _message_from_fetch(result: FetchResult, target_day: Optional[date] = None) -> str:
@@ -356,6 +356,7 @@ def _clear_day_paper_cache(session: Session, target_day: date, settings: Setting
 
     cache_markers = {f"submittedDate:{arxiv_date_range(target_day, settings.timezone)}"}
     cache_markers.update(f"submittedDate:{date_range}" for date_range in arxiv_date_ranges(target_day, settings.timezone))
+    cache_markers.update(f"submittedDate:{date_range}" for date_range in arxiv_batch_date_ranges(target_day))
     cache_rows_by_key = {}
     for cache_marker in cache_markers:
         for row in session.exec(select(ArxivPageCache).where(ArxivPageCache.query.contains(cache_marker))).all():

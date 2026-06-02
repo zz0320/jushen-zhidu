@@ -1,10 +1,10 @@
 # 具身智读
 
-本项目是一个本地 FastAPI Web 应用，用于按北京时间自然日抓取 arXiv 上机器人、具身智能、VLA、world model、具身数据集和 benchmark 相关论文，并调用智能模型按需生成单篇摘要翻译、单篇总结和全文总结。
+本项目是一个本地 FastAPI Web 应用，用于按 arXiv 批次日抓取机器人、具身智能、VLA、world model、具身数据集和 benchmark 相关论文，并调用智能模型按需生成单篇摘要翻译、单篇总结和全文总结。
 
 ## 功能
 
-- 按日期从 arXiv 抓取新论文，默认分类为 `cs.RO`、`cs.CV`、`cs.LG`、`cs.AI`、`eess.SY`。
+- 按 arXiv 美东工作日 14:00 截止批次从 arXiv 抓取新论文，默认分类为 `cs.RO`、`cs.CV`、`cs.LG`、`cs.AI`、`eess.SY`。
 - 本地管理 arXiv 分类、关键词组、权重和排除词。
 - SQLite 持久化论文、命中关键词、相关性分数、摘要翻译、单篇总结和全文总结。
 - 智能模型通过兼容 Chat Completions 的接口调用，支持在 Web 的“智能设置”页面配置 Base URL、模型 ID、temperature、输出 token 和长文本输入上限。
@@ -80,6 +80,8 @@ arxiv-daily fetch --date 2026-05-15 --force-refresh
 `ARXIV_DAILY_NETWORK_FETCH_LIMIT` 用于限制同一目标日期每天“有效拉取”的次数；默认 `5`。只有成功完成且保存到新论文的官方 API 抓取才计数，429、503、超时、连接失败、缓存命中和 0 篇新增都不计数。普通抓取会优先使用本地缓存重算关键词。设置为 `0` 表示不限制。
 
 当天和前一天的 arXiv 空结果缓存默认只复用 30 分钟，避免太早抓取到 `totalResults=0` 后挡住后续更新；可用 `ARXIV_EMPTY_CACHE_TTL_SECONDS` 调整，设置为 `0` 表示不过期。
+
+日期选择对应 arXiv 的美东工作日 14:00 截止批次，而不是北京时间自然日。周一批次覆盖上周五 14:00 到周一 14:00 前的提交；周二到周五批次覆盖前一工作日 14:00 到当天 14:00 前的提交。周六和周日没有常规批次。
 
 ## arXiv 官方接口使用
 

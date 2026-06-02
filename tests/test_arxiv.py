@@ -85,9 +85,15 @@ def test_build_search_query_uses_categories_and_submitted_date():
     query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 15), "Asia/Shanghai")
 
     assert "(cat:cs.RO OR cat:cs.CV)" in query
-    assert "submittedDate:[202605141600 TO 202605142359]" in query
-    assert "submittedDate:[202605150000 TO 202605151559]" in query
+    assert "submittedDate:[202605141800 TO 202605142359]" in query
+    assert "submittedDate:[202605150000 TO 202605151759]" in query
     assert " OR " in query
+
+
+def test_build_search_query_returns_empty_for_weekend_without_regular_batch():
+    query = build_search_query(["cs.RO", "cs.CV"], date(2026, 5, 30), "Asia/Shanghai")
+
+    assert query == ""
 
 
 def test_fetch_papers_scores_and_saves_relevant_paper():
@@ -107,6 +113,22 @@ def test_fetch_papers_scores_and_saves_relevant_paper():
         assert paper.relevance_score > 0
         assert paper.affiliations == ["Embodied AI Lab, Test University", "Robotics Institute"]
         assert "world" in paper.matched_terms.lower()
+
+
+def test_fetch_papers_skips_network_for_weekend_without_regular_batch():
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False})
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        init_default_config(session)
+
+        def fake_get(*args, **kwargs):
+            raise AssertionError("weekend batch should not call arXiv")
+
+        result = fetch_papers_for_date(session, date(2026, 5, 30), http_get=fake_get)
+
+    assert result.fetched == 0
+    assert result.network_requests == 0
+    assert result.query == ""
 
 
 def test_fetch_papers_refreshes_existing_paper_timestamp(tmp_path):

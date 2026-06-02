@@ -53,6 +53,7 @@
             <div class="api-policy-note">
               <span>{{ "官方 API" if arxiv_policy.uses_official_api else "自定义接口" }}</span>
               <span>{{ arxiv_policy.base_url }}</span>
+              <span>日期按 arXiv 美东工作日 14:00 截止批次</span>
               <span>单连接 · ≥{{ arxiv_policy.request_delay_seconds }} 秒/次 · 新增论文才计额度</span>
             </div>
             <button type="submit" id="fetch-button">抓取论文</button>
@@ -103,7 +104,7 @@
         </div>
         <div class="metric-card">
           <strong>{{ day }}</strong>
-          <span>北京时间自然日</span>
+          <span>arXiv 批次日</span>
         </div>
       </section>
 
