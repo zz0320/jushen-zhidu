@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from arxiv_daily.dates import (
     arxiv_batch_date_ranges,
@@ -6,7 +7,10 @@ from arxiv_daily.dates import (
     arxiv_date_range,
     arxiv_date_ranges,
     arxiv_submitted_date_query,
+    latest_fetchable_arxiv_batch_day,
     local_day_to_utc_range,
+    next_fetchable_arxiv_batch_day,
+    previous_fetchable_arxiv_batch_day,
 )
 
 
@@ -54,3 +58,21 @@ def test_sunday_arxiv_batch_covers_thursday_to_friday_cutoff():
 def test_friday_and_saturday_have_no_regular_arxiv_batch():
     assert arxiv_batch_utc_range(date(2026, 5, 29)) is None
     assert arxiv_batch_date_ranges(date(2026, 5, 30)) == []
+
+
+def test_latest_fetchable_batch_skips_unpublished_current_batch():
+    beijing_time = datetime(2026, 6, 2, 11, 45, tzinfo=ZoneInfo("Asia/Shanghai"))
+
+    assert latest_fetchable_arxiv_batch_day(beijing_time) == date(2026, 6, 1)
+
+
+def test_latest_fetchable_batch_waits_for_evening_announcement():
+    before_monday_announcement = datetime(2026, 6, 2, 7, 0, tzinfo=ZoneInfo("Asia/Shanghai"))
+
+    assert latest_fetchable_arxiv_batch_day(before_monday_announcement) == date(2026, 5, 31)
+
+
+def test_fetchable_batch_navigation_skips_non_announcement_days():
+    assert previous_fetchable_arxiv_batch_day(date(2026, 6, 1)) == date(2026, 5, 31)
+    assert previous_fetchable_arxiv_batch_day(date(2026, 5, 31)) == date(2026, 5, 28)
+    assert next_fetchable_arxiv_batch_day(date(2026, 5, 28)) == date(2026, 5, 31)

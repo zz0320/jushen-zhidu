@@ -115,9 +115,17 @@ def fetch_paper_full_text(
     paper: Paper,
     max_chars: int = MAX_FULL_TEXT_CHARS,
     figure_limit: int = DEFAULT_FIGURE_LIMIT,
+    figure_output_dir: Optional[Path] = None,
 ) -> FullTextExtraction:
     source_url, pdf_bytes = download_paper_pdf(paper)
-    return extract_paper_pdf_text(paper, pdf_bytes, source_url=source_url, max_chars=max_chars, figure_limit=figure_limit)
+    return extract_paper_pdf_text(
+        paper,
+        pdf_bytes,
+        source_url=source_url,
+        max_chars=max_chars,
+        figure_limit=figure_limit,
+        figure_output_dir=figure_output_dir,
+    )
 
 
 def trim_full_text(text: str, source_url: str, max_chars: int = MAX_FULL_TEXT_CHARS) -> FullTextExtraction:
@@ -139,6 +147,16 @@ def normalize_pdf_text(text: str) -> str:
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
+
+
+def figure_static_url(output_dir: Path, filename: str) -> str:
+    try:
+        relative_dir = output_dir.resolve().relative_to(DEFAULT_FIGURE_OUTPUT_DIR.resolve())
+    except ValueError:
+        relative_dir = Path()
+    if str(relative_dir) in {"", "."}:
+        return f"/static/generated/figures/{filename}"
+    return f"/static/generated/figures/{relative_dir.as_posix()}/{filename}"
 
 
 def extract_paper_pdf_figures(
@@ -186,7 +204,7 @@ def extract_paper_pdf_figures(
             path.write_bytes(data)
             figures.append(
                 PaperFigure(
-                    url=f"/static/generated/figures/{filename}",
+                    url=figure_static_url(output_dir, filename),
                     page=page_index,
                     index=figure_index,
                     caption=f"PDF 第 {page_index} 页图片摘选",
@@ -247,7 +265,7 @@ def render_paper_pdf_figure_pages(
                 image.save(path, format="JPEG", quality=86, optimize=True)
                 figures.append(
                     PaperFigure(
-                        url=f"/static/generated/figures/{filename}",
+                        url=figure_static_url(output_dir, filename),
                         page=page_number,
                         index=figure_index,
                         caption=f"PDF 第 {page_number} 页图文预览",
@@ -306,7 +324,7 @@ def render_paper_pdf_selected_pages(
                 caption = _selected_figure_caption(selection, label, page_number)
                 figures.append(
                     PaperFigure(
-                        url=f"/static/generated/figures/{filename}",
+                        url=figure_static_url(output_dir, filename),
                         page=page_number,
                         index=figure_index,
                         caption=caption,

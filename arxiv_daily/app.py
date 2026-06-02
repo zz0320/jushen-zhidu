@@ -4,6 +4,7 @@ import threading
 import time
 import urllib.parse
 import uuid
+from dataclasses import replace
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, Generator, Optional
@@ -43,7 +44,16 @@ from .auth import (
 from .app_settings import qwen_settings_view, resolve_runtime_settings, save_qwen_form
 from .config import Settings, get_settings
 from .database import build_engine, create_db_and_tables
-from .dates import arxiv_batch_date_ranges, arxiv_date_range, arxiv_date_ranges, parse_day
+from .dates import (
+    arxiv_batch_date_ranges,
+    arxiv_batch_utc_range,
+    arxiv_date_range,
+    arxiv_date_ranges,
+    latest_fetchable_arxiv_batch_day,
+    next_fetchable_arxiv_batch_day,
+    parse_day,
+    previous_fetchable_arxiv_batch_day,
+)
 from .defaults import init_default_config
 from .forest import (
     build_forest_tiles,
@@ -115,12 +125,31 @@ def _latest_day_with_papers(session: Session) -> str:
     return latest_paper.fetched_for_date if latest_paper else ""
 
 
-def _day_nav_context(target_day: date, session: Session) -> Dict[str, str]:
+def _day_nav_context(target_day: date, session: Session) -> Dict[str, object]:
+    latest_fetchable_day = latest_fetchable_arxiv_batch_day()
+    next_fetchable_day = next_fetchable_arxiv_batch_day(target_day)
+    has_next_day = next_fetchable_day <= latest_fetchable_day
     return {
-        "previous_day": (target_day - timedelta(days=1)).isoformat(),
-        "next_day": (target_day + timedelta(days=1)).isoformat(),
+        "previous_day": previous_fetchable_arxiv_batch_day(target_day).isoformat(),
+        "next_day": next_fetchable_day.isoformat(),
+        "has_next_day": has_next_day,
+        "latest_fetchable_day": latest_fetchable_day.isoformat(),
+        "fetchable_day_options": _fetchable_day_options(target_day, latest_fetchable_day),
         "latest_day": _latest_day_with_papers(session),
     }
+
+
+def _fetchable_day_options(target_day: date, latest_fetchable_day: date, limit: int = 45) -> list[Dict[str, object]]:
+    options: list[Dict[str, object]] = []
+    seen: set[date] = set()
+    candidate = latest_fetchable_day
+    while len(options) < limit:
+        options.append({"value": candidate.isoformat(), "selected": candidate == target_day})
+        seen.add(candidate)
+        candidate = previous_fetchable_arxiv_batch_day(candidate)
+    if target_day not in seen:
+        options.append({"value": target_day.isoformat(), "selected": True})
+    return options
 
 
 def _request_path_with_query(request: Request) -> str:
@@ -157,13 +186,24 @@ def _mark_favorite_tiles(tiles: list[Dict[str, object]], favorite_ids: set[str])
         tile["favorite"] = str(tile.get("arxiv_id") or "") in favorite_ids
 
 
-def _parse_optional_day(value: Optional[str], settings: Settings) -> tuple[date, str]:
+def _coerce_fetchable_day(value: Optional[str], settings: Settings) -> tuple[date, str]:
+    latest_fetchable_day = latest_fetchable_arxiv_batch_day()
     if not value:
-        return parse_day(None, settings.timezone), ""
+        return latest_fetchable_day, ""
     try:
-        return parse_day(value, settings.timezone), ""
+        requested_day = parse_day(value, settings.timezone)
     except ValueError:
-        return parse_day(None, settings.timezone), f"日期 {value} 无法识别，已展示今天的论文森林。"
+        return latest_fetchable_day, f"arXiv 公告批次 {value} 无法识别，已切换到最近可抓取批次 {latest_fetchable_day.isoformat()}。"
+    if requested_day > latest_fetchable_day:
+        return latest_fetchable_day, f"arXiv 公告批次 {requested_day.isoformat()} 尚未发布，已切换到最近可抓取批次 {latest_fetchable_day.isoformat()}。"
+    if arxiv_batch_utc_range(requested_day) is None:
+        fetchable_day = previous_fetchable_arxiv_batch_day(requested_day)
+        return fetchable_day, f"arXiv 公告批次 {requested_day.isoformat()} 不存在，已切换到可抓取批次 {fetchable_day.isoformat()}。"
+    return requested_day, ""
+
+
+def _parse_optional_day(value: Optional[str], settings: Settings) -> tuple[date, str]:
+    return _coerce_fetchable_day(value, settings)
 
 
 def _redirect(path: str, **query: object) -> RedirectResponse:
@@ -263,22 +303,22 @@ def _arxiv_policy_view(settings: Settings) -> Dict[str, object]:
 def _empty_fetch_message(target_day: Optional[date] = None) -> str:
     if target_day is not None and target_day.weekday() in {4, 5}:
         return (
-            f"arXiv 没有返回 {target_day.isoformat()} 的论文。arXiv 周五和周六没有常规公告；"
+            f"arXiv 没有返回公告批次 {target_day.isoformat()} 的论文。arXiv 周五和周六没有常规公告；"
             "周五 14:00 后到周一 14:00 前的提交会进入周一公告批次。"
         )
     if target_day is not None:
         return (
-            f"arXiv 没有返回 {target_day.isoformat()} 的论文；通常是该批次尚未公开、"
+            f"arXiv 没有返回公告批次 {target_day.isoformat()} 的论文；通常是该批次尚未公开、"
             "节假日暂停，或美东批次时间还未到。"
         )
-    return "arXiv 没有返回这一天的论文；通常是该批次尚未公开，或周末/节假日没有新提交。"
+    return "arXiv 没有返回这个公告批次的论文；通常是该批次尚未公开，或周末/节假日没有新提交。"
 
 
 def _message_from_fetch(result: FetchResult, target_day: Optional[date] = None) -> str:
     source_note = f"联网请求 {result.network_requests} 次，缓存页 {result.cached_pages} 页。"
     quota_note = ""
     if result.daily_network_fetch_limit > 0:
-        quota_note = f" 今日有效拉取额度 {result.daily_network_fetch_used}/{result.daily_network_fetch_limit}。"
+        quota_note = f" 今日官方 API 有效拉取额度 {result.daily_network_fetch_used}/{result.daily_network_fetch_limit}。"
     if result.fetched == 0:
         return f"{_empty_fetch_message(target_day)} {source_note}{quota_note}"
     return (
@@ -383,7 +423,7 @@ def _clear_generated_figure_cache(output_dir: Optional[Path] = None) -> int:
     return count
 
 
-def _clear_all_paper_cache(session: Session) -> Dict[str, int]:
+def _clear_all_paper_cache(session: Session, figure_output_dir: Optional[Path] = None) -> Dict[str, int]:
     counts = {
         "papers": 0,
         "favorites": _delete_rows(session, session.exec(select(UserPaperFavorite)).all()),
@@ -391,7 +431,7 @@ def _clear_all_paper_cache(session: Session) -> Dict[str, int]:
         "paper_summaries": _delete_rows(session, session.exec(select(PaperSummary)).all()),
         "full_text_summaries": _delete_rows(session, session.exec(select(PaperFullTextSummary)).all()),
         "arxiv_pages": _delete_rows(session, session.exec(select(ArxivPageCache)).all()),
-        "figure_files": _clear_generated_figure_cache(),
+        "figure_files": _clear_generated_figure_cache(figure_output_dir),
     }
     counts["papers"] = _delete_rows(session, session.exec(select(Paper)).all())
     session.commit()
@@ -568,9 +608,47 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
     app.mount("/static", StaticFiles(directory=str(PACKAGE_DIR / "static")), name="static")
     fetch_jobs: Dict[str, Dict[str, object]] = {}
     fetch_jobs_lock = threading.Lock()
-    arxiv_fetch_lock = threading.Lock()
+    arxiv_fetch_locks: Dict[int, threading.Lock] = {}
+    arxiv_fetch_locks_lock = threading.Lock()
     summary_jobs: Dict[str, Dict[str, object]] = {}
     summary_jobs_lock = threading.Lock()
+    workspace_engines: Dict[int, Engine] = {1: engine}
+    workspace_engines_lock = threading.Lock()
+
+    def workspace_database_path(user_id: int) -> Path:
+        return settings.database_path.parent / "workspaces" / f"user-{user_id}" / settings.database_path.name
+
+    def workspace_engine_for_user(user_id: int) -> Engine:
+        if user_id <= 1:
+            return engine
+        with workspace_engines_lock:
+            existing = workspace_engines.get(user_id)
+            if existing is not None:
+                return existing
+            workspace_settings = replace(settings, database_path=workspace_database_path(user_id))
+            user_engine = build_engine(workspace_settings)
+            create_db_and_tables(user_engine)
+            with Session(user_engine) as user_session:
+                init_default_config(user_session)
+                _mark_stale_fetch_runs_failed(user_session)
+            workspace_engines[user_id] = user_engine
+            return user_engine
+
+    def arxiv_fetch_lock_for_user(user_id: int) -> threading.Lock:
+        with arxiv_fetch_locks_lock:
+            lock = arxiv_fetch_locks.get(user_id)
+            if lock is None:
+                lock = threading.Lock()
+                arxiv_fetch_locks[user_id] = lock
+            return lock
+
+    def workspace_figure_output_dir(user_id: int) -> Path:
+        if user_id <= 1:
+            return DEFAULT_FIGURE_OUTPUT_DIR
+        return DEFAULT_FIGURE_OUTPUT_DIR / f"user-{user_id}"
+
+    def route_uses_auth_database(path: str) -> bool:
+        return path in {"/setup-admin", "/login", "/logout", "/account/password"} or path.startswith("/users")
 
     @app.middleware("http")
     async def auth_middleware(request: Request, call_next):  # type: ignore[no-untyped-def]
@@ -621,8 +699,9 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
         return await call_next(request)
 
-    def get_session() -> Generator[Session, None, None]:
-        with Session(engine) as session:
+    def get_session(request: Request) -> Generator[Session, None, None]:
+        selected_engine = engine if route_uses_auth_database(request.url.path) else workspace_engine_for_user(_current_user_id(request))
+        with Session(selected_engine) as session:
             yield session
 
     def expire_fetch_job_if_stale(job: Dict[str, object]) -> bool:
@@ -642,20 +721,20 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         )
         return True
 
-    def active_fetch_job_for_day_locked(day_text: str) -> Optional[Dict[str, object]]:
+    def active_fetch_job_for_day_locked(day_text: str, user_id: int) -> Optional[Dict[str, object]]:
         active_jobs = []
         for job in fetch_jobs.values():
             expire_fetch_job_if_stale(job)
-            if job.get("day") == day_text and job.get("status") in {"queued", "running"}:
+            if job.get("user_id") == user_id and job.get("day") == day_text and job.get("status") in {"queued", "running"}:
                 active_jobs.append(dict(job))
         if not active_jobs:
             return None
         active_jobs.sort(key=lambda job: float(job.get("created_at") or 0.0))
         return active_jobs[-1]
 
-    def active_fetch_job_for_day(day_text: str) -> Optional[Dict[str, object]]:
+    def active_fetch_job_for_day(day_text: str, user_id: int) -> Optional[Dict[str, object]]:
         with fetch_jobs_lock:
-            active_job = active_fetch_job_for_day_locked(day_text)
+            active_job = active_fetch_job_for_day_locked(day_text, user_id)
             if active_job is None:
                 return None
             return dict(active_job)
@@ -953,7 +1032,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         error: str = "",
         session: Session = Depends(get_session),
     ) -> Response:
-        target_day = parse_day(day, settings.timezone)
+        target_day, date_notice = _coerce_fetchable_day(day, settings)
         papers = session.exec(
             select(Paper)
             .where(Paper.fetched_for_date == target_day.isoformat())
@@ -994,54 +1073,62 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "full_text_summaries_by_paper": full_text_summaries_by_paper,
                 "fetch_quota": _fetch_quota_view(target_day, session, settings),
                 "arxiv_policy": _arxiv_policy_view(settings),
-                "active_fetch_job": active_fetch_job_for_day(target_day.isoformat()),
+                "active_fetch_job": active_fetch_job_for_day(target_day.isoformat(), _current_user_id(request)),
                 "message": message,
-                "error": error,
+                "error": error or date_notice,
                 **_day_nav_context(target_day, session),
             },
         )
 
     @app.post("/fetch")
     def fetch(
+        request: Request,
         day: str = Form(...),
         force_refresh: bool = Form(False),
         session: Session = Depends(get_session),
     ) -> RedirectResponse:
-        target_day = date.fromisoformat(day)
+        target_day, date_notice = _coerce_fetchable_day(day, settings)
+        day = target_day.isoformat()
         try:
-            with arxiv_fetch_lock:
+            with arxiv_fetch_lock_for_user(_current_user_id(request)):
                 result = fetch_papers_for_date(session, target_day, settings, force_refresh=force_refresh)
         except Exception as exc:  # pragma: no cover - exercised through manual runtime
             return _redirect("/", day=day, error=_fetch_error_message(exc))
-        return _redirect("/", day=day, message=_message_from_fetch(result, target_day))
+        message_text = _message_from_fetch(result, target_day)
+        if date_notice:
+            message_text = f"{date_notice} {message_text}"
+        return _redirect("/", day=day, message=message_text)
 
     @app.post("/day-cache/{day}/clear")
     def clear_day_cache(day: str, session: Session = Depends(get_session)) -> RedirectResponse:
         target_day = date.fromisoformat(day)
-        with arxiv_fetch_lock:
-            counts = _clear_day_paper_cache(session, target_day, settings)
+        counts = _clear_day_paper_cache(session, target_day, settings)
         return _redirect("/", day=day, message=_message_from_clear_day_cache(day, counts))
 
     @app.post("/cache/clear")
-    def clear_all_cache(day: str = Form(""), session: Session = Depends(get_session)) -> RedirectResponse:
-        target_day = parse_day(day or None, settings.timezone)
-        with arxiv_fetch_lock:
-            counts = _clear_all_paper_cache(session)
+    def clear_all_cache(request: Request, day: str = Form(""), session: Session = Depends(get_session)) -> RedirectResponse:
+        target_day, _ = _coerce_fetchable_day(day or None, settings)
+        counts = _clear_all_paper_cache(session, workspace_figure_output_dir(_current_user_id(request)))
         return _redirect("/", day=target_day.isoformat(), message=_message_from_clear_all_cache(counts))
 
     @app.post("/fetch-jobs")
-    def start_fetch_job(day: str = Form(...), force_refresh: bool = Form(False)) -> Dict[str, object]:
+    def start_fetch_job(request: Request, day: str = Form(...), force_refresh: bool = Form(False)) -> Dict[str, object]:
         job_id = uuid.uuid4().hex
-        target_day = date.fromisoformat(day)
-        with Session(engine) as quota_session:
+        user_id = _current_user_id(request)
+        user_engine = workspace_engine_for_user(user_id)
+        user_fetch_lock = arxiv_fetch_lock_for_user(user_id)
+        target_day, date_notice = _coerce_fetchable_day(day, settings)
+        day = target_day.isoformat()
+        with Session(user_engine) as quota_session:
             quota_view = _fetch_quota_view(target_day, quota_session, settings)
         now = time.time()
         with fetch_jobs_lock:
-            active_job = active_fetch_job_for_day_locked(day)
+            active_job = active_fetch_job_for_day_locked(day, user_id)
             if active_job is not None:
                 return {"job_id": active_job["id"], "reused": True}
             fetch_jobs[job_id] = {
                 "id": job_id,
+                "user_id": user_id,
                 "day": day,
                 "redirect_url": f"/?day={urllib.parse.quote(day)}",
                 "status": "queued",
@@ -1062,6 +1149,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "page": 0,
                 "total_pages": max(1, (settings.arxiv_max_results + settings.arxiv_page_size - 1) // settings.arxiv_page_size),
                 "message": "任务已创建，正在排队。",
+                "date_notice": date_notice,
                 "error": "",
                 "created_at": now,
                 "updated_at": now,
@@ -1089,7 +1177,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
         def worker() -> None:
             update_job(status="running", stage="preparing", stage_label="准备检索", message="正在读取分类和关键词配置。", percent=3)
-            with Session(engine) as worker_session:
+            with Session(user_engine) as worker_session:
                 try:
                     lock_started_at = time.monotonic()
                     total_pages = max(1, (settings.arxiv_max_results + settings.arxiv_page_size - 1) // settings.arxiv_page_size)
@@ -1098,7 +1186,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                         settings.request_timeout_seconds * (settings.arxiv_retry_count + 2),
                         settings.effective_arxiv_request_delay_seconds * total_pages + 120.0,
                     )
-                    while not arxiv_fetch_lock.acquire(timeout=1.0):
+                    while not user_fetch_lock.acquire(timeout=1.0):
                         waited = int(time.monotonic() - lock_started_at)
                         update_job(
                             status="running",
@@ -1119,7 +1207,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             force_refresh=force_refresh,
                         )
                     finally:
-                        arxiv_fetch_lock.release()
+                        user_fetch_lock.release()
                     current_count = len(
                         worker_session.exec(
                             select(Paper.arxiv_id).where(Paper.fetched_for_date == target_day.isoformat())
@@ -1128,6 +1216,8 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                     latest_day = _latest_day_with_papers(worker_session)
                     redirect_url = f"/?day={urllib.parse.quote(day)}"
                     completion_message = _message_from_fetch(result, target_day)
+                    if date_notice:
+                        completion_message = f"{date_notice} {completion_message}"
                     if current_count == 0 and latest_day and latest_day != target_day.isoformat():
                         completion_message = f"{completion_message} 本地最近有论文的日期是 {latest_day}，可手动切换查看。"
                 except Exception as exc:  # pragma: no cover - runtime network path
@@ -1174,19 +1264,20 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         return {"job_id": job_id}
 
     @app.get("/fetch-jobs/{job_id}")
-    def fetch_job_status(job_id: str) -> Dict[str, object]:
+    def fetch_job_status(request: Request, job_id: str) -> Dict[str, object]:
         with fetch_jobs_lock:
             job = fetch_jobs.get(job_id)
-            if job is None:
+            if job is None or job.get("user_id") != _current_user_id(request):
                 return {"id": job_id, "status": "not_found", "stage_label": "任务不存在", "percent": 100}
             expire_fetch_job_if_stale(job)
             return dict(job)
 
-    def create_summary_job(kind: str, label: str, redirect_url: str) -> str:
+    def create_summary_job(kind: str, label: str, redirect_url: str, user_id: int) -> str:
         job_id = uuid.uuid4().hex
         with summary_jobs_lock:
             summary_jobs[job_id] = {
                 "id": job_id,
+                "user_id": user_id,
                 "kind": kind,
                 "status": "queued",
                 "stage": "queued",
@@ -1204,12 +1295,14 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             summary_jobs[job_id].update(values)
 
     @app.post("/summary-jobs/papers/{arxiv_id:path}/all")
-    def start_paper_all_insights_job(arxiv_id: str, force: bool = Form(False)) -> Dict[str, object]:
+    def start_paper_all_insights_job(request: Request, arxiv_id: str, force: bool = Form(False)) -> Dict[str, object]:
+        user_id = _current_user_id(request)
+        user_engine = workspace_engine_for_user(user_id)
         redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#paper-abstract"
-        job_id = create_summary_job("paper_all", "翻译、摘要与全文总结", redirect_url)
+        job_id = create_summary_job("paper_all", "翻译、摘要与全文总结", redirect_url, user_id)
 
         def worker() -> None:
-            with Session(engine) as worker_session:
+            with Session(user_engine) as worker_session:
                 try:
                     paper = worker_session.get(Paper, arxiv_id)
                     if paper is None:
@@ -1256,11 +1349,11 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                         stage="calling_model",
                         stage_label="生成全文",
                         percent=72,
-                            message=(
-                                "正在提取 PDF 正文生成文字总结；随后上传 PDF 给 Qwen 文档模型生成关键图片总结。"
-                                if runtime_settings.full_text_pdf_upload_enabled
-                                else "正在提取 PDF 正文和图片；有论文图时会调用 Qwen 多模态模型生成全文总结。"
-                            ),
+                        message=(
+                            "正在提取 PDF 正文生成文字总结；随后上传 PDF 给 Qwen 文档模型生成关键图片总结。"
+                            if runtime_settings.full_text_pdf_upload_enabled
+                            else "正在提取 PDF 正文和图片；有论文图时会调用 Qwen 多模态模型生成全文总结。"
+                        ),
                         model=_model_display_name(summary.model),
                     )
                     full_text_summary = generate_paper_full_text_summary(
@@ -1268,6 +1361,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                         arxiv_id,
                         runtime_settings,
                         force=force,
+                        figure_output_dir=workspace_figure_output_dir(user_id),
                     )
                     update_summary_job(
                         job_id,
@@ -1303,12 +1397,14 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         return {"job_id": job_id}
 
     @app.post("/summary-jobs/papers/{arxiv_id:path}")
-    def start_paper_summary_job(arxiv_id: str, force: bool = Form(False)) -> Dict[str, object]:
+    def start_paper_summary_job(request: Request, arxiv_id: str, force: bool = Form(False)) -> Dict[str, object]:
+        user_id = _current_user_id(request)
+        user_engine = workspace_engine_for_user(user_id)
         redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#abstract-summary"
-        job_id = create_summary_job("paper", "单篇研究摘要", redirect_url)
+        job_id = create_summary_job("paper", "单篇研究摘要", redirect_url, user_id)
 
         def worker() -> None:
-            with Session(engine) as worker_session:
+            with Session(user_engine) as worker_session:
                 reused_existing = False
                 try:
                     paper = worker_session.get(Paper, arxiv_id)
@@ -1379,14 +1475,17 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @app.post("/summary-jobs/paper-abstract-translation")
     def start_paper_abstract_translation_job(
+        request: Request,
         arxiv_id: str = Form(...),
         force: bool = Form(False),
     ) -> Dict[str, object]:
+        user_id = _current_user_id(request)
+        user_engine = workspace_engine_for_user(user_id)
         redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#abstract-translation"
-        job_id = create_summary_job("paper_abstract_translation", "题目与摘要中文翻译", redirect_url)
+        job_id = create_summary_job("paper_abstract_translation", "题目与摘要中文翻译", redirect_url, user_id)
 
         def worker() -> None:
-            with Session(engine) as worker_session:
+            with Session(user_engine) as worker_session:
                 reused_existing = False
                 try:
                     paper = worker_session.get(Paper, arxiv_id)
@@ -1464,14 +1563,17 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @app.post("/summary-jobs/paper-full-text")
     def start_paper_full_text_summary_job(
+        request: Request,
         arxiv_id: str = Form(...),
         force: bool = Form(False),
     ) -> Dict[str, object]:
+        user_id = _current_user_id(request)
+        user_engine = workspace_engine_for_user(user_id)
         redirect_url = f"/papers/{urllib.parse.quote(arxiv_id, safe='')}#full-text-summary"
-        job_id = create_summary_job("paper_full_text", "单篇全文总结", redirect_url)
+        job_id = create_summary_job("paper_full_text", "单篇全文总结", redirect_url, user_id)
 
         def worker() -> None:
-            with Session(engine) as worker_session:
+            with Session(user_engine) as worker_session:
                 reused_existing = False
                 try:
                     paper = worker_session.get(Paper, arxiv_id)
@@ -1514,6 +1616,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                             source_url=source_url,
                             max_chars=runtime_settings.full_text_max_chars,
                             figure_limit=runtime_settings.full_text_figure_limit,
+                            figure_output_dir=workspace_figure_output_dir(user_id),
                         )
                     else:
                         reused_existing = True
@@ -1560,6 +1663,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                         extraction=extraction,
                         pdf_bytes=pdf_bytes,
                         source_url=source_url,
+                        figure_output_dir=workspace_figure_output_dir(user_id),
                     )
                     update_summary_job(
                         job_id,
@@ -1594,10 +1698,10 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         return {"job_id": job_id}
 
     @app.get("/summary-jobs/{job_id}")
-    def summary_job_status(job_id: str) -> Dict[str, object]:
+    def summary_job_status(request: Request, job_id: str) -> Dict[str, object]:
         with summary_jobs_lock:
             job = summary_jobs.get(job_id)
-            if job is None:
+            if job is None or job.get("user_id") != _current_user_id(request):
                 return {"id": job_id, "status": "not_found", "stage_label": "任务不存在", "percent": 100}
             return dict(job)
 
@@ -1862,8 +1966,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
         error: str = "",
         session: Session = Depends(get_session),
     ) -> Response:
-        latest_day = _latest_day_with_papers(session)
-        target_day = parse_day(day or latest_day or None, settings.timezone)
+        target_day, date_notice = _coerce_fetchable_day(day, settings)
         papers = session.exec(
             select(Paper)
             .where(Paper.fetched_for_date == target_day.isoformat())
@@ -1897,7 +2000,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
                 "favorites_only": favorites,
                 "favorites_page": False,
                 "message": message,
-                "error": error,
+                "error": error or date_notice,
                 "summaries_by_paper": {summary.arxiv_id: summary for summary in paper_summaries},
                 "full_text_summaries_by_paper": {summary.arxiv_id: summary for summary in full_text_summaries},
                 **_day_nav_context(target_day, session),
@@ -1934,7 +2037,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             if paper_ids
             else []
         )
-        today = parse_day(None, settings.timezone)
+        today = latest_fetchable_arxiv_batch_day()
         return templates.TemplateResponse(
             "papers.html",
             {
@@ -2055,6 +2158,7 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @app.post("/papers/{arxiv_id:path}/summarize-all")
     def summarize_paper_all(
+        request: Request,
         arxiv_id: str,
         force: bool = Form(False),
         session: Session = Depends(get_session),
@@ -2063,7 +2167,13 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
             runtime_settings = resolve_runtime_settings(session, settings)
             generate_abstract_translation(session, arxiv_id, runtime_settings, force=force)
             generate_paper_summary(session, arxiv_id, runtime_settings, force=force)
-            generate_paper_full_text_summary(session, arxiv_id, runtime_settings, force=force)
+            generate_paper_full_text_summary(
+                session,
+                arxiv_id,
+                runtime_settings,
+                force=force,
+                figure_output_dir=workspace_figure_output_dir(_current_user_id(request)),
+            )
         except Exception as exc:  # pragma: no cover - model/PDF runtime path
             return _redirect(f"/papers/{arxiv_id}", error=_summary_error_message(exc))
         return _redirect(f"/papers/{arxiv_id}", message="三类智能结果已生成。")
@@ -2094,12 +2204,19 @@ def create_app(settings: Optional[Settings] = None, engine: Optional[Engine] = N
 
     @app.post("/paper-full-text/summarize")
     def summarize_paper_full_text(
+        request: Request,
         arxiv_id: str = Form(...),
         force: bool = Form(False),
         session: Session = Depends(get_session),
     ) -> RedirectResponse:
         try:
-            generate_paper_full_text_summary(session, arxiv_id, resolve_runtime_settings(session, settings), force=force)
+            generate_paper_full_text_summary(
+                session,
+                arxiv_id,
+                resolve_runtime_settings(session, settings),
+                force=force,
+                figure_output_dir=workspace_figure_output_dir(_current_user_id(request)),
+            )
         except Exception as exc:  # pragma: no cover - model/PDF runtime path
             return _redirect(f"/papers/{arxiv_id}", error=_summary_error_message(exc))
         return _redirect(f"/papers/{arxiv_id}", message="Full-text paper summary generated.")

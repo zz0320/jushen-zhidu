@@ -11689,7 +11689,8 @@ body .forest-shell-v2 .forest-command-v2 .hero-controls .toolbar {
   gap: 8px !important;
 }
 
-body .forest-shell-v2 .forest-command-v2 .hero-controls input[type="date"] {
+body .forest-shell-v2 .forest-command-v2 .hero-controls input[type="date"],
+body .forest-shell-v2 .forest-command-v2 .hero-controls select {
   min-height: 42px !important;
   padding: 8px 12px !important;
 }

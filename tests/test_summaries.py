@@ -3,7 +3,7 @@ from sqlmodel import Session, SQLModel, create_engine
 from arxiv_daily.config import Settings
 from arxiv_daily import summaries as summary_module
 from arxiv_daily.models import Paper, PaperFullTextSummary
-from arxiv_daily.pdf_text import FullTextExtraction, PaperFigure
+from arxiv_daily.pdf_text import DEFAULT_FIGURE_OUTPUT_DIR, FullTextExtraction, PaperFigure, figure_static_url
 from arxiv_daily.summaries import (
     CompletionResult,
     build_full_text_pdf_messages,
@@ -178,6 +178,13 @@ def test_full_text_pdf_messages_use_file_id_and_pdf_first_prompt():
     assert "上传的完整 PDF 文件为主" in messages[2]["content"]
 
 
+def test_figure_static_url_includes_workspace_subdirectory():
+    assert (
+        figure_static_url(DEFAULT_FIGURE_OUTPUT_DIR / "user-2", "2605.00001v1-page-2-preview.jpg")
+        == "/static/generated/figures/user-2/2605.00001v1-page-2-preview.jpg"
+    )
+
+
 def test_parse_full_text_pdf_result_extracts_summary_and_model_selected_figures():
     content = """```json
 {"key_image_summary_markdown":"基于 arXiv PDF 原文文件的关键图片总结。\\n\\n图表总结。","key_figures":[{"page":4,"label":"Figure 2","caption":"方法框架","reason":"解释整体架构"},{"page":"bad","label":"","caption":"","reason":""}]}
@@ -241,12 +248,15 @@ def test_pdf_full_text_summary_uses_model_selected_figures(tmp_path, monkeypatch
                 visuals=[{"page": 4, "label": "Figure 2", "caption": "方法框架", "reason": "解释整体架构"}],
             )
 
-        def fake_render(paper, pdf_bytes, selections, limit):
+        figure_output_dir = tmp_path / "figures" / "user-2"
+
+        def fake_render(paper, pdf_bytes, selections, limit, output_dir):
             assert selections[0]["page"] == 4
             assert limit == 3
+            assert output_dir == figure_output_dir
             return [
                 PaperFigure(
-                    url="/static/generated/figures/2605.00007v1-selected-1-p4.jpg",
+                    url="/static/generated/figures/user-2/2605.00007v1-selected-1-p4.jpg",
                     page=4,
                     index=1,
                     caption="Figure 2 · PDF 第 4 页 · 方法框架 · 解释整体架构",
@@ -265,12 +275,13 @@ def test_pdf_full_text_summary_uses_model_selected_figures(tmp_path, monkeypatch
             force=True,
             extraction=extraction,
             pdf_bytes=b"%PDF fake",
+            figure_output_dir=figure_output_dir,
         )
 
     assert summary.content == "基于 PDF 提取正文的文字总结。"
     assert summary.model == "qwen-plus + qwen-doc-turbo"
     assert summary.figures[0]["page"] == 4
-    assert "selected-1-p4" in summary.figures[0]["url"]
+    assert "user-2/2605.00007v1-selected-1-p4" in summary.figures[0]["url"]
     assert summary.figures[0]["source_name"] == "model-selected:Figure 2"
 
 

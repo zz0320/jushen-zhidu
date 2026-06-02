@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ day }} 论文森林 · 具身智读{% endblock %}
 {% block extra_head %}
-    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260529-favorites">
+    <link rel="stylesheet" href="{{ url_for('static', path='/forest.css') }}?v=20260602-fetchable-dates">
 {% endblock %}
 {% block content %}
   {% set first_tile = tiles[0] if tiles else none %}
@@ -11,19 +11,25 @@
       <div>
         <div class="eyebrow">Paper Forest</div>
         <h1>{{ day }} 论文森林</h1>
-        <p class="forest-command-copy">{{ tiles|length }} 篇论文按主题、相关性和成长状态映射成森林地图，可点击树木查看论文详情。</p>
+        <p class="forest-command-copy">{{ tiles|length }} 篇 arXiv 公告批次论文按主题、相关性和成长状态映射成森林地图，可点击树木查看论文详情。</p>
       </div>
 
       <div class="hero-controls">
         <form class="toolbar" method="get" action="/forest">
-          <label class="visually-hidden" for="forest-date-picker">选择日期</label>
-          <input id="forest-date-picker" type="date" name="date" value="{{ day }}">
+          <label class="visually-hidden" for="forest-date-picker">选择 arXiv 公告批次</label>
+          <select id="forest-date-picker" name="date">
+            {% for option in fetchable_day_options %}
+              <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.value }}</option>
+            {% endfor %}
+          </select>
           <button type="submit">查看</button>
         </form>
 
-        <div class="date-jump" aria-label="论文森林导航">
-          <a class="button secondary compact-button" href="/forest?date={{ previous_day }}">前一天</a>
-          <a class="button secondary compact-button" href="/forest?date={{ next_day }}">后一天</a>
+        <div class="date-jump" aria-label="论文森林公告批次导航">
+          <a class="button secondary compact-button" href="/forest?date={{ previous_day }}">前一批</a>
+          {% if has_next_day %}
+            <a class="button secondary compact-button" href="/forest?date={{ next_day }}">后一批</a>
+          {% endif %}
           <a class="button secondary compact-button" href="/papers?day={{ day }}">单篇论文</a>
         </div>
       </div>
@@ -300,7 +306,7 @@
       <section class="forest-empty-v2 {{ scene_classes }}" id="forest-map" data-forest-season="{{ scene.season_key }}" data-forest-mood="{{ scene.mood_key }}">
         <div class="empty-state paper-empty">
           <strong>这一天还没有森林</strong>
-          <span>先到总览同步 arXiv，或切换到已有论文的日期。</span>
+          <span>先到总览同步 arXiv，或切换到已有论文的公告批次。</span>
         </div>
       </section>
     {% endif %}

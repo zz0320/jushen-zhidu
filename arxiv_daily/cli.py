@@ -9,7 +9,7 @@ from sqlmodel import Session
 from .arxiv import FetchQuotaExceeded, fetch_papers_for_date
 from .config import get_settings
 from .database import build_engine, create_db_and_tables
-from .dates import parse_day
+from .dates import latest_fetchable_arxiv_batch_day, parse_day
 from .defaults import init_default_config
 from .app_settings import resolve_runtime_settings
 from .summaries import generate_paper_full_text_summary, generate_paper_summary
@@ -54,12 +54,12 @@ def init_db() -> None:
 
 @main.command()
 def fetch(
-    day: Optional[str] = typer.Option(None, "--date", "-d", help="Date in YYYY-MM-DD, default today."),
+    day: Optional[str] = typer.Option(None, "--date", "-d", help="arXiv announcement batch date in YYYY-MM-DD; defaults to latest released batch."),
     force_refresh: bool = typer.Option(False, "--force-refresh", help="Ignore cached arXiv pages and call arXiv again."),
 ) -> None:
-    """Fetch arXiv papers for one local day."""
+    """Fetch arXiv papers for one announcement batch."""
     session, settings = _session()
-    target_day = parse_day(day, settings.timezone)
+    target_day = parse_day(day, settings.timezone) if day else latest_fetchable_arxiv_batch_day()
     try:
         result = fetch_papers_for_date(session, target_day, settings, force_refresh=force_refresh)
     except FetchQuotaExceeded as exc:

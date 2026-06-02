@@ -497,6 +497,7 @@ def _full_text_extraction_from_pdf(
     extraction: Optional[FullTextExtraction] = None,
     pdf_bytes: Optional[bytes] = None,
     source_url: str = "",
+    figure_output_dir: Optional[Path] = None,
 ) -> tuple[FullTextExtraction, Optional[bytes]]:
     if extraction is not None:
         return extraction, pdf_bytes
@@ -508,6 +509,7 @@ def _full_text_extraction_from_pdf(
         source_url=source_url,
         max_chars=settings.full_text_max_chars,
         figure_limit=settings.full_text_figure_limit,
+        figure_output_dir=figure_output_dir,
     )
     return extraction, pdf_bytes
 
@@ -592,6 +594,7 @@ def generate_paper_full_text_summary(
     extraction: Optional[FullTextExtraction] = None,
     pdf_bytes: Optional[bytes] = None,
     source_url: str = "",
+    figure_output_dir: Optional[Path] = None,
 ) -> PaperFullTextSummary:
     settings = settings or get_settings()
     paper = session.get(Paper, arxiv_id)
@@ -606,6 +609,7 @@ def generate_paper_full_text_summary(
                     paper,
                     max_chars=settings.full_text_max_chars,
                     figure_limit=settings.full_text_figure_limit,
+                    figure_output_dir=figure_output_dir,
                 )
             except Exception:
                 return existing
@@ -627,6 +631,7 @@ def generate_paper_full_text_summary(
         extraction=extraction,
         pdf_bytes=pdf_bytes,
         source_url=source_url,
+        figure_output_dir=figure_output_dir,
     )
     display_figures = extraction.figures
     visual_result: Optional[CompletionResult] = None
@@ -647,12 +652,10 @@ def generate_paper_full_text_summary(
             pdf_bytes,
             settings.qwen_max_tokens_full_text,
         )
-        selected_figures = render_paper_pdf_selected_pages(
-            paper,
-            pdf_bytes,
-            visual_result.visuals,
-            limit=settings.full_text_figure_limit,
-        )
+        render_kwargs: dict[str, object] = {"limit": settings.full_text_figure_limit}
+        if figure_output_dir is not None:
+            render_kwargs["output_dir"] = figure_output_dir
+        selected_figures = render_paper_pdf_selected_pages(paper, pdf_bytes, visual_result.visuals, **render_kwargs)
         if selected_figures:
             display_figures = selected_figures
     else:

@@ -7,11 +7,11 @@
     if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
       const weekday = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2])).getUTCDay();
       if (weekday === 5 || weekday === 6) {
-        return `arXiv 没有返回 ${text} 的论文。arXiv 周五和周六没有常规公告；周五 14:00 后到周一 14:00 前的提交会进入周一公告批次。${sourceText}`;
+        return `arXiv 没有返回公告批次 ${text} 的论文。arXiv 周五和周六没有常规公告；周五 14:00 后到周一 14:00 前的提交会进入周一公告批次。${sourceText}`;
       }
-      return `arXiv 没有返回 ${text} 的论文；通常是该批次尚未公开、节假日暂停，或美东批次时间还未到。${sourceText}`;
+      return `arXiv 没有返回公告批次 ${text} 的论文；通常是该批次尚未公开、节假日暂停，或美东批次时间还未到。${sourceText}`;
     }
-    return `arXiv 没有返回这一天的论文；通常是该批次尚未公开，或周末/节假日没有新提交。${sourceText}`;
+    return `arXiv 没有返回这个公告批次的论文；通常是该批次尚未公开，或周末/节假日没有新提交。${sourceText}`;
   };
 
   const buildUrlWithMessage = (target, message) => {
@@ -263,7 +263,7 @@
       applyFetchProgress({
         status: "queued",
         stage_label: "等待开始",
-        message: "任务已创建，正在连接官方 arXiv API。",
+        message: "任务已创建，正在按 arXiv 公告批次连接官方 API。",
         percent: 2,
       });
 

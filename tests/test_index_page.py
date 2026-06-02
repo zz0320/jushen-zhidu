@@ -2,10 +2,12 @@ import threading
 import time
 from datetime import date, datetime, timezone
 
+from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
 
 import arxiv_daily.app as app_module
+from arxiv_daily.auth import create_user
 from arxiv_daily.app import create_app
 from arxiv_daily.arxiv import FetchResult
 from arxiv_daily.config import Settings
@@ -20,6 +22,27 @@ from arxiv_daily.models import (
     UserPaperFavorite,
 )
 from auth_helpers import authenticated_client
+from auth_helpers import TEST_PASSWORD
+
+
+def authenticated_named_client(app, engine, username: str, *, role: str = "admin"):
+    with Session(engine) as session:
+        create_user(
+            session,
+            username=username,
+            display_name=username,
+            password=TEST_PASSWORD,
+            role=role,
+            must_change_password=False,
+        )
+    client = TestClient(app)
+    response = client.post(
+        "/login",
+        data={"username": username, "password": TEST_PASSWORD, "next": "/"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    return client
 
 
 def test_index_paper_card_exposes_ai_actions(tmp_path):
@@ -572,6 +595,163 @@ def test_fetch_job_reuses_active_job_for_same_day(tmp_path, monkeypatch):
         release.set()
 
 
+def test_fetch_job_is_not_reused_across_accounts(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    first_client = authenticated_named_client(app, engine, "first-admin")
+    second_client = authenticated_named_client(app, engine, "second-admin")
+    started = threading.Event()
+    release = threading.Event()
+
+    def fake_fetch(*args, **kwargs):
+        started.set()
+        release.wait(timeout=2)
+        return FetchResult(
+            fetched=0,
+            saved=0,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="fake",
+        )
+
+    monkeypatch.setattr(app_module, "fetch_papers_for_date", fake_fetch)
+
+    first = first_client.post("/fetch-jobs", data={"day": "2026-05-21"})
+    try:
+        assert first.status_code == 200
+        assert started.wait(timeout=1)
+
+        second = second_client.post("/fetch-jobs", data={"day": "2026-05-21"})
+
+        assert second.status_code == 200
+        assert second.json()["job_id"] != first.json()["job_id"]
+        assert not second.json().get("reused")
+
+        second_status = second_client.get(f"/fetch-jobs/{first.json()['job_id']}").json()
+        assert second_status["status"] == "not_found"
+    finally:
+        release.set()
+
+
+def test_fetched_papers_are_isolated_between_accounts(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    first_client = authenticated_named_client(app, engine, "owner-admin")
+    second_client = authenticated_named_client(app, engine, "other-admin")
+
+    def fake_fetch(session, target_day, *args, **kwargs):
+        session.add(
+            Paper(
+                arxiv_id="2606.99999v1",
+                title="Owner Only Robot Paper",
+                abstract="A paper that should only be visible to the fetching account.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date=target_day.isoformat(),
+                relevance_score=42.0,
+            )
+        )
+        session.commit()
+        return FetchResult(
+            fetched=1,
+            saved=1,
+            matched=1,
+            skipped_no_keyword=0,
+            skipped_excluded=0,
+            query="fake",
+        )
+
+    monkeypatch.setattr(app_module, "fetch_papers_for_date", fake_fetch)
+
+    started = first_client.post("/fetch-jobs", data={"day": "2026-05-21"})
+    assert started.status_code == 200
+    job_id = started.json()["job_id"]
+    payload = {}
+    for _ in range(50):
+        payload = first_client.get(f"/fetch-jobs/{job_id}").json()
+        if payload.get("status") == "completed":
+            break
+        time.sleep(0.02)
+
+    assert payload["status"] == "completed"
+    first_html = first_client.get("/?day=2026-05-21").text
+    second_html = second_client.get("/?day=2026-05-21").text
+
+    assert "Owner Only Robot Paper" in first_html
+    assert "Owner Only Robot Paper" not in second_html
+
+
+def test_summary_jobs_are_isolated_between_accounts(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+    first_client = authenticated_named_client(app, engine, "summary-owner")
+    second_client = authenticated_named_client(app, engine, "summary-other")
+    with Session(engine) as session:
+        session.add(
+            Paper(
+                arxiv_id="2606.12345v1",
+                title="Private Workspace Paper",
+                abstract="Only the owner workspace contains this paper.",
+                authors_json='["Alice Chen"]',
+                primary_category="cs.RO",
+                categories_json='["cs.RO"]',
+                fetched_for_date="2026-05-21",
+                relevance_score=12.0,
+            )
+        )
+        session.commit()
+
+    def fake_generate_paper_summary(session, arxiv_id, *args, **kwargs):
+        summary = PaperSummary(arxiv_id=arxiv_id, content="owner only summary", model="fake-qwen")
+        session.add(summary)
+        session.commit()
+        return summary
+
+    monkeypatch.setattr(app_module, "generate_paper_summary", fake_generate_paper_summary)
+
+    started = first_client.post("/summary-jobs/papers/2606.12345v1")
+    assert started.status_code == 200
+    first_job_id = started.json()["job_id"]
+    assert second_client.get(f"/summary-jobs/{first_job_id}").json()["status"] == "not_found"
+
+    first_payload = {}
+    for _ in range(50):
+        first_payload = first_client.get(f"/summary-jobs/{first_job_id}").json()
+        if first_payload.get("status") == "completed":
+            break
+        time.sleep(0.02)
+    assert first_payload["status"] == "completed"
+
+    second_started = second_client.post("/summary-jobs/papers/2606.12345v1")
+    assert second_started.status_code == 200
+    second_job_id = second_started.json()["job_id"]
+    second_payload = {}
+    for _ in range(50):
+        second_payload = second_client.get(f"/summary-jobs/{second_job_id}").json()
+        if second_payload.get("status") == "failed":
+            break
+        time.sleep(0.02)
+
+    assert second_payload["status"] == "failed"
+    assert "Paper not found" in second_payload["message"]
+
+
 def test_fetch_job_stale_threshold_respects_long_arxiv_wait(tmp_path):
     settings = Settings(database_path=tmp_path / "test.sqlite3", request_timeout_seconds=30)
 
@@ -592,7 +772,7 @@ def test_empty_fetch_result_explains_no_arxiv_batch():
         )
     )
 
-    assert "没有返回这一天的论文" in message
+    assert "没有返回这个公告批次的论文" in message
     assert "联网请求 1 次" in message
 
 
@@ -663,7 +843,30 @@ def test_empty_fetch_job_stays_on_requested_day_and_reports_latest_available(tmp
     assert payload["status"] == "completed"
     assert payload["current_count"] == 0
     assert payload["latest_day"] == "2026-05-29"
-    assert payload["redirect_url"] == "/?day=2026-05-30"
-    assert "没有返回 2026-05-30 的论文" in payload["message"]
-    assert "周五和周六没有常规公告" in payload["message"]
+    assert payload["redirect_url"] == "/?day=2026-05-28"
+    assert "没有返回公告批次 2026-05-28 的论文" in payload["message"]
+    assert "arXiv 公告批次 2026-05-30 不存在，已切换到可抓取批次 2026-05-28" in payload["message"]
     assert "最近有论文的日期是 2026-05-29" in payload["message"]
+
+
+def test_index_clamps_future_batch_to_latest_fetchable_day(tmp_path, monkeypatch):
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    settings = Settings(database_path=tmp_path / "test.sqlite3")
+    app = create_app(settings=settings, engine=engine)
+
+    monkeypatch.setattr(app_module, "latest_fetchable_arxiv_batch_day", lambda: date(2026, 6, 1))
+    client = authenticated_client(app, engine)
+
+    html = client.get("/?day=2026-06-02").text
+
+    assert "2026-06-01 arXiv 公告批次" in html
+    assert '<select id="day-picker" name="day"' in html
+    assert '<option value="2026-06-01" selected>' in html
+    assert 'value="2026-06-02"' not in html
+    assert 'value="2026-05-29"' not in html
+    assert "/?day=2026-06-02" not in html
+    assert "已切换到最近可抓取批次 2026-06-01" in html

@@ -9,9 +9,9 @@
         {% if favorites_page %}
           汇总当前账号收藏的论文，方便跨日期回看和继续生成智能阅读包。
         {% elif favorites_only %}
-          只显示 {{ day }} 已收藏的论文；可随时切回当日全部论文。
+          只显示 {{ day }} 公告批次里已收藏的论文；可随时切回该批次全部论文。
         {% else %}
-          集中进入单篇阅读、摘要总结和全文总结；列表来自 {{ day }} 的总览结果。
+          集中进入单篇阅读、摘要总结和全文总结；列表来自 {{ day }} arXiv 公告批次。
         {% endif %}
       </p>
     </div>
@@ -20,14 +20,20 @@
         <a class="button secondary" href="/papers">返回单篇论文</a>
       {% else %}
         <form class="toolbar" method="get" action="/papers">
-          <label class="visually-hidden" for="paper-day-picker">选择日期</label>
-          <input id="paper-day-picker" type="date" name="day" value="{{ day }}">
+          <label class="visually-hidden" for="paper-day-picker">选择 arXiv 公告批次</label>
+          <select id="paper-day-picker" name="day">
+            {% for option in fetchable_day_options %}
+              <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.value }}</option>
+            {% endfor %}
+          </select>
           {% if favorites_only %}<input type="hidden" name="favorites" value="true">{% endif %}
           <button type="submit">查看</button>
         </form>
-        <div class="date-jump" aria-label="单篇论文日期快捷跳转">
-          <a class="button secondary compact-button" href="/papers?day={{ previous_day }}{% if favorites_only %}&favorites=true{% endif %}">前一天</a>
-          <a class="button secondary compact-button" href="/papers?day={{ next_day }}{% if favorites_only %}&favorites=true{% endif %}">后一天</a>
+        <div class="date-jump" aria-label="单篇论文公告批次快捷跳转">
+          <a class="button secondary compact-button" href="/papers?day={{ previous_day }}{% if favorites_only %}&favorites=true{% endif %}">前一批</a>
+          {% if has_next_day %}
+            <a class="button secondary compact-button" href="/papers?day={{ next_day }}{% if favorites_only %}&favorites=true{% endif %}">后一批</a>
+          {% endif %}
           <a class="button secondary compact-button" href="/forest?date={{ day }}">论文森林</a>
         </div>
       {% endif %}
@@ -47,7 +53,7 @@
       <section class="summary-strip insight-strip">
         <div class="metric-card">
           <strong>{{ papers|length }}</strong>
-          <span>{{ "收藏论文" if favorites_page or favorites_only else "当日论文" }}</span>
+          <span>{{ "收藏论文" if favorites_page or favorites_only else "公告批次论文" }}</span>
         </div>
         <div class="metric-card">
           <strong data-favorite-count>{{ favorite_count }}</strong>
@@ -137,8 +143,8 @@
           </article>
         {% else %}
           <div class="empty-state paper-empty">
-            <strong>{{ "还没有收藏论文" if favorites_page or favorites_only else "当前日期还没有论文" }}</strong>
-            <span>{{ "在总览、单篇论文或论文森林里点击“收藏”后会显示在这里。" if favorites_page or favorites_only else "先到总览同步 arXiv，或切换到其他日期。" }}</span>
+            <strong>{{ "还没有收藏论文" if favorites_page or favorites_only else "当前公告批次还没有论文" }}</strong>
+            <span>{{ "在总览、单篇论文或论文森林里点击“收藏”后会显示在这里。" if favorites_page or favorites_only else "先到总览同步 arXiv，或切换到其他公告批次。" }}</span>
           </div>
         {% endfor %}
       </section>

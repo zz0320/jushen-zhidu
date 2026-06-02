@@ -25,7 +25,7 @@ def _paper(
         primary_category="cs.RO",
         categories_json='["cs.RO", "cs.LG"]',
         abs_url=f"https://arxiv.org/abs/{arxiv_id}",
-        fetched_for_date="2026-05-23",
+        fetched_for_date="2026-05-21",
         relevance_score=score,
         matched_keywords_json=matched_keywords_json,
     )
@@ -287,12 +287,12 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
         session.commit()
 
     client = authenticated_client(app, engine)
-    payload = client.get("/api/forest?date=2026-05-23").json()
-    vla_payload = client.get("/api/forest?date=2026-05-23&filter=vla").json()
-    summarized_payload = client.get("/api/forest?date=2026-05-23&filter=summarized").json()
-    unsummarized_payload = client.get("/api/forest?date=2026-05-23&filter=unsummarized").json()
+    payload = client.get("/api/forest?date=2026-05-21").json()
+    vla_payload = client.get("/api/forest?date=2026-05-21&filter=vla").json()
+    summarized_payload = client.get("/api/forest?date=2026-05-21&filter=summarized").json()
+    unsummarized_payload = client.get("/api/forest?date=2026-05-21&filter=unsummarized").json()
 
-    assert payload["date"] == "2026-05-23"
+    assert payload["date"] == "2026-05-21"
     assert payload["scene"]["season_key"] == "spring"
     assert payload["counts"]["total"] == 2
     assert payload["filters"][0]["count"] == 2
@@ -303,7 +303,7 @@ def test_forest_api_returns_tiles_and_filtering(tmp_path):
     assert payload["tiles"][0]["generated_ai_count"] == 1
     assert payload["tiles"][0]["plant_tier"] == "young"
     assert [step["key"] for step in payload["tiles"][0]["growth_steps"]] == ["metadata", "grown"]
-    foundation_payload = client.get("/api/forest?date=2026-05-23&filter=foundation").json()
+    foundation_payload = client.get("/api/forest?date=2026-05-21&filter=foundation").json()
     assert len(vla_payload["tiles"]) == 1
     assert len(foundation_payload["tiles"]) == 1
     assert len(summarized_payload["tiles"]) == 1
@@ -330,7 +330,7 @@ def test_forest_page_renders_tile_grid_and_details(tmp_path):
         session.add(PaperFullTextSummary(arxiv_id="2605.00003v1", content="全文", model="fake"))
         session.commit()
 
-    response = authenticated_client(app, engine).get("/forest?date=2026-05-23")
+    response = authenticated_client(app, engine).get("/forest?date=2026-05-21")
 
     assert response.status_code == 200
     assert "论文森林" in response.text
@@ -422,7 +422,7 @@ def test_forest_page_renders_large_groves_without_preview_overflow(tmp_path):
             )
         session.commit()
 
-    response = authenticated_client(app, engine).get("/forest?date=2026-05-23")
+    response = authenticated_client(app, engine).get("/forest?date=2026-05-21")
 
     assert response.status_code == 200
     assert response.text.count("data-forest-tile") == 26
@@ -451,7 +451,7 @@ def test_forest_page_marks_saplings_and_grown_trees(tmp_path):
         session.add(PaperSummary(arxiv_id="2605.00004v1", content="摘要", model="fake"))
         session.commit()
 
-    response = authenticated_client(app, engine).get("/forest?date=2026-05-23")
+    response = authenticated_client(app, engine).get("/forest?date=2026-05-21")
 
     assert response.status_code == 200
     assert 'data-plant-stage="tree"' in response.text

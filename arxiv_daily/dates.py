@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 
 ARXIV_BATCH_TIMEZONE = "America/New_York"
 ARXIV_BATCH_CUTOFF_HOUR = 14
+ARXIV_BATCH_RELEASE_HOUR = 20
 
 
 def parse_day(value: Optional[str], timezone_name: str = "Asia/Shanghai") -> date:
@@ -58,6 +59,39 @@ def arxiv_batch_utc_range(day: date) -> Optional[Tuple[datetime, datetime]]:
     start_local = datetime.combine(start_day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz)
     end_local = datetime.combine(end_day, time(ARXIV_BATCH_CUTOFF_HOUR), tzinfo=batch_tz) - timedelta(minutes=1)
     return start_local.astimezone(timezone.utc), end_local.astimezone(timezone.utc)
+
+
+def is_fetchable_arxiv_batch_day(day: date) -> bool:
+    return arxiv_batch_utc_range(day) is not None
+
+
+def previous_fetchable_arxiv_batch_day(day: date) -> date:
+    candidate = day - timedelta(days=1)
+    while not is_fetchable_arxiv_batch_day(candidate):
+        candidate -= timedelta(days=1)
+    return candidate
+
+
+def next_fetchable_arxiv_batch_day(day: date) -> date:
+    candidate = day + timedelta(days=1)
+    while not is_fetchable_arxiv_batch_day(candidate):
+        candidate += timedelta(days=1)
+    return candidate
+
+
+def latest_fetchable_arxiv_batch_day(now: Optional[datetime] = None) -> date:
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    batch_tz = ZoneInfo(ARXIV_BATCH_TIMEZONE)
+    current_batch_time = current.astimezone(batch_tz)
+    candidate = current_batch_time.date()
+    release_time = time(ARXIV_BATCH_RELEASE_HOUR)
+    if current_batch_time.time() < release_time:
+        candidate -= timedelta(days=1)
+    while not is_fetchable_arxiv_batch_day(candidate):
+        candidate -= timedelta(days=1)
+    return candidate
 
 
 def arxiv_batch_date_ranges(day: date) -> List[str]:
