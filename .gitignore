@@ -13,6 +13,11 @@ data/.arxiv-api-rate-limit
 reports/*.md
 output/
 .env
+DerivedData/
+build/
+.build/
+xcuserdata/
+*.xcuserstate
 arxiv_daily/static/generated/*
 !arxiv_daily/static/generated/forest-materials/
 !arxiv_daily/static/generated/forest-materials/**

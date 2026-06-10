@@ -1,0 +1,628 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		101000000000000000000001 /* JushenZhiduApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000001 /* JushenZhiduApp.swift */; };
+		101000000000000000000002 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000002 /* AppTheme.swift */; };
+		101000000000000000000003 /* DomainModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000003 /* DomainModels.swift */; };
+		101000000000000000000004 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000004 /* AppSettings.swift */; };
+		101000000000000000000005 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000005 /* KeychainStore.swift */; };
+		101000000000000000000006 /* ArxivServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000006 /* ArxivServices.swift */; };
+		101000000000000000000007 /* InsightGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000007 /* InsightGenerator.swift */; };
+		101000000000000000000008 /* LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000008 /* LibraryViewModel.swift */; };
+		101000000000000000000009 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000009 /* MainTabView.swift */; };
+		10100000000000000000000A /* ForestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10200000000000000000000A /* ForestView.swift */; };
+		10100000000000000000000B /* PaperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10200000000000000000000B /* PaperViews.swift */; };
+		10100000000000000000000C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10200000000000000000000C /* SettingsView.swift */; };
+		10100000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10200000000000000000000D /* Assets.xcassets */; };
+		101000000000000000000021 /* DomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000021 /* DomainTests.swift */; };
+		101000000000000000000022 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000022 /* ParserTests.swift */; };
+		101000000000000000000023 /* ScoringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000023 /* ScoringTests.swift */; };
+		101000000000000000000031 /* JushenZhiduUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102000000000000000000031 /* JushenZhiduUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		103000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 10A000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 10B000000000000000000001;
+			remoteInfo = JushenZhidu;
+		};
+		103000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 10A000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 10B000000000000000000001;
+			remoteInfo = JushenZhidu;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		102000000000000000000001 /* JushenZhiduApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JushenZhiduApp.swift; sourceTree = "<group>"; };
+		102000000000000000000002 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		102000000000000000000003 /* DomainModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainModels.swift; sourceTree = "<group>"; };
+		102000000000000000000004 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		102000000000000000000005 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		102000000000000000000006 /* ArxivServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArxivServices.swift; sourceTree = "<group>"; };
+		102000000000000000000007 /* InsightGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightGenerator.swift; sourceTree = "<group>"; };
+		102000000000000000000008 /* LibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViewModel.swift; sourceTree = "<group>"; };
+		102000000000000000000009 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		10200000000000000000000A /* ForestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForestView.swift; sourceTree = "<group>"; };
+		10200000000000000000000B /* PaperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaperViews.swift; sourceTree = "<group>"; };
+		10200000000000000000000C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		10200000000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		10200000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		102000000000000000000021 /* DomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTests.swift; sourceTree = "<group>"; };
+		102000000000000000000022 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
+		102000000000000000000023 /* ScoringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoringTests.swift; sourceTree = "<group>"; };
+		102000000000000000000031 /* JushenZhiduUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JushenZhiduUITests.swift; sourceTree = "<group>"; };
+		102000000000000000000101 /* JushenZhidu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JushenZhidu.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		102000000000000000000102 /* JushenZhiduTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JushenZhiduTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		102000000000000000000103 /* JushenZhiduUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JushenZhiduUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		104000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		104000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		104000000000000000000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		105000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				105000000000000000000010 /* JushenZhidu */,
+				105000000000000000000020 /* JushenZhiduTests */,
+				105000000000000000000030 /* JushenZhiduUITests */,
+				105000000000000000000100 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		105000000000000000000010 /* JushenZhidu */ = {
+			isa = PBXGroup;
+			children = (
+				105000000000000000000011 /* App */,
+				105000000000000000000012 /* Design */,
+				105000000000000000000013 /* Domain */,
+				105000000000000000000014 /* Services */,
+				105000000000000000000015 /* ViewModels */,
+				105000000000000000000016 /* Views */,
+				105000000000000000000017 /* Resources */,
+			);
+			path = JushenZhidu;
+			sourceTree = "<group>";
+		};
+		105000000000000000000011 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000001 /* JushenZhiduApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		105000000000000000000012 /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000002 /* AppTheme.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		105000000000000000000013 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000003 /* DomainModels.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		105000000000000000000014 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000004 /* AppSettings.swift */,
+				102000000000000000000005 /* KeychainStore.swift */,
+				102000000000000000000006 /* ArxivServices.swift */,
+				102000000000000000000007 /* InsightGenerator.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		105000000000000000000015 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000008 /* LibraryViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		105000000000000000000016 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000009 /* MainTabView.swift */,
+				10200000000000000000000A /* ForestView.swift */,
+				10200000000000000000000B /* PaperViews.swift */,
+				10200000000000000000000C /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		105000000000000000000017 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				10200000000000000000000D /* Assets.xcassets */,
+				10200000000000000000000E /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		105000000000000000000020 /* JushenZhiduTests */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000021 /* DomainTests.swift */,
+				102000000000000000000022 /* ParserTests.swift */,
+				102000000000000000000023 /* ScoringTests.swift */,
+			);
+			path = JushenZhiduTests;
+			sourceTree = "<group>";
+		};
+		105000000000000000000030 /* JushenZhiduUITests */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000031 /* JushenZhiduUITests.swift */,
+			);
+			path = JushenZhiduUITests;
+			sourceTree = "<group>";
+		};
+		105000000000000000000100 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				102000000000000000000101 /* JushenZhidu.app */,
+				102000000000000000000102 /* JushenZhiduTests.xctest */,
+				102000000000000000000103 /* JushenZhiduUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		10B000000000000000000001 /* JushenZhidu */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 10C000000000000000000010 /* Build configuration list for PBXNativeTarget "JushenZhidu" */;
+			buildPhases = (
+				106000000000000000000001 /* Sources */,
+				104000000000000000000001 /* Frameworks */,
+				107000000000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JushenZhidu;
+			productName = JushenZhidu;
+			productReference = 102000000000000000000101 /* JushenZhidu.app */;
+			productType = "com.apple.product-type.application";
+		};
+		10B000000000000000000002 /* JushenZhiduTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 10C000000000000000000020 /* Build configuration list for PBXNativeTarget "JushenZhiduTests" */;
+			buildPhases = (
+				106000000000000000000002 /* Sources */,
+				104000000000000000000002 /* Frameworks */,
+				107000000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				108000000000000000000001 /* PBXTargetDependency */,
+			);
+			name = JushenZhiduTests;
+			productName = JushenZhiduTests;
+			productReference = 102000000000000000000102 /* JushenZhiduTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		10B000000000000000000003 /* JushenZhiduUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 10C000000000000000000030 /* Build configuration list for PBXNativeTarget "JushenZhiduUITests" */;
+			buildPhases = (
+				106000000000000000000003 /* Sources */,
+				104000000000000000000003 /* Frameworks */,
+				107000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				108000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = JushenZhiduUITests;
+			productName = JushenZhiduUITests;
+			productReference = 102000000000000000000103 /* JushenZhiduUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		10A000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2605;
+				LastUpgradeCheck = 2605;
+				TargetAttributes = {
+					10B000000000000000000001 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					10B000000000000000000002 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 10B000000000000000000001;
+					};
+					10B000000000000000000003 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = 10B000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = 10C000000000000000000001 /* Build configuration list for PBXProject "JushenZhidu" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				"zh-Hans",
+				en,
+				Base,
+			);
+			mainGroup = 105000000000000000000001;
+			productRefGroup = 105000000000000000000100 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				10B000000000000000000001 /* JushenZhidu */,
+				10B000000000000000000002 /* JushenZhiduTests */,
+				10B000000000000000000003 /* JushenZhiduUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		107000000000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10100000000000000000000D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		107000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		107000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		106000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				101000000000000000000001 /* JushenZhiduApp.swift in Sources */,
+				101000000000000000000002 /* AppTheme.swift in Sources */,
+				101000000000000000000003 /* DomainModels.swift in Sources */,
+				101000000000000000000004 /* AppSettings.swift in Sources */,
+				101000000000000000000005 /* KeychainStore.swift in Sources */,
+				101000000000000000000006 /* ArxivServices.swift in Sources */,
+				101000000000000000000007 /* InsightGenerator.swift in Sources */,
+				101000000000000000000008 /* LibraryViewModel.swift in Sources */,
+				101000000000000000000009 /* MainTabView.swift in Sources */,
+				10100000000000000000000A /* ForestView.swift in Sources */,
+				10100000000000000000000B /* PaperViews.swift in Sources */,
+				10100000000000000000000C /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		106000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				101000000000000000000021 /* DomainTests.swift in Sources */,
+				101000000000000000000022 /* ParserTests.swift in Sources */,
+				101000000000000000000023 /* ScoringTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		106000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				101000000000000000000031 /* JushenZhiduUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		108000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 10B000000000000000000001 /* JushenZhidu */;
+			targetProxy = 103000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		108000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 10B000000000000000000001 /* JushenZhidu */;
+			targetProxy = 103000000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		10D000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		10D000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		10D000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = BJP66W3755;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = JushenZhidu/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kenton.JushenZhidu;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		10D000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = BJP66W3755;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = JushenZhidu/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kenton.JushenZhidu;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		10D000000000000000000020 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kenton.JushenZhiduTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JushenZhidu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JushenZhidu";
+			};
+			name = Debug;
+		};
+		10D000000000000000000021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kenton.JushenZhiduTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JushenZhidu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/JushenZhidu";
+			};
+			name = Release;
+		};
+		10D000000000000000000030 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kenton.JushenZhiduUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = JushenZhidu;
+			};
+			name = Debug;
+		};
+		10D000000000000000000031 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kenton.JushenZhiduUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = JushenZhidu;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		10C000000000000000000001 /* Build configuration list for PBXProject "JushenZhidu" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10D000000000000000000001 /* Debug */,
+				10D000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		10C000000000000000000010 /* Build configuration list for PBXNativeTarget "JushenZhidu" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10D000000000000000000010 /* Debug */,
+				10D000000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		10C000000000000000000020 /* Build configuration list for PBXNativeTarget "JushenZhiduTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10D000000000000000000020 /* Debug */,
+				10D000000000000000000021 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		10C000000000000000000030 /* Build configuration list for PBXNativeTarget "JushenZhiduUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				10D000000000000000000030 /* Debug */,
+				10D000000000000000000031 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 10A000000000000000000001 /* Project object */;
+}
