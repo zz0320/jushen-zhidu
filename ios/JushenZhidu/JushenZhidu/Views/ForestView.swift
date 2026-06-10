@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct ForestView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var library: LibraryViewModel
     @EnvironmentObject private var settings: AppSettings
@@ -13,6 +14,10 @@ struct ForestView: View {
 
     private var visiblePapers: [PaperRecord] {
         library.filteredPapers(papers)
+    }
+
+    private var tabBarClearance: CGFloat {
+        78
     }
 
     var body: some View {
@@ -45,41 +50,64 @@ struct ForestView: View {
                 }
             }
             .overlay(alignment: .bottom) {
-                floatingPaperPanel
+                bottomOverlay
             }
+            .animation(reduceMotion ? nil : AppTheme.Motion.drawer, value: selectedPaper?.arxivId)
             .navigationTitle("具身智读")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(item: $selectedPaper) { paper in
-                PaperPreviewSheet(paper: paper)
-                    .presentationDetents([.medium, .large])
-                    .presentationDragIndicator(.visible)
-                    .presentationBackground(AppTheme.ColorToken.paper.opacity(0.94))
+            .fullScreenCover(item: $selectedPaper) { paper in
+                ForestPaperDetailFullScreen(paper: paper)
             }
         }
     }
 
     @ViewBuilder
+    private var bottomOverlay: some View {
+        floatingPaperPanel
+    }
+
+    @ViewBuilder
     private var floatingPaperPanel: some View {
         if let focusedPaper {
-            ForestFloatingPaperPanel(
+            ForestPaperDetailLauncher(
                 paper: focusedPaper,
-                activeTask: library.activeTask,
-                openPreview: { selectedPaper = focusedPaper },
-                dismiss: {
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
-                        self.focusedPaper = nil
+                openDetail: {
+                    withAnimation(AppTheme.Motion.drawer) {
+                        selectedPaper = focusedPaper
                     }
-                },
-                toggleFavorite: { library.toggleFavorite(focusedPaper, context: modelContext) },
-                generateTranslation: { library.generateTranslation(for: focusedPaper, context: modelContext, settings: settings) },
-                generateSummary: { library.generateSummary(for: focusedPaper, context: modelContext, settings: settings) },
-                generateFullText: { library.generateFullText(for: focusedPaper, context: modelContext, settings: settings) },
-                completeMissingInsights: { library.completeMissingInsights(for: focusedPaper, context: modelContext, settings: settings) }
+                }
             )
             .padding(.horizontal, AppTheme.Spacing.lg)
-            .padding(.bottom, AppTheme.Spacing.md)
-            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .padding(.bottom, tabBarClearance)
+            .transition(.asymmetric(
+                insertion: .scale(scale: 0.90, anchor: .bottom).combined(with: .opacity),
+                removal: .scale(scale: 0.96, anchor: .bottom).combined(with: .opacity)
+            ))
             .zIndex(10)
+        }
+    }
+
+}
+
+struct ForestPaperDetailFullScreen: View {
+    @Environment(\.dismiss) private var dismiss
+    let paper: PaperRecord
+
+    var body: some View {
+        NavigationStack {
+            PaperDetailView(paper: paper)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .stableIconButtonStyle()
+                        }
+                        .buttonStyle(.forestPress)
+                        .accessibilityLabel("关闭论文详情")
+                    }
+                }
         }
     }
 }
@@ -315,137 +343,77 @@ struct ForestMapView: View {
         } else {
             next.insert(key)
         }
-        withAnimation(.spring(response: 0.32, dampingFraction: 0.86)) {
+        withAnimation(AppTheme.Motion.panel) {
             expandedTopicKeys = next
         }
     }
 }
 
-struct ForestFloatingPaperPanel: View {
+struct ForestPaperDetailLauncher: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let paper: PaperRecord
-    let activeTask: TaskActivity?
-    let openPreview: () -> Void
-    let dismiss: () -> Void
-    let toggleFavorite: () -> Void
-    let generateTranslation: () -> Void
-    let generateSummary: () -> Void
-    let generateFullText: () -> Void
-    let completeMissingInsights: () -> Void
-    @GestureState private var dragOffset: CGFloat = 0
+    let openDetail: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
-            Capsule()
-                .fill(AppTheme.ColorToken.lineSoft)
-                .frame(width: 42, height: 5)
-                .frame(maxWidth: .infinity)
-                .accessibilityHidden(true)
-
-            HStack(alignment: .top, spacing: AppTheme.Spacing.md) {
-                PaperForestThumbnail(paper: paper, size: 58)
-                VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
-                    HStack(spacing: AppTheme.Spacing.sm) {
-                        Text(paper.topic.labelZh)
-                            .font(AppTheme.Typography.chineseCaption)
-                            .padding(.horizontal, AppTheme.Spacing.sm)
-                            .padding(.vertical, AppTheme.Spacing.xs)
-                            .background(AppTheme.ColorToken.paperDeep, in: Capsule())
-                        Text(String(format: "%.1f", paper.relevanceScore))
-                            .font(AppTheme.Typography.metricSmall)
-                            .foregroundStyle(AppTheme.ColorToken.warmAction)
-                        Spacer()
-                    }
-                    Text(paper.title)
-                        .font(AppTheme.Typography.englishHeading)
-                        .foregroundStyle(AppTheme.ColorToken.ink)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text(paper.authors.prefix(4).joined(separator: ", "))
-                        .font(AppTheme.Typography.englishFootnote)
-                        .foregroundStyle(AppTheme.ColorToken.mutedInk)
-                        .lineLimit(1)
-                }
-                Button(action: dismiss) {
-                    Image(systemName: "xmark")
-                        .stableIconButtonStyle()
-                }
-                .accessibilityLabel("关闭论文浮层")
-            }
-
-            KeywordChips(keywords: Array(paper.matchedKeywords.prefix(3).map(\.keyword)))
-
-            HStack(spacing: AppTheme.Spacing.sm) {
-                InsightTaskButton(kind: .translation, paper: paper, activeTask: activeTask, action: generateTranslation)
-                InsightTaskButton(kind: .summary, paper: paper, activeTask: activeTask, action: generateSummary)
-                InsightTaskButton(kind: .fullText, paper: paper, activeTask: activeTask, action: generateFullText)
-            }
-
+        Button(action: openDetail) {
             HStack(spacing: AppTheme.Spacing.md) {
-                FloatingInsightSummary(paper: paper)
-                Spacer()
-                Button(action: toggleFavorite) {
-                    Image(systemName: paper.isFavorite ? "bookmark.fill" : "bookmark")
-                        .font(AppTheme.Typography.captionStrong)
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(paper.isFavorite ? AppTheme.ColorToken.warmAction : AppTheme.ColorToken.mossDark)
-                .background(AppTheme.ColorToken.vellum.opacity(0.78), in: Circle())
-                .accessibilityLabel(paper.isFavorite ? "取消收藏" : "收藏")
-
-                Button(action: openPreview) {
-                    Image(systemName: "rectangle.and.text.magnifyingglass")
-                        .font(AppTheme.Typography.captionStrong)
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(AppTheme.ColorToken.arxivBlue)
-                .background(AppTheme.ColorToken.vellum.opacity(0.78), in: Circle())
-                .accessibilityLabel("论文速览")
-
-                Button(action: completeMissingInsights) {
-                    HStack(spacing: AppTheme.Spacing.xs) {
-                        Image(systemName: "sparkles")
-                        Text(paper.hasFullInsightPack ? "刷新" : "补全")
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
+                PaperForestThumbnail(paper: paper, size: 44)
+                    .overlay(alignment: .bottomTrailing) {
+                        if paper.hasFullInsightPack {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(AppTheme.Typography.captionSmallStrong)
+                                .foregroundStyle(AppTheme.ColorToken.success)
+                                .padding(3)
+                                .background(AppTheme.ColorToken.paper.opacity(0.92), in: Circle())
+                                .offset(x: 3, y: 3)
+                        }
                     }
-                        .font(AppTheme.Typography.chineseLabel)
-                        .frame(minWidth: 74)
+
+                VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
+                    Text(paper.title)
+                        .font(AppTheme.Typography.englishFootnote)
+                        .foregroundStyle(Color.white)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    HStack(spacing: AppTheme.Spacing.xs) {
+                        Text(paper.topic.labelZh)
+                        Text(String(format: "%.1f", paper.relevanceScore))
+                        Text("\(paper.insightCompletionCount)/3")
+                    }
+                    .font(AppTheme.Typography.englishFootnote)
+                    .foregroundStyle(Color.white.opacity(0.72))
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(AppTheme.ColorToken.warmAction)
-                .disabled(isPaperTaskRunning)
+
+                Image(systemName: "chevron.up")
+                    .font(AppTheme.Typography.captionStrong)
+                    .foregroundStyle(Color.white.opacity(0.88))
+                    .frame(width: 30, height: 30)
+                    .background(Color.white.opacity(0.14), in: Circle())
             }
+            .padding(.horizontal, AppTheme.Spacing.md)
+            .padding(.vertical, AppTheme.Spacing.sm)
+            .frame(maxWidth: .infinity)
+            .background(launcherBackground, in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
+            }
+            .shadow(color: AppTheme.ColorToken.canopy.opacity(0.34), radius: 18, x: 0, y: 10)
         }
-        .padding(AppTheme.Spacing.md)
-        .offset(y: dragOffset * 0.18)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous))
-        .background(AppTheme.ColorToken.paper.opacity(0.92), in: RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous)
-                .stroke(AppTheme.ColorToken.lineSoft, lineWidth: 1)
-        }
-        .shadow(color: Color.black.opacity(0.18), radius: 18, x: 0, y: 12)
-        .simultaneousGesture(expandGesture)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("forest.floatingPaperPanel")
+        .buttonStyle(.forestPress)
+        .accessibilityLabel("打开论文详细阅读：\(paper.title)")
+        .animation(reduceMotion ? nil : AppTheme.Motion.panel, value: paper.arxivId)
     }
 
-    private var isPaperTaskRunning: Bool {
-        activeTask?.paperId == paper.arxivId && activeTask?.isTerminal == false
-    }
-
-    private var expandGesture: some Gesture {
-        DragGesture(minimumDistance: 18)
-            .updating($dragOffset) { value, state, _ in
-                state = min(0, value.translation.height)
-            }
-            .onEnded { value in
-                if value.translation.height < -56 || value.predictedEndTranslation.height < -110 {
-                    openPreview()
-                }
-            }
+    private var launcherBackground: LinearGradient {
+        LinearGradient(
+            colors: [
+                AppTheme.ColorToken.canopy.opacity(0.98),
+                AppTheme.ColorToken.mossDark.opacity(0.96)
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
     }
 }
 
@@ -453,6 +421,7 @@ struct InsightTaskButton: View {
     let kind: InsightKind
     let paper: PaperRecord
     let activeTask: TaskActivity?
+    var compact = false
     let action: () -> Void
 
     private var state: InsightButtonState {
@@ -471,24 +440,27 @@ struct InsightTaskButton: View {
         Button(action: action) {
             HStack(spacing: AppTheme.Spacing.xs) {
                 statusIcon
-                    .frame(width: 16, height: 16)
-                Text(kind.label)
+                    .frame(width: compact ? 13 : 16, height: compact ? 13 : 16)
+                Text(compact ? compactLabel : kind.label)
                     .lineLimit(1)
                     .minimumScaleFactor(0.82)
             }
-            .font(AppTheme.Typography.chineseCaption)
+            .font(compact ? AppTheme.Typography.captionSmallStrong : AppTheme.Typography.chineseCaption)
             .foregroundStyle(foregroundColor)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, AppTheme.Spacing.sm)
+            .frame(width: compact ? 44 : nil, height: compact ? 30 : nil)
+            .frame(maxWidth: compact ? nil : .infinity)
+            .padding(.vertical, compact ? 0 : AppTheme.Spacing.sm)
             .background(backgroundColor, in: RoundedRectangle(cornerRadius: AppTheme.Radius.control, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: AppTheme.Radius.control, style: .continuous)
                     .stroke(borderColor, lineWidth: state == .running ? 2 : 1)
             }
+            .scaleEffect(state == .running ? 1.015 : 1)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.forestPress)
         .disabled(isPaperTaskRunning)
         .opacity(isPaperTaskRunning && state != .running ? 0.72 : 1)
+        .animation(AppTheme.Motion.control, value: state)
         .accessibilityLabel("\(kind.label)\(accessibilityState)")
     }
 
@@ -514,6 +486,17 @@ struct InsightTaskButton: View {
             return "checkmark.circle.fill"
         case .failed:
             return "exclamationmark.circle.fill"
+        }
+    }
+
+    private var compactLabel: String {
+        switch kind {
+        case .translation:
+            return "译"
+        case .summary:
+            return "速"
+        case .fullText:
+            return "深"
         }
     }
 
@@ -689,7 +672,7 @@ struct ForestGroveView: View {
 
             if let leadPaper = papers.first {
                 GroveHeadlinePaper(paper: leadPaper) {
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+                    withAnimation(AppTheme.Motion.panel) {
                         focusedPaper = leadPaper
                     }
                 }
@@ -697,8 +680,12 @@ struct ForestGroveView: View {
 
             LazyVGrid(columns: columns, spacing: 10) {
                 ForEach(Array(displayedPapers.enumerated()), id: \.element.arxivId) { index, paper in
-                    TreeTile(paper: paper, rank: index + 1, isFocused: focusedPaper?.arxivId == paper.arxivId) {
-                        withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+                    TreeTile(
+                        paper: paper,
+                        rank: index + 1,
+                        isFocused: focusedPaper?.arxivId == paper.arxivId
+                    ) {
+                        withAnimation(AppTheme.Motion.panel) {
                             focusedPaper = paper
                         }
                     }
@@ -774,7 +761,7 @@ struct GroveHeadlinePaper: View {
                     .stroke(AppTheme.ColorToken.lineSoft, lineWidth: 1)
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.forestPress)
         .accessibilityLabel("聚焦代表论文 \(paper.title)")
     }
 }
@@ -873,11 +860,13 @@ struct TreeTile: View {
                     .stroke(borderColor, lineWidth: isFocused ? 3 : paper.hasFullInsightPack ? 2 : 1)
             }
             .scaleEffect(isFocused ? 1.035 : 1)
-            .animation(.spring(response: 0.24, dampingFraction: 0.78), value: isFocused)
+            .shadow(color: isFocused ? AppTheme.ColorToken.arxivBlue.opacity(0.28) : Color.black.opacity(0.04), radius: isFocused ? 10 : 4, x: 0, y: isFocused ? 6 : 3)
+            .animation(AppTheme.Motion.control, value: isFocused)
+            .animation(AppTheme.Motion.status, value: paper.insightCompletionCount)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("\(paper.title)，\(paper.plantTier.label)")
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.forestPress)
     }
 
     private var tileGradient: LinearGradient {
@@ -1124,154 +1113,5 @@ struct ForestBackground: View {
             endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
-    }
-}
-
-struct PaperPreviewSheet: View {
-    @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var library: LibraryViewModel
-    @EnvironmentObject private var settings: AppSettings
-    let paper: PaperRecord
-
-    var body: some View {
-        NavigationStack {
-            ZStack {
-                ForestBackground()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: AppTheme.Spacing.lg) {
-                        PaperPreviewHeroCard(
-                            paper: paper,
-                            activeTask: library.activeTask,
-                            toggleFavorite: { library.toggleFavorite(paper, context: modelContext) },
-                            generateTranslation: { library.generateTranslation(for: paper, context: modelContext, settings: settings) },
-                            generateSummary: { library.generateSummary(for: paper, context: modelContext, settings: settings) },
-                            generateFullText: { library.generateFullText(for: paper, context: modelContext, settings: settings) },
-                            completeMissingInsights: { library.completeMissingInsights(for: paper, context: modelContext, settings: settings) }
-                        )
-
-                        if !paper.translationTitle.isEmpty {
-                            PreviewTextSection(title: "中文题目", systemImage: "character.book.closed", text: paper.translationTitle)
-                        }
-
-                        PreviewTextSection(title: "English Abstract", systemImage: "text.alignleft", text: paper.abstract)
-
-                        NavigationLink {
-                            PaperDetailView(paper: paper)
-                        } label: {
-                            Label("进入论文详情", systemImage: "doc.text")
-                                .font(AppTheme.Typography.chineseAction)
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(AppTheme.ColorToken.warmAction)
-                    }
-                    .padding(AppTheme.Spacing.lg)
-                }
-            }
-            .navigationTitle("论文速览")
-            .navigationBarTitleDisplayMode(.inline)
-        }
-    }
-}
-
-struct PaperPreviewHeroCard: View {
-    let paper: PaperRecord
-    let activeTask: TaskActivity?
-    let toggleFavorite: () -> Void
-    let generateTranslation: () -> Void
-    let generateSummary: () -> Void
-    let generateFullText: () -> Void
-    let completeMissingInsights: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.sm) {
-            HStack(alignment: .top, spacing: AppTheme.Spacing.md) {
-                PaperForestThumbnail(paper: paper, size: 64)
-                VStack(alignment: .leading, spacing: AppTheme.Spacing.xs) {
-                    HStack(spacing: AppTheme.Spacing.sm) {
-                        Text(paper.topic.labelZh)
-                            .font(AppTheme.Typography.chineseCaption)
-                            .padding(.horizontal, AppTheme.Spacing.sm)
-                            .padding(.vertical, AppTheme.Spacing.xs)
-                            .background(AppTheme.ColorToken.paperDeep, in: Capsule())
-                        Text(String(format: "%.1f", paper.relevanceScore))
-                            .font(AppTheme.Typography.metricSmall)
-                            .foregroundStyle(AppTheme.ColorToken.warmAction)
-                        Spacer()
-                    }
-                    Text(paper.title)
-                        .font(AppTheme.Typography.englishHeading)
-                        .foregroundStyle(AppTheme.ColorToken.ink)
-                        .lineLimit(3)
-                    Text(paper.authors.prefix(5).joined(separator: ", "))
-                        .font(AppTheme.Typography.englishFootnote)
-                        .foregroundStyle(AppTheme.ColorToken.mutedInk)
-                        .lineLimit(2)
-                }
-            }
-
-            KeywordChips(keywords: Array(paper.matchedKeywords.prefix(4).map(\.keyword)))
-
-            HStack(spacing: AppTheme.Spacing.sm) {
-                InsightTaskButton(kind: .translation, paper: paper, activeTask: activeTask, action: generateTranslation)
-                InsightTaskButton(kind: .summary, paper: paper, activeTask: activeTask, action: generateSummary)
-                InsightTaskButton(kind: .fullText, paper: paper, activeTask: activeTask, action: generateFullText)
-            }
-
-            HStack(spacing: AppTheme.Spacing.md) {
-                FloatingInsightSummary(paper: paper)
-                Spacer()
-                Button(action: toggleFavorite) {
-                    Image(systemName: paper.isFavorite ? "bookmark.fill" : "bookmark")
-                        .font(AppTheme.Typography.captionStrong)
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(paper.isFavorite ? AppTheme.ColorToken.warmAction : AppTheme.ColorToken.mossDark)
-                .background(AppTheme.ColorToken.vellum.opacity(0.78), in: Circle())
-                .accessibilityLabel(paper.isFavorite ? "取消收藏" : "收藏")
-
-                Button(action: completeMissingInsights) {
-                    HStack(spacing: AppTheme.Spacing.xs) {
-                        Image(systemName: "sparkles")
-                        Text(paper.hasFullInsightPack ? "刷新" : "补全")
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
-                    }
-                    .font(AppTheme.Typography.chineseLabel)
-                    .frame(minWidth: 74)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(AppTheme.ColorToken.warmAction)
-                .disabled(activeTask?.paperId == paper.arxivId && activeTask?.isTerminal == false)
-            }
-        }
-        .padding(AppTheme.Spacing.md)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous))
-        .background(AppTheme.ColorToken.paper.opacity(0.92), in: RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous)
-                .stroke(AppTheme.ColorToken.lineSoft, lineWidth: 1)
-        }
-        .shadow(color: Color.black.opacity(0.14), radius: 14, x: 0, y: 8)
-    }
-}
-
-struct PreviewTextSection: View {
-    let title: String
-    let systemImage: String
-    let text: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.md) {
-            Label(title, systemImage: systemImage)
-                .font(AppTheme.Typography.sectionTitle)
-                .foregroundStyle(AppTheme.ColorToken.ink)
-            Text(text)
-                .font(title.contains("English") ? AppTheme.Typography.englishBody : AppTheme.Typography.body)
-                .foregroundStyle(AppTheme.ColorToken.ink)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .forestCard()
     }
 }

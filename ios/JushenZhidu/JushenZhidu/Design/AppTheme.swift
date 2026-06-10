@@ -41,6 +41,14 @@ enum AppTheme {
         static let sheet: CGFloat = 18
     }
 
+    enum Motion {
+        static let panel: Animation = .spring(response: 0.30, dampingFraction: 0.86, blendDuration: 0.08)
+        static let drawer: Animation = .interactiveSpring(response: 0.38, dampingFraction: 0.88, blendDuration: 0.12)
+        static let control: Animation = .spring(response: 0.22, dampingFraction: 0.84, blendDuration: 0.06)
+        static let status: Animation = .easeInOut(duration: 0.26)
+        static let press: Animation = .spring(response: 0.18, dampingFraction: 0.72, blendDuration: 0.04)
+    }
+
     enum Typography {
         private static let displayFontNames = ["STSongti-SC-Bold", "STSongti-TC-Bold", "Songti SC Bold", "Songti TC Bold"]
         private static let bodyRegularFontNames = ["PingFangSC-Regular", "PingFangTC-Regular", "HiraSansGB-W3"]
@@ -288,6 +296,24 @@ extension View {
                 RoundedRectangle(cornerRadius: AppTheme.Radius.control, style: .continuous)
                     .stroke(AppTheme.ColorToken.lineSoft, lineWidth: 1)
             }
+    }
+}
+
+struct ForestPressButtonStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var scale: CGFloat = 0.97
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? scale : 1)
+            .opacity(configuration.isPressed ? 0.88 : 1)
+            .animation(reduceMotion ? nil : AppTheme.Motion.press, value: configuration.isPressed)
+    }
+}
+
+extension ButtonStyle where Self == ForestPressButtonStyle {
+    static var forestPress: ForestPressButtonStyle {
+        ForestPressButtonStyle()
     }
 }
 

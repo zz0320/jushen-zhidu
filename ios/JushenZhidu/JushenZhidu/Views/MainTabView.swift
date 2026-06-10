@@ -38,7 +38,7 @@ struct MainTabView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             if let activity = library.activeTask {
                 TaskProgressFloatingCard(activity: activity) {
-                    withAnimation(.spring(response: 0.28, dampingFraction: 0.88)) {
+                    withAnimation(AppTheme.Motion.panel) {
                         library.activeTask = nil
                     }
                 }
@@ -48,7 +48,7 @@ struct MainTabView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .animation(.spring(response: 0.28, dampingFraction: 0.88), value: library.activeTask)
+        .animation(AppTheme.Motion.panel, value: library.activeTask)
     }
 }
 
@@ -95,7 +95,7 @@ struct TaskProgressFloatingCard: View {
                         .frame(width: 30, height: 30)
                         .background(AppTheme.ColorToken.vellum.opacity(0.78), in: Circle())
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.forestPress)
                 .accessibilityLabel("关闭任务进度")
             }
         }
@@ -109,6 +109,7 @@ struct TaskProgressFloatingCard: View {
                 .scaleEffect(x: 1, y: 0.7)
                 .padding(.horizontal, AppTheme.Spacing.md)
                 .offset(y: -2)
+                .animation(AppTheme.Motion.status, value: activity.percent)
         }
         .overlay {
             RoundedRectangle(cornerRadius: AppTheme.Radius.sheet, style: .continuous)

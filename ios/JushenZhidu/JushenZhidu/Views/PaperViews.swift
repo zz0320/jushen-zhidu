@@ -49,7 +49,7 @@ struct PapersListView: View {
                                     } label: {
                                         PaperCardView(paper: paper, rank: index + 1)
                                     }
-                                    .buttonStyle(.plain)
+                                    .buttonStyle(.forestPress)
                                 }
                             }
                         }
@@ -175,9 +175,11 @@ struct InsightProgressRing: View {
                 .trim(from: 0, to: progress)
                 .stroke(ringColor, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                 .rotationEffect(.degrees(-90))
+                .animation(AppTheme.Motion.status, value: progress)
             Text("\(completed)")
                 .font(AppTheme.Typography.metricTiny)
                 .foregroundStyle(AppTheme.ColorToken.ink)
+                .contentTransition(.numericText())
         }
         .frame(width: 32, height: 32)
         .accessibilityHidden(true)
@@ -202,6 +204,8 @@ struct InsightDot: View {
                 .font(AppTheme.Typography.captionSmallStrong)
                 .foregroundStyle(done ? Color.white : AppTheme.ColorToken.mossMuted)
         }
+        .scaleEffect(done ? 1 : 0.94)
+        .animation(AppTheme.Motion.control, value: done)
         .accessibilityLabel(label)
     }
 }
